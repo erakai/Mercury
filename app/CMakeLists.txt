@@ -1,12 +1,18 @@
-# TODO: https://doc.qt.io/qt-6/cmake-get-started.html#building-a-c-gui-application
-
 # Determine source list
 set(APP_SOURCES
 main.cpp
 )
 
 # The binary
-add_executable(mercury ${APP_SOURCES})
+qt_add_executable(mercury ${APP_SOURCES})
+
+# Qt set up
+target_link_libraries(mercury PRIVATE Qt6::Widgets)
+
+# Prevents console window on windows (Qt stuff)
+set_target_properties(mercury PROPERTIES
+    WIN32_EXECUTABLE ON
+)
 
 # Add networking library
 target_link_libraries(mercury PRIVATE netlib)

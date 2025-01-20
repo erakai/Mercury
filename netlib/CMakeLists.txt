@@ -3,7 +3,7 @@ set(NETLIB_SOURCES
 )
 
 # The library
-add_library(netlib ${NETLIB_SOURCES})
+qt_add_library(netlib ${NETLIB_SOURCES})
 
 # Set include dir
 target_include_directories(netlib

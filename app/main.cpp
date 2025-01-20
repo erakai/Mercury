@@ -1,5 +1,4 @@
 #include "mnet.hpp"
-#include <iostream>
 
 int main()
 {

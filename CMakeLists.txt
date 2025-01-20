@@ -22,6 +22,22 @@ set(CMAKE_CXX_FLAGS "-Wall -Werror")
 # Project definition
 project(mercury)
 
+# Sets the default installation path for mac. If you aren't on mac, you
+# should figure out where it installs to and add an extra case to this
+# if statement that appends your installation location. Alternatively,
+# you can run "cmake .. -DCMAKE_PREFIX_PATH=your_installation"
+if (WIN32)
+  # list(APPEND CMAKE_PREFIX_PATH "")
+elseif (APPLE)
+  list(APPEND CMAKE_PREFIX_PATH "~/Qt/6.8.1/macos")
+elseif (UNIX)
+  # list(APPEND CMAKE_PREFIX_PATH "")
+endif()
+
+# Install qt
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+qt_standard_project_setup()
+
 ###################################Add components
 
 # Target to copy asset folder into binary folder

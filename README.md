@@ -16,8 +16,9 @@ Prerequisites:
 * Open-Source GPL Licensed Qt 6.8 Developer Tools (from [here](https://www.qt.io/download-qt-installer-oss))
 * C++, CMake, Git
 
+You can either build from the command line (an example path to pass into cmake could be: `cmake .. -DCMAKE_PREFIX_PATH=~/Qt/6.8.1/macos`):
 ```bash
-git clone ...
+git clone https://github.com/erakai/Mercury
 git submodule update --init --recursive
 mkdir build
 cd build
@@ -26,6 +27,7 @@ make
 ./mercury
 ```
 
-An example path to pass into cmake could be: `cmake .. -DCMAKE_PREFIX_PATH=~/Qt/6.8.1/macos`.
+Or, you can open QtCreator, and load this project by selecting "Open File or Project" and selecting the top-level `CMakeLists.txt` file. Then, go to Build -> Run. You need to do this to edit `ui` files.
+
 
 ### Screenshots

@@ -10,3 +10,5 @@ Makefile
 .DS_Store
 **/*/.DS_STORE
 .VSCodeCounter/
+
+CMakeLists.txt.user

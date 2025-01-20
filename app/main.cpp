@@ -1,8 +1,16 @@
+#include "mainwindow.hpp"
 #include "mnet.hpp"
 
-int main()
+#include <QApplication>
+
+int main(int argc, char **argv)
 {
   mercury::init_mercury_network();
 
-  return 0;
+  QApplication a(argc, argv);
+
+  MainWindow w;
+  w.show();
+
+  return a.exec();
 }

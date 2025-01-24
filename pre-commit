@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# An example hook script to verify what is about to be committed.
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+#
+# To enable this hook, rename this file to "pre-commit".
+
+find app -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format -Werror --dry-run
+exit_code_1=$?
+
+find netlib -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format -Werror --dry-run
+exit_code_2=$?
+
+if [[ $exit_code_1 -ne 0 || $exit_code_2 -ne 0 ]]; then
+  echo "Formatting check failed. Please run \"format.sh\", re-add the files, and try again."
+  exit 1
+fi
+
+echo "Formatting check succeeded."
+exit 0
+

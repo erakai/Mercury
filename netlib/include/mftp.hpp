@@ -1,9 +1,10 @@
 #pragma once
 
+#include <QByteArray>
 #include <QUdpSocket>
 
 /*
-Packet formatting
+Packet formatting.
 */
 
 struct MFTP_Header
@@ -19,6 +20,8 @@ struct MFTP_Header
 
 struct AV_Payload
 {
+  QByteArray audio;
+  QByteArray video;
 };
 
 /*

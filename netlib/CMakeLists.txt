@@ -3,6 +3,7 @@ set(NETLIB_SOURCES
   src/mftp.cpp
   src/mercury_client.cpp
   src/mercury_server.cpp
+  src/logger.cpp
 )
 
 set(NETLIB_TESTER_SOURCES

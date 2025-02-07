@@ -15,7 +15,7 @@ std::shared_ptr<QUdpSocket> acquire_mftp_socket(int port)
 }
 
 bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
-                   int dest_port, MFTP_Header header, AV_Payload payload)
+                   int dest_port, MFTP_Header header, AV_Frame payload)
 {
   char *header_bytes = static_cast<char *>(static_cast<void *>(&header));
 
@@ -39,7 +39,7 @@ bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
 }
 
 bool process_datagram(std::shared_ptr<QUdpSocket> sock, MFTP_Header &header,
-                      AV_Payload &payload)
+                      AV_Frame &payload)
 {
   if (!sock->hasPendingDatagrams())
     return false;

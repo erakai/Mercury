@@ -22,7 +22,7 @@ struct MFTP_Header
   char source_name[12];  // 12 bytes
 };
 
-struct AV_Payload
+struct AV_Frame
 {
   QByteArray audio;
   QByteArray video;
@@ -39,7 +39,7 @@ Host-side functionality.
 */
 
 bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
-                   int dest_port, MFTP_Header header, AV_Payload payload);
+                   int dest_port, MFTP_Header header, AV_Frame payload);
 
 /*
 Client-side functionality. Note that this is only a helper function to process
@@ -53,4 +53,4 @@ Then you may call process_packet within YOUR_FUNCTION to deserialize the data.
 */
 
 bool process_datagram(std::shared_ptr<QUdpSocket> sock, MFTP_Header &header,
-                      AV_Payload &payload);
+                      AV_Frame &payload);

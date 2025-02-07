@@ -18,8 +18,8 @@ They are inspired by DHCP options: https://www.ietf.org/rfc/rfc2132.txt.
 struct Option
 {
   uint8_t type;
-  uint8_t len; // in bytes
-  uint8_t *data;
+  uint8_t len; // length of data field in bytes (may be 0)
+  char *data;
 };
 
 struct HSTP_Header
@@ -33,10 +33,10 @@ struct HSTP_Header
 Host-side functionality.
 */
 
-void send_packet(QTcpSocket sock, HSTP_Header header);
+void send_datagram(QTcpSocket *sock, HSTP_Header header);
 
 /*
 Client-side functionality.
 */
 
-void recv_packet(QTcpSocket sock, HSTP_Header &header);
+void read_datagram(QTcpSocket *sock, HSTP_Header &header);

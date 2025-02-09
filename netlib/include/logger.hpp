@@ -61,7 +61,7 @@ template <typename... Args> void log(FormatWithLocation fmt, Args &&...args)
   std::string path_str = path.filename().string();
 
   printf("[%s (%s) (%03d:%02d %s)] ", current_time.c_str(),
-         get_log_level_string(level), fmt.loc.line(), fmt.loc.column(),
+         get_log_level_string(level).c_str(), fmt.loc.line(), fmt.loc.column(),
          path_str.c_str());
   printf(fmt.value, args...);
   printf("\n");

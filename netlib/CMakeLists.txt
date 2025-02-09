@@ -17,8 +17,8 @@ qt_add_library(netlib ${NETLIB_SOURCES})
 qt_add_executable(netlib_tester ${NETLIB_TESTER_SOURCES})
 
 # Qt set up
-target_link_libraries(netlib PRIVATE Qt6::Widgets Qt6::Network)
-target_link_libraries(netlib_tester PRIVATE Qt6::Widgets Qt6::Network)
+target_link_libraries(netlib PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia)
+target_link_libraries(netlib_tester PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia)
 target_link_libraries(netlib_tester PRIVATE netlib)
 
 # Set include dir

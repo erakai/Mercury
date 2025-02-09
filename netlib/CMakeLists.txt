@@ -4,6 +4,12 @@ set(NETLIB_SOURCES
   src/mercury_client.cpp
   src/mercury_server.cpp
   src/logger.cpp
+
+  include/hstp.hpp
+  include/mftp.hpp
+  include/mercury_client.hpp
+  include/mercury_server.hpp
+  include/logger.hpp
 )
 
 set(NETLIB_TESTER_SOURCES

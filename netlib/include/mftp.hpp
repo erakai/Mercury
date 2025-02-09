@@ -6,6 +6,8 @@
 
 #include <memory>
 
+constexpr uint8_t MFTP_VERSION = 1;
+
 /*
 Packet formatting. Note modifying this header rquires updating the
 process_datagram implementation as well, or everything breaks.

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QHostAddress>
 #include <QTcpSocket>
 
 /*
@@ -28,6 +29,13 @@ struct HSTP_Header
   uint8_t option_count;
   Option options[];
 };
+
+/*
+General usage.
+*/
+
+std::shared_ptr<QTcpSocket> acquire_hstp_socket(QHostAddress server_ip,
+                                                int server_port, int port);
 
 /*
 Host-side functionality.

@@ -10,6 +10,14 @@ and contains data specific to that option.
 
 Options
 
+(ID: 0) Echo
+
+  Debugging tool used to test functionality. Sender expects receiver
+  to send back what was sent.
+  Len: Variable
+  Data:
+    - char[len_of_message] message
+
 (ID: 1) Establishment
 
   Represents if this is the first or last message with a client.

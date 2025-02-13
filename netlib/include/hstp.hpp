@@ -60,6 +60,11 @@ public:
   {
   }
 
+  HstpHandler(std::shared_ptr<QTcpSocket> sock)
+      : m_current_status(MSG_STATUS::READY), m_qtcp_sock(sock)
+  {
+  }
+
   // connection
   bool connect(QHostAddress addr, int port);
   void close();

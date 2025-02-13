@@ -12,22 +12,29 @@ set(NETLIB_SOURCES
   include/logger.hpp
 )
 
-set(NETLIB_TESTER_SOURCES
-  netlib_tester.cpp
+set(NETLIB_TEST_SOURCES
+  test/netlib_test.cpp
 )
 
 # The library
 qt_add_library(netlib ${NETLIB_SOURCES})
 
-# Tester executable
-qt_add_executable(netlib_tester ${NETLIB_TESTER_SOURCES})
-
-# Qt set up
-target_link_libraries(netlib PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia)
-target_link_libraries(netlib_tester PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia)
-target_link_libraries(netlib_tester PRIVATE netlib)
-
-# Set include dir
+# Set include dir and qt
 target_include_directories(netlib
   PUBLIC ${PROJECT_SOURCE_DIR}/netlib/include
 )
+target_link_libraries(netlib PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia)
+
+# Tester executable
+enable_testing()
+qt_add_executable(netlib_test ${NETLIB_TEST_SOURCES})
+
+# Qt set up
+target_link_libraries(netlib_test PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia)
+
+# Other dependencies
+target_link_libraries(netlib_test PRIVATE netlib)
+target_link_libraries(netlib_test PRIVATE GTest::gtest_main)
+
+include(GoogleTest)
+gtest_discover_tests(netlib_test)

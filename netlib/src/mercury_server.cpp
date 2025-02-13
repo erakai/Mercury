@@ -38,6 +38,7 @@ void MercuryServer::start_server()
 
   log("Started server at %s on port %d.", address.data(), tcp_port, ll::NOTE);
   server_start = std::chrono::system_clock::now();
+  id_counter = 0;
 }
 
 void MercuryServer::close_server()
@@ -75,19 +76,25 @@ void MercuryServer::new_client_connection()
 
   QTcpSocket *connection = nextPendingConnection();
   new_client.id = ++id_counter;
-  new_client.hstp_sock = connection;
+  new_client.hstp_sock = std::shared_ptr<QTcpSocket>(connection);
+  new_client.hstp_messager = HstpHandler(new_client.hstp_sock);
 
   // Connect relevant functions
   connect(connection, &QAbstractSocket::readyRead, this,
           [=, this]() { this->process_received_hstp_messages(new_client.id); });
   connect(connection, &QAbstractSocket::disconnected, this,
           [=, this]() { this->on_client_disconnect(new_client.id); });
+
+  clients[new_client.id] = new_client;
 }
 
 void MercuryServer::force_disconnect_client(int id)
 {
-  // Send closing message.
   // Waiting on HSTP to be implemnted.
+  Client client = clients[id];
+  client.hstp_messager.init_msg(client.alias);
+  // client.hstp_messager.add_option_establishing(0);
+  client.hstp_messager.send_msg();
 
   on_client_disconnect(id);
 }
@@ -98,11 +105,11 @@ void MercuryServer::on_client_disconnect(int id)
 
   if (client.hstp_sock->state() == QAbstractSocket::ConnectedState)
     client.hstp_sock->disconnectFromHost();
-  free(client.hstp_sock);
   clients.erase(id);
 
   emit client_disconnect(id, client.alias);
 
+  //  free(client.hstp_sock);
   log("Client %s has disconnected.", client.alias, ll::NOTE);
 }
 

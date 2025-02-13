@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hstp.hpp"
 #include <QAudioBuffer>
 #include <QPixmap>
 #include <QTcpServer>
@@ -22,8 +23,9 @@ struct Client
   // UDP socket the client gave to send MFTP messages to
   uint16_t mftp_port = 0;
 
-  // This is a regular pointer because QTcpServer generates it.
-  QTcpSocket *hstp_sock = nullptr;
+  // QTcpServer generates this for us upon connection.
+  HstpHandler hstp_messager;
+  std::shared_ptr<QTcpSocket> hstp_sock;
 
   // Keeps track of the sequence number of the protocol.
   uint32_t frame_seq_num = 0;

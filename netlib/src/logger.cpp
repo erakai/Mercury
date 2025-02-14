@@ -3,6 +3,7 @@
 using namespace std::chrono;
 
 time_point<system_clock> boot_time = system_clock::now();
+int MINIMUM_LOG_LEVEL = -1;
 
 std::string get_time_since_boot()
 {

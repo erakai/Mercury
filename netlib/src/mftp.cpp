@@ -17,10 +17,16 @@ std::shared_ptr<QUdpSocket> acquire_mftp_socket(int port)
 bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
                    int dest_port, MFTP_Header header, AV_Frame payload)
 {
-  char *header_bytes = static_cast<char *>(static_cast<void *>(&header));
-
   // Set up data that we will be sending across
-  QByteArray data(header_bytes);
+  QByteArray data;
+  QDataStream ds(&data, QIODevice::WriteOnly);
+  ds << header.version;
+  ds << header.payload_type;
+  ds << header.seq_num;
+  ds << header.timestamp;
+  ds << header.audio_len;
+  ds << header.video_len;
+  ds << header.source_name;
   data.append(payload.audio);
   data.append(payload.video);
 
@@ -47,7 +53,6 @@ bool process_datagram(std::shared_ptr<QUdpSocket> sock, MFTP_Header &header,
   // Acquire datagram
   QNetworkDatagram dg = sock->receiveDatagram();
   QByteArray data = dg.data();
-  int index = 0;
 
   if (data.size() < sizeof(MFTP_Header))
   {
@@ -56,26 +61,20 @@ bool process_datagram(std::shared_ptr<QUdpSocket> sock, MFTP_Header &header,
   }
 
   // Read in the header
-  header.version = data.sliced(index, 1).toUInt();
-  index += 1;
-  header.payload_type = data.sliced(index, 2).toUInt();
-  index += 2;
-  header.seq_num = data.sliced(index, 2).toUInt();
-  index += 2;
-  header.timestamp = data.sliced(index, 4).toUInt();
-  index += 4;
-  header.audio_len = data.sliced(index, 2).toUInt();
-  index += 2;
-  header.video_len = data.sliced(index, 2).toUInt();
-  index += 2;
-  strcpy(header.source_name, data.sliced(index, 12).data());
-  index += 12;
+  QDataStream ds(data);
+  ds >> header.version;
+  ds >> header.payload_type;
+  ds >> header.seq_num;
+  ds >> header.timestamp;
+  ds >> header.audio_len;
+  ds >> header.video_len;
+  strcpy(header.source_name, data.sliced(sizeof(MFTP_Header) - 11, 12).data());
 
   if (header.audio_len + header.video_len <= 0)
     return true;
 
   // If we have a payload, process it
-  data.slice(12, header.audio_len + header.video_len);
+  data.slice(sizeof(MFTP_Header), header.audio_len + header.video_len);
   payload.audio = data.sliced(0, header.audio_len);
   payload.video = data.sliced(header.audio_len, header.video_len);
 

@@ -35,8 +35,10 @@ elseif (UNIX)
 endif()
 
 # Install qt
-find_package(Qt6 REQUIRED COMPONENTS Widgets Network Multimedia)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Network Multimedia Test)
 qt_standard_project_setup()
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
 
 # Install Google Test
 include(FetchContent)
@@ -57,7 +59,6 @@ add_custom_target(assets
 
 # Create dependencies
 add_subdirectory(netlib)
-add_subdirectory(external)
 
 # Main app
 add_subdirectory(app)

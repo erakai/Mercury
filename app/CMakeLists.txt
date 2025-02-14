@@ -6,6 +6,10 @@ mainwindow.hpp
 mainwindow.ui
 )
 
+set(TEST_SOURCES
+test/mercury_test.cpp
+)
+
 # The binary
 qt_add_executable(mercury
   MANUAL_FINALIZATION
@@ -35,4 +39,9 @@ install(TARGETS mercury
 )
 
 qt_finalize_executable(mercury)
+
+# Set up testing executable
+enable_testing(true)
+qt_add_executable(mercury_test ${TEST_SOURCES})
+target_link_libraries(mercury_test PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::Test netlib)
 

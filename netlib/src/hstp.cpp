@@ -1,18 +1,14 @@
 #include "hstp.hpp"
 #include "logger.hpp"
-#include "mftp.hpp"
 #include <QtCore/qstringview.h>
-#include <concepts>
 #include <cstddef>
 #include <cstdint>
-#include <cstdio>
 #include <cstring>
-#include <format>
-#include <iomanip>
+#include <memory>
 #include <string>
 #include <sys/_endian.h>
 
-bool HstpHandler::connect(QHostAddress addr, int port)
+bool HstpHandler::connect(QHostAddress &addr, int port)
 {
   m_qtcp_sock->connectToHost(addr, port);
 
@@ -38,7 +34,7 @@ bool HstpHandler::init_msg(char sender_alias[18])
   return true;
 }
 
-bool HstpHandler::add_option_echo(char *msg)
+bool HstpHandler::add_option_echo(const char *msg)
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
@@ -50,7 +46,9 @@ bool HstpHandler::add_option_echo(char *msg)
   Option opt;
   opt.type = 0;
   opt.len = str_msg.length();
-  opt.data = str_msg.c_str();
+  opt.data = std::shared_ptr<char[]>(new char[opt.len]);
+  std::memcpy(opt.data.get(), msg, str_msg.length());
+
   m_hdr->options.push_back(opt);
 
   return false;
@@ -63,6 +61,8 @@ bool HstpHandler::send_msg()
     log("Unable to send message, message not in progress", ll::ERROR);
     return false;
   }
+
+  QByteArray byte_array = _serialize(*m_hdr);
 
   return true;
 }
@@ -82,20 +82,18 @@ MSG_STATUS HstpHandler::get_status()
 QByteArray HstpHandler::_serialize(HSTP_Header &hdr)
 {
   QByteArray byte_array;
+  QDataStream ds(&byte_array, QIODevice::WriteOnly);
 
-  byte_array.push_back(hdr.sender_alias);
-  for (int i = 0; i < ALIAS_SIZE - strlen(hdr.sender_alias); i++)
-  {
-    byte_array.push_back('\0');
-  }
+  ds.writeRawData(hdr.sender_alias, 18);
 
-  byte_array.push_back((uint8_t) hdr.options.size());
+  uint8_t s = hdr.options.size();
+  ds << s;
 
   for (const auto &opt : hdr.options)
   {
-    byte_array.push_back(opt.type);
-    byte_array.push_back(opt.len);
-    byte_array.push_back(opt.data);
+    ds << opt.type;
+    ds << opt.len;
+    ds.writeRawData(opt.data.get(), opt.len);
   }
 
   return byte_array;
@@ -104,14 +102,26 @@ QByteArray HstpHandler::_serialize(HSTP_Header &hdr)
 HSTP_Header HstpHandler::_deserialize(const QByteArray &buff)
 {
   HSTP_Header hdr;
+  QDataStream ds(buff);
 
-  QByteArray::const_iterator it = buff.begin();
+  // get alias
+  ds.readRawData(hdr.sender_alias, 18);
 
-  std::string alias_str;
-  for (int i = 0; i < ALIAS_SIZE; i++)
+  // get option count
+  uint8_t opt_count;
+  ds >> opt_count;
+
+  // read in all options
+  for (int i = 0; i < opt_count; i++)
   {
-    it++;
-    alias_str[i] = (char) *it;
+    Option opt;
+    ds >> opt.type;
+    ds >> opt.len;
+    opt.data = std::shared_ptr<char[]>(new char[opt.len]);
+    ds.readRawData(opt.data.get(), opt.len);
+
+    hdr.options.push_back(opt);
   }
+
   return hdr;
 }

@@ -29,13 +29,32 @@ struct Option
 {
   uint8_t type;
   uint8_t len; // length of data field in bytes (may be 0)
-  const char *data;
+  std::shared_ptr<char[]> data;
+  bool operator==(const Option &other) const
+  {
+    if (type != other.type || len != other.len)
+    {
+      return false; // Types or lengths do not match
+    }
+    if (len == 0)
+    {
+      return true; // Both are empty
+    }
+    return std::memcmp(data.get(), other.data.get(), len) == 0;
+  }
 };
 
 struct HSTP_Header
 {
-  char sender_alias[ALIAS_SIZE];
+  char sender_alias[ALIAS_SIZE] = {0};
   std::vector<Option> options;
+
+  bool operator==(const HSTP_Header &other) const
+  {
+    return std::memcmp(sender_alias, other.sender_alias, ALIAS_SIZE) == 0 &&
+           options.size() == other.options.size() &&
+           std::equal(options.begin(), options.end(), other.options.begin());
+  }
 };
 
 /*
@@ -51,7 +70,7 @@ enum class MSG_STATUS
 
 class HstpHandler
 {
-  friend class HstpHandlerTester;
+  friend class HstpHandlerTest;
 
 public:
   HstpHandler()
@@ -66,12 +85,12 @@ public:
   }
 
   // connection
-  bool connect(QHostAddress addr, int port);
+  bool connect(QHostAddress &addr, int port);
   void close();
 
   // transmission
   bool init_msg(char sender_alias[18]);
-  bool add_option_echo(char *msg);
+  bool add_option_echo(const char *msg);
   bool send_msg();
   void clear_msg();
 

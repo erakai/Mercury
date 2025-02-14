@@ -22,6 +22,16 @@ struct MFTP_Header
   uint16_t audio_len;    // 2 bytes
   uint16_t video_len;    // 2 bytes
   char source_name[12];  // 12 bytes
+
+  // Used in testing
+  bool operator==(const MFTP_Header &other) const
+  {
+    return version == other.version && payload_type == other.payload_type &&
+           seq_num == other.seq_num && timestamp == other.timestamp &&
+           audio_len == other.audio_len && video_len == other.video_len &&
+           std::memcmp(source_name, other.source_name, sizeof(source_name)) ==
+               0;
+  }
 };
 
 struct AV_Frame

@@ -15,6 +15,7 @@ set(NETLIB_SOURCES
 set(NETLIB_TEST_SOURCES
   test/netlib_test.cpp
   test/hstp_test.cpp
+  test/mftp_test.cpp
 )
 
 # The library

@@ -19,7 +19,7 @@ extern std::chrono::time_point<std::chrono::system_clock> boot_time;
 std::string get_time_since_boot();
 
 // Log levels
-constexpr int MINIMUM_LOG_LEVEL = -1; // increase this to filter what is printed
+extern int MINIMUM_LOG_LEVEL; // increase this to filter what is printed
 enum class ll
 {
   NOTE = 0,

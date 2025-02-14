@@ -5,8 +5,11 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
+#include <format>
 #include <iomanip>
+#include <string>
 #include <sys/_endian.h>
 
 bool HstpHandler::connect(QHostAddress addr, int port)
@@ -111,34 +114,4 @@ HSTP_Header HstpHandler::_deserialize(const QByteArray &buff)
     alias_str[i] = (char) *it;
   }
   return hdr;
-}
-
-bool HstpHandlerTester::test_serialize(HstpHandler &handler)
-{
-  HSTP_Header hdr;
-  Option echo_option;
-
-  strcpy(hdr.sender_alias, "Alex");
-  echo_option.type = 1;
-  echo_option.len = 7;
-  echo_option.data = "hello";
-
-  hdr.options.push_back(echo_option);
-
-  QByteArray byte_array;
-  byte_array = handler._serialize(hdr);
-
-  std::string out;
-  for (QByteArray::iterator it = byte_array.begin(); it != byte_array.end();
-       it++)
-  {
-    if (*it == '\0')
-      out.push_back('0');
-    else
-      out.push_back(*it);
-  }
-
-  log(out.c_str(), ll::NOTE);
-
-  return true;
 }

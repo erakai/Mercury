@@ -14,10 +14,12 @@ set(NETLIB_SOURCES
 
 set(NETLIB_TEST_SOURCES
   test/netlib_test.cpp
+  test/hstp_test.cpp
 )
 
 # The library
-qt_add_library(netlib ${NETLIB_SOURCES})
+qt_add_library(netlib ${NETLIB_SOURCES}
+    include/hstp.hpp include/logger.hpp include/mercury_client.hpp include/mercury_server.hpp include/mftp.hpp)
 
 # Set include dir and qt
 target_include_directories(netlib

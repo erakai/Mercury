@@ -91,10 +91,3 @@ private:
 
   HSTP_Header *m_hdr;
 };
-
-class HstpHandlerTester
-{
-public:
-  bool test_serialize(HstpHandler &obj);
-  bool test_deserialize(HstpHandler &obj);
-};

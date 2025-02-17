@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>HostStreamWindow</class>
- <widget class="QDialog" name="HostStreamWindow">
+ <class>JoinStreamWindow</class>
+ <widget class="QDialog" name="JoinStreamWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,23 +13,20 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QLabel" name="label">
+  <widget class="QLineEdit" name="displayNameTextEdit">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>91</width>
-     <height>41</height>
+     <x>30</x>
+     <y>70</y>
+     <width>181</width>
+     <height>21</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Host Stream</string>
-   </property>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="cancelButton">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>180</x>
      <y>260</y>
      <width>100</width>
      <height>32</height>
@@ -39,49 +36,39 @@
     <string>Cancel</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="joinButton">
    <property name="geometry">
     <rect>
-     <x>280</x>
+     <x>290</x>
      <y>260</y>
      <width>100</width>
      <height>32</height>
     </rect>
    </property>
    <property name="text">
-    <string>Host</string>
+    <string>Join</string>
    </property>
    <property name="default">
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QLabel" name="joinStreamLabel">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>130</y>
-     <width>181</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>100</y>
+     <y>10</y>
      <width>91</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
-    <string>Stream Name</string>
+    <string>Join Stream</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="displayNameLabel">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>30</x>
      <y>40</y>
      <width>91</width>
      <height>41</height>
@@ -91,49 +78,27 @@
     <string>Display Name</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_2">
+  <widget class="QLineEdit" name="ipAddressTextEdit">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>70</y>
+     <x>30</x>
+     <y>130</y>
      <width>181</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="label_4">
+  <widget class="QLabel" name="ipAddressLabel">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>160</y>
+     <x>30</x>
+     <y>100</y>
      <width>91</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
     <string>IP Address</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_3">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>190</y>
-     <width>121</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>127.0.22.45</string>
-   </property>
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::EditCopy"/>
-   </property>
-   <property name="default">
-    <bool>false</bool>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
    </property>
   </widget>
  </widget>

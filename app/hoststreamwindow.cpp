@@ -6,6 +6,9 @@
 HostStreamWindow::HostStreamWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::HostStreamWindow)
 {
+  // Get the ip address here to display
+
+
   ui->setupUi(this);
 }
 
@@ -19,8 +22,9 @@ void HostStreamWindow::on_pushButton_clicked()
   this->close();
 }
 
-void HostStreamWindow::on_toolButton_clicked()
+void HostStreamWindow::on_pushButton_3_clicked()
 {
   QClipboard *cb = QApplication::clipboard();
   cb->setText(QString("copied IP address"));
 }
+

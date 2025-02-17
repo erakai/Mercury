@@ -1,4 +1,5 @@
 #include "mainwindow.hpp"
+#include "joinstreamwindow.h"
 #include "hoststreamwindow.h"
 #include "settingswindow.h"
 
@@ -23,3 +24,11 @@ void MainWindow::on_hostButton_clicked()
   hostStreamWindow.setModal(true);
   hostStreamWindow.exec();
 }
+
+void MainWindow::on_joinButton_clicked()
+{
+  JoinStreamWindow joinStreamWindow;
+  joinStreamWindow.setModal(true);
+  joinStreamWindow.exec();
+}
+

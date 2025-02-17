@@ -12,6 +12,7 @@ qt_add_executable(mercury
   ${APP_SOURCES}
   settingswindow.h settingswindow.cpp settingswindow.ui
   hoststreamwindow.h hoststreamwindow.cpp hoststreamwindow.ui
+  joinstreamwindow.h joinstreamwindow.cpp joinstreamwindow.ui
 )
 
 # Qt set up

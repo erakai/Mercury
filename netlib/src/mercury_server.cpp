@@ -9,7 +9,7 @@
 void MercuryServer::connect_signals_and_slots()
 {
   connect(this, &QTcpServer::newConnection, this,
-          &MercuryServer::new_client_connection);
+          &MercuryServer::add_new_client);
 }
 
 void MercuryServer::start_server()
@@ -67,7 +67,7 @@ int MercuryServer::convert_alias_to_id(char *alias)
   return -1;
 }
 
-void MercuryServer::new_client_connection()
+void MercuryServer::add_new_client()
 {
   // Add the new client
   if (!hasPendingConnections())
@@ -83,7 +83,7 @@ void MercuryServer::new_client_connection()
   connect(connection, &QAbstractSocket::readyRead, this,
           [=, this]() { this->process_received_hstp_messages(new_client.id); });
   connect(connection, &QAbstractSocket::disconnected, this,
-          [=, this]() { this->on_client_disconnect(new_client.id); });
+          [=, this]() { this->disconnect_client(new_client.id); });
 
   clients[new_client.id] = new_client;
 }
@@ -96,10 +96,10 @@ void MercuryServer::force_disconnect_client(int id)
   // client.hstp_messager.add_option_establishing(0);
   // client.hstp_messager.send_msg();
 
-  on_client_disconnect(id);
+  disconnect_client(id);
 }
 
-void MercuryServer::on_client_disconnect(int id)
+void MercuryServer::disconnect_client(int id)
 {
   Client client = clients[id];
 
@@ -107,7 +107,7 @@ void MercuryServer::on_client_disconnect(int id)
     client.hstp_sock->disconnectFromHost();
   clients.erase(id);
 
-  emit client_disconnect(id, client.alias);
+  emit client_disconnected(id, client.alias);
 
   //  free(client.hstp_sock);
   log("Client %s has disconnected.", client.alias, ll::NOTE);

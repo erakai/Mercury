@@ -1,6 +1,5 @@
 #include "hstp.hpp"
-#include <QtCore/qcontainerfwd.h>
-#include <memory>
+#include "logger.hpp"
 
 bool HstpHandler::init_msg(char sender_alias[18])
 {

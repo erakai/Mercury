@@ -1,10 +1,4 @@
 # Determine source list
-set(APP_SOURCES
-main.cpp
-mainwindow.cpp
-mainwindow.hpp
-mainwindow.ui
-)
 
 set(TEST_SOURCES
 test/mercury_test.cpp
@@ -13,7 +7,11 @@ test/mercury_test.cpp
 # The binary
 qt_add_executable(mercury
   MANUAL_FINALIZATION
-  ${APP_SOURCES}
+  main.cpp
+  mainwindow.cpp mainwindow.hpp mainwindow.ui
+  settingswindow.h settingswindow.cpp settingswindow.ui
+  hoststreamwindow.h hoststreamwindow.cpp hoststreamwindow.ui
+  joinstreamwindow.h joinstreamwindow.cpp joinstreamwindow.ui
 )
 
 # Qt set up

@@ -1,4 +1,7 @@
 #include "mainwindow.hpp"
+#include "hoststreamwindow.h"
+#include "joinstreamwindow.h"
+#include "settingswindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -6,4 +9,25 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
   // that don't rely on ui files, open an example in Qt Creator (the screenshot
   // example is really good).
   ui.setupUi(this);
+}
+
+void MainWindow::on_settingsButton_clicked()
+{
+  SettingsWindow settingsWindow;
+  settingsWindow.setModal(true);
+  settingsWindow.exec();
+}
+
+void MainWindow::on_hostButton_clicked()
+{
+  HostStreamWindow hostStreamWindow;
+  hostStreamWindow.setModal(true);
+  hostStreamWindow.exec();
+}
+
+void MainWindow::on_joinButton_clicked()
+{
+  JoinStreamWindow joinStreamWindow;
+  joinStreamWindow.setModal(true);
+  joinStreamWindow.exec();
 }

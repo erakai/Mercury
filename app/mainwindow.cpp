@@ -1,4 +1,5 @@
 #include "mainwindow.hpp"
+#include "hoststreamwindow.h"
 #include "settingswindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -14,4 +15,11 @@ void MainWindow::on_settingsButton_clicked()
   SettingsWindow settingsWindow;
   settingsWindow.setModal(true);
   settingsWindow.exec();
+}
+
+void MainWindow::on_hostButton_clicked()
+{
+  HostStreamWindow hostStreamWindow;
+  hostStreamWindow.setModal(true);
+  hostStreamWindow.exec();
 }

@@ -11,6 +11,7 @@ qt_add_executable(mercury
   MANUAL_FINALIZATION
   ${APP_SOURCES}
   settingswindow.h settingswindow.cpp settingswindow.ui
+  hoststreamwindow.h hoststreamwindow.cpp hoststreamwindow.ui
 )
 
 # Qt set up

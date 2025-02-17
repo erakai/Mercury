@@ -10,6 +10,7 @@ mainwindow.ui
 qt_add_executable(mercury
   MANUAL_FINALIZATION
   ${APP_SOURCES}
+  settingswindow.h settingswindow.cpp settingswindow.ui
 )
 
 # Qt set up

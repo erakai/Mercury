@@ -1,4 +1,5 @@
 #include "mainwindow.hpp"
+#include "settingswindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -7,3 +8,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
   // example is really good).
   ui.setupUi(this);
 }
+
+void MainWindow::on_settingsButton_clicked()
+{
+  SettingsWindow settingsWindow;
+  settingsWindow.setModal(true);
+  settingsWindow.exec();
+
+}
+

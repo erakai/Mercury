@@ -40,6 +40,9 @@ qt_standard_project_setup()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
+# GTest keeps throwing annoying deprecration warnings that don't apply to us
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
+
 # Install Google Test
 include(FetchContent)
 FetchContent_Declare(

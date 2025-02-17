@@ -77,7 +77,7 @@ void MercuryServer::new_client_connection()
   QTcpSocket *connection = nextPendingConnection();
   new_client.id = ++id_counter;
   new_client.hstp_sock = std::shared_ptr<QTcpSocket>(connection);
-  new_client.hstp_messager = HstpHandler(new_client.hstp_sock);
+  new_client.hstp_messager = HstpHandler();
 
   // Connect relevant functions
   connect(connection, &QAbstractSocket::readyRead, this,
@@ -94,7 +94,7 @@ void MercuryServer::force_disconnect_client(int id)
   Client client = clients[id];
   client.hstp_messager.init_msg(client.alias);
   // client.hstp_messager.add_option_establishing(0);
-  client.hstp_messager.send_msg();
+  // client.hstp_messager.send_msg();
 
   on_client_disconnect(id);
 }

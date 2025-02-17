@@ -2,9 +2,15 @@
 
 #include <QHostAddress>
 #include <QTcpSocket>
+#include <QtCore/qcontainerfwd.h>
+#include <QtCore/qobject.h>
 #include <QtCore/qstringview.h>
+#include <cstddef>
 #include <cstdint>
+#include <cstring>
+#include <logger.hpp>
 #include <memory>
+#include <sys/_endian.h>
 #include <vector>
 
 /*
@@ -57,56 +63,52 @@ struct HSTP_Header
   }
 };
 
-/*
-General usage.
-*/
-
 enum class MSG_STATUS
 {
   READY,
   IN_PROGRESS,
-  SENDING
 };
+
+/*
+ * HstpHandler offers the user an object to build out a HSTP message
+ * through a series of function calls to ensure safety and proper use.
+ * Furthermore, elimates the need to know exact details how avaliable
+ * options.
+ *
+ * Use by starting with init_msg(alias) and then various add_option_* to
+ * append to the message. Then emit_msg() to get the bytes and reset the
+ * state of Handler for the next message.
+ */
 
 class HstpHandler
 {
   friend class HstpHandlerTest;
 
 public:
-  HstpHandler()
-      : m_current_status(MSG_STATUS::READY),
-        m_qtcp_sock(std::shared_ptr<QTcpSocket>(new QTcpSocket(nullptr)))
-  {
-  }
+  HstpHandler() : m_current_status(MSG_STATUS::READY) {}
 
-  HstpHandler(std::shared_ptr<QTcpSocket> sock)
-      : m_current_status(MSG_STATUS::READY), m_qtcp_sock(sock)
-  {
-  }
-
-  // connection
-  bool connect(QHostAddress &addr, int port);
-  void close();
-
-  // transmission
+  // messaging processing, allows you to build a HSTP header
   bool init_msg(char sender_alias[18]);
   bool add_option_echo(const char *msg);
-  bool send_msg();
   void clear_msg();
+  std::shared_ptr<QByteArray>
+  emit_msg(); // emits the bytes from the constructed message and resets
+  // status
 
-  // retrival
-  std::shared_ptr<HSTP_Header> read();
-  std::vector<std::shared_ptr<HSTP_Header>> readAll();
+  std::shared_ptr<HSTP_Header>
+  bytes_to_msg(const std::shared_ptr<QByteArray>
+                   &buff); // converts string of bytes to HSTP message
 
   // status
   MSG_STATUS get_status();
 
 private:
   MSG_STATUS m_current_status;
-  std::shared_ptr<QTcpSocket> m_qtcp_sock;
 
-  QByteArray _serialize(HSTP_Header &hdr);
-  HSTP_Header _deserialize(const QByteArray &buff);
+  std::shared_ptr<QByteArray>
+  _serialize(const std::shared_ptr<HSTP_Header> &hdr);
+  std::shared_ptr<HSTP_Header>
+  _deserialize(const std::shared_ptr<QByteArray> &buff);
 
-  HSTP_Header *m_hdr;
+  std::shared_ptr<HSTP_Header> m_hdr;
 };

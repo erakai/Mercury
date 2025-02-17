@@ -14,6 +14,4 @@ void MainWindow::on_settingsButton_clicked()
   SettingsWindow settingsWindow;
   settingsWindow.setModal(true);
   settingsWindow.exec();
-
 }
-

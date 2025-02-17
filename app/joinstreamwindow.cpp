@@ -16,4 +16,3 @@ void JoinStreamWindow::on_cancelButton_clicked()
 {
   this->close();
 }
-

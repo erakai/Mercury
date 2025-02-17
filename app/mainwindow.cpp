@@ -1,6 +1,6 @@
 #include "mainwindow.hpp"
-#include "joinstreamwindow.h"
 #include "hoststreamwindow.h"
+#include "joinstreamwindow.h"
 #include "settingswindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -31,4 +31,3 @@ void MainWindow::on_joinButton_clicked()
   joinStreamWindow.setModal(true);
   joinStreamWindow.exec();
 }
-

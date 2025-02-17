@@ -115,7 +115,7 @@ QMainWindow {
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Chrislee3x7</string>
+           <string>Display Name</string>
           </property>
          </widget>
         </item>
@@ -189,7 +189,7 @@ QMainWindow {
      <x>0</x>
      <y>0</y>
      <width>344</width>
-     <height>24</height>
+     <height>36</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

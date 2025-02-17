@@ -72,7 +72,7 @@ public slots:
   will acquire the next connected QTcpSocket*, and then create a new client
   struct to add to the list.
   */
-  void new_client_connection();
+  void add_new_client();
 
   /*
   Forcibly disconnects a client given their id. Sends a closing message
@@ -83,7 +83,7 @@ public slots:
   /*
   Called when the client disconnects themself or when the server disconnects it.
   */
-  void on_client_disconnect(int id);
+  void disconnect_client(int id);
 
   /*
   This is connected to the readyRead signal of every QTcpSocket. When some
@@ -103,14 +103,14 @@ signals:
   This is emitted whenever a QTcpSocket emits stateChanged (connect signal to
   signal).
   */
-  void client_disconnect(int id, char *alias);
+  void client_disconnected(int id, char *alias);
 
   /*
   This is emitted when a client sends its initial establishment start
   message, and we obtain its alias. Note it will have been added to
   the client list before this when it initially connects.
   */
-  void client_connect(int id, char *alias);
+  void client_connected(int id, char *alias);
 
 private:
   /*

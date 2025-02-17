@@ -68,7 +68,7 @@ TEST_F(MftpTest, SendAndProcessBasic)
   spin_until_received(sock2, 5000);
   ASSERT_TRUE(process_datagram(sock2, received_header, received_frame));
 
-  EXPECT_EQ(header, received_header);
+  EXPECT_EQ(received_header, header);
   EXPECT_EQ(received_frame.audio, frame.audio);
   EXPECT_EQ(received_frame.video, frame.video);
 }

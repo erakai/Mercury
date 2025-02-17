@@ -1,5 +1,4 @@
 # Determine source list
-
 set(TEST_SOURCES
 test/mercury_test.cpp
 )

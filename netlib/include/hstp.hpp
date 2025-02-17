@@ -1,16 +1,9 @@
 #pragma once
 
+#include "logger.hpp"
 #include <QHostAddress>
 #include <QTcpSocket>
-#include <QtCore/qcontainerfwd.h>
-#include <QtCore/qobject.h>
-#include <QtCore/qstringview.h>
-#include <cstddef>
-#include <cstdint>
-#include <cstring>
-#include <logger.hpp>
 #include <memory>
-#include <sys/_endian.h>
 #include <vector>
 
 /*

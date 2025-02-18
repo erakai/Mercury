@@ -24,6 +24,8 @@ public:
 
   ~MftpTest()
   {
+    MINIMUM_LOG_LEVEL = -1;
+
     sock1->close();
     sock2->close();
   }

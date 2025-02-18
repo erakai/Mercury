@@ -3,8 +3,7 @@
 
 std::shared_ptr<QUdpSocket> acquire_mftp_socket(int port)
 {
-  std::shared_ptr<QUdpSocket> sock =
-      std::shared_ptr<QUdpSocket>(new QUdpSocket(nullptr));
+  std::shared_ptr<QUdpSocket> sock = std::make_shared<QUdpSocket>();
 
   // Bind socket to target port on this machine
   sock->bind(QHostAddress::LocalHost, port);

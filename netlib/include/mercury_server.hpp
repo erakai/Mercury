@@ -15,6 +15,9 @@ meant to be exposed to the actual application.
 */
 struct Client
 {
+  // Validated - has sent server port, alias, and password, etc
+  bool validated = false;
+
   // Here, id is an arbitrary unique identifier the server assigns every
   // incoming connection. Alias is the client's alias.
   int id = -1;
@@ -36,17 +39,15 @@ class MercuryServer : public QTcpServer
   Q_OBJECT;
 
 public:
+  MercuryServer() {}
   MercuryServer(int tcp_port, int udp_port)
-      : tcp_port(tcp_port), udp_port(udp_port)
-  {
-    connect_signals_and_slots();
-  };
+      : tcp_port(tcp_port), udp_port(udp_port) {};
 
   /*
     Starts the server on the given port, meaning it will accept inbound
     HSTP connnections and add them to its client list.
   */
-  void start_server();
+  bool start_server();
 
   /*
   Closes the server. Sends a closing message to every client on its list
@@ -61,10 +62,18 @@ public:
   int convert_alias_to_id(char *alias);
 
   /*
-  Control connection helpers (KRIS THIS ON YOU)
+  Retrieve client list.
   */
-  // void handle_chat_message(...);
-  // void handle_annotation_datagram(...);
+  std::unordered_map<int, Client> get_clients();
+
+  /*
+  Getters and setters. Note the ports cannot be changed once the server has been
+  started.
+  */
+  void set_ports(int tcp_port, int udp_port);
+  int get_tcp_port() { return tcp_port; };
+  int get_udp_port() { return udp_port; }
+  Client get_client(int id) { return clients[id]; }
 
 public slots:
   /*
@@ -94,23 +103,30 @@ public slots:
 
   /*
   Serializes a audio/video payload and then distributes it to every
-  client in the client list.
+  client in the client list. Returns the number of clients it tried to send the
+  frame too.
   */
-  void send_frame(char source[12], QAudioBuffer audio, QPixmap video);
+  int send_frame(char source[12], QAudioBuffer audio, QPixmap video);
+
+  /*
+  Handles a client's initial establishment message and validates the client,
+  enabling it to receive MFTP data.
+  */
+  void validate_client(int id, char alias[18], int mftp_port);
 
 signals:
   /*
   This is emitted whenever a QTcpSocket emits stateChanged (connect signal to
   signal).
   */
-  void client_disconnected(int id, char *alias);
+  void client_disconnected(int id, std::string alias);
 
   /*
   This is emitted when a client sends its initial establishment start
   message, and we obtain its alias. Note it will have been added to
   the client list before this when it initially connects.
   */
-  void client_connected(int id, char *alias);
+  void client_connected(int id, std::string alias);
 
 private:
   /*
@@ -119,7 +135,7 @@ private:
   void connect_signals_and_slots();
 
   // Global UDP socket that all clients will be contacted with
-  std::shared_ptr<QUdpSocket> mftp_sock;
+  std::shared_ptr<QUdpSocket> mftp_sock = nullptr;
 
   // Ports the server is running on
   int tcp_port = -1;

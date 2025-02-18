@@ -8,6 +8,8 @@ class MercuryClient : public QObject
   Q_OBJECT;
 
 public:
+  MercuryClient() {}
+
   /*
   Pops the next frame from the client's jitter buffer, and returns it packaged
   within the AV_Frame struct. Contains both audio and video.

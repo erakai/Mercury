@@ -26,8 +26,23 @@ By far the simplest solution is to purchase a **static IP**. These are public ad
 ### Port Forwarding
 Another easy, and this time free, option is **port forwarding**. Choose a port that you will stream all Mercury session out of. Now, go to your router configuration settings, and port forward it to direct all traffic aimed at your public IP and that port to your computer. Any device supplied with your router's public IP and your chosen port will send traffic directly to your computer, allowing you to stream to them.
 
+A guide to port forwarding: https://www.noip.com/support/knowledgebase/general-port-forwarding-guide
+
+### Using a VPS
+A VPS (Virtual Private Server) can be rented from online providers, and often can have a static IP (for an extra fee). This is cheaper than purchasing one for your own device because you don't have to lease one for an extended period of time from the ISP - only discuss renting the server from whatever company owns it. As a result, if you own a VPS with a static IP, you can remote into it using something like VNC and run Mercury from it.
+
+Some options:
+* https://aws.amazon.com/free/compute/lightsail/
+* https://azure.microsoft.com/en-us/
+* https://cloudzy.com/dedicated-ip-vps/
+* https://go.lightnode.com/dedicated-ip-vps
+* https://www.vps-mart.com/ip
+
 ### Cloud Tunneling
+Cloud tunneling refers to a wide array of techniques for transporting data across a network using protocols not normally supported. Generally, it refers to encapsulating packets within additional headers (such as IP-in-IP). However, a specific kind of tunnel has become more popular recently. By trusting an external provider (such as Cloudflare) with your network traffic, you can have your users send data to a Cloudflare server, and have that server forward it on to your network. The way this avoids the issue with the NAT translation that normally occurs is that your computer can repeatedly send small packets of data to the Cloudflare server, and thus inform your router that any data coming from that server should be sent to it.
 
+![tunnel](images/tunnel.png)
 
-### Dynamic DNS
+The downside to this is that you will be exposing all network traffic, you may have to pay a fee as usage scales, and configuring it for uncommon kinds of data (anything besides SSH or HTTP) can be difficult. You can read more about this option [here](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
+
 

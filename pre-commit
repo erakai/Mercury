@@ -2,10 +2,10 @@
 
 # This will be moved into the .git/hooks repository by ./format.sh the first time you run it.
 
-find app -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format -Werror --dry-run
+find app -iname '*.h*' -o -iname '*.cpp' | xargs clang-format -Werror --dry-run
 exit_code_1=$?
 
-find netlib -iname '*.hpp' -o -iname '*.cpp' | xargs clang-format -Werror --dry-run
+find netlib -iname '*.h*' -o -iname '*.cpp' | xargs clang-format -Werror --dry-run
 exit_code_2=$?
 
 if [[ $exit_code_1 -ne 0 || $exit_code_2 -ne 0 ]]; then

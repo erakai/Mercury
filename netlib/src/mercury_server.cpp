@@ -12,16 +12,24 @@ void MercuryServer::connect_signals_and_slots()
           &MercuryServer::add_new_client);
 }
 
-void MercuryServer::start_server()
+bool MercuryServer::start_server()
 {
+  if (udp_port == -1 || tcp_port == -1)
+  {
+    log("Server ports are not set, cannot start.", ll::CRITICAL);
+    return false;
+  }
+
   mftp_sock = acquire_mftp_socket(udp_port);
 
   if (!listen(QHostAddress::Any, tcp_port))
   {
-    log("Error: Unable to start server", ll::CRITICAL);
+    log("Error: Unable to start server.", ll::CRITICAL);
     close();
-    return;
+    return false;
   }
+
+  connect_signals_and_slots();
 
   QString address;
   for (const QHostAddress &entry : QNetworkInterface::allAddresses())
@@ -36,9 +44,12 @@ void MercuryServer::start_server()
   if (address.isEmpty())
     address = QHostAddress(QHostAddress::LocalHost).toString();
 
-  log("Started server at %s on port %d.", address.data(), tcp_port, ll::NOTE);
+  log("Started server at %s with HSTP port %d.", address.toStdString().c_str(),
+      tcp_port, ll::NOTE);
   server_start = std::chrono::system_clock::now();
   id_counter = 0;
+
+  return true;
 }
 
 void MercuryServer::close_server()
@@ -51,10 +62,11 @@ void MercuryServer::close_server()
   }
 
   clients.clear();
-  close();
   mftp_sock->close();
+  close();
 
   log("Server closed.", ll::NOTE);
+  id_counter = 0;
 }
 
 int MercuryServer::convert_alias_to_id(char *alias)
@@ -67,6 +79,21 @@ int MercuryServer::convert_alias_to_id(char *alias)
   return -1;
 }
 
+std::unordered_map<int, Client> MercuryServer::get_clients()
+{
+  return clients;
+}
+
+void MercuryServer::set_ports(int tcp, int udp)
+{
+  // Don't change ports if server is started
+  if (isListening())
+    return;
+
+  tcp_port = tcp;
+  udp_port = udp;
+}
+
 void MercuryServer::add_new_client()
 {
   // Add the new client
@@ -74,18 +101,36 @@ void MercuryServer::add_new_client()
     return;
   Client new_client;
 
+  // TODO: VERIFY CLIENT NOT ON BLACKLIST BEFORE ADDING TO LIST
   QTcpSocket *connection = nextPendingConnection();
   new_client.id = ++id_counter;
   new_client.hstp_sock = std::shared_ptr<QTcpSocket>(connection);
   new_client.hstp_messager = HstpHandler();
 
+  // NOT VALIDATED until first establishing HSTP message received.
+  // Please read validate_client().
+  new_client.validated = false;
+
   // Connect relevant functions
   connect(connection, &QAbstractSocket::readyRead, this,
           [=, this]() { this->process_received_hstp_messages(new_client.id); });
-  connect(connection, &QAbstractSocket::disconnected, this,
+  connect(new_client.hstp_sock.get(), &QAbstractSocket::disconnected, this,
           [=, this]() { this->disconnect_client(new_client.id); });
 
   clients[new_client.id] = new_client;
+}
+
+void MercuryServer::validate_client(int id, char alias[18], int mftp_port)
+{
+  Client new_client = clients[id];
+
+  // TODO: VERIFY PASSWORD HERE (ADD EXTRA PARAMETER)
+
+  new_client.validated = true;
+  new_client.mftp_port = mftp_port;
+  strcpy(new_client.alias, alias);
+
+  emit client_connected(id, std::string(alias));
 }
 
 void MercuryServer::force_disconnect_client(int id)
@@ -107,21 +152,23 @@ void MercuryServer::disconnect_client(int id)
     client.hstp_sock->disconnectFromHost();
   clients.erase(id);
 
-  emit client_disconnect(id, client.alias);
-
-  //  free(client.hstp_sock);
-  log("Client %s has disconnected.", client.alias, ll::NOTE);
+  // If this was a "real" client
+  if (client.validated)
+  {
+    emit client_disconnected(id, std::string(client.alias));
+    //  free(client.hstp_sock);
+    log("Client %s has disconnected.", client.alias, ll::NOTE);
+  }
 }
 
 void MercuryServer::process_received_hstp_messages(int id)
 {
-  // Remember to emit client connect if this is an establishment message,
-  // and call the appropriate handlers otherwise.
+  // If this is an establishment message: validate_client();
   // Waiting on HSTP to be implemented.
 }
 
-void MercuryServer::send_frame(char source[12], QAudioBuffer audio,
-                               QPixmap video)
+int MercuryServer::send_frame(char source[12], QAudioBuffer audio,
+                              QPixmap video)
 {
   // Send to every client and increment their frame seq num
   MFTP_Header header;
@@ -148,15 +195,19 @@ void MercuryServer::send_frame(char source[12], QAudioBuffer audio,
   strcpy(header.source_name, source);
 
   // Send data
+  int client_sent_to_count = 0;
   for (auto &[id, client] : clients)
   {
-    if (client.mftp_port == 0 || id == -1)
+    if (!client.validated || client.mftp_port == 0 || id == -1)
       continue;
 
     header.seq_num = client.frame_seq_num;
     client.frame_seq_num++;
 
+    client_sent_to_count++;
     send_datagram(mftp_sock, client.hstp_sock->peerAddress(), client.mftp_port,
                   header, payload);
   }
+
+  return client_sent_to_count;
 }

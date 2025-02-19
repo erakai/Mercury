@@ -16,6 +16,7 @@ public:
 
   // Other public methods...
   void hello();
+  QStringList get_windows();
 
 private:
   // Private constructor prevents direct instantiation.

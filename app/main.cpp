@@ -1,5 +1,6 @@
 #include "mainwindow.hpp"
 #include "mnet.hpp"
+#include "windowmanager.h"
 
 #include <QApplication>
 

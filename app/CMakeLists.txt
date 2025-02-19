@@ -8,6 +8,11 @@ qt_add_executable(mercury
   settingswindow.h settingswindow.cpp settingswindow.ui
   hoststreamwindow.h hoststreamwindow.cpp hoststreamwindow.ui
   joinstreamwindow.h joinstreamwindow.cpp joinstreamwindow.ui
+  grabwindowstest.h grabwindowstest.cpp grabwindowstest.ui
+  windowmanager.h
+  windowmanager.h
+  windowmanager.cpp
+
 )
 
 # Qt set up

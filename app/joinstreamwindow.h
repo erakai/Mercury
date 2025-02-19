@@ -18,6 +18,7 @@ public:
 
 private slots:
   void on_cancelButton_clicked();
+  void join_button_clicked();
 
 private:
   Ui::JoinStreamWindow *ui;

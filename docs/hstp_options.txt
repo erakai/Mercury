@@ -12,8 +12,8 @@ Options
 
 (ID: 0) Echo
 
-  Debugging tool used to test functionality. Sender expects receiver
-  to send back what was sent.
+  Debugging tool used to test functionality. Sender expects nothing,
+  receiver logs the message to the logger for debugging.
   Len: Variable
   Data:
     - char[len_of_message] message

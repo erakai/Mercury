@@ -16,6 +16,8 @@ class MercuryClient : public QObject
 public:
   MercuryClient(const std::string &alias) : m_alias(alias)
   {
+    m_hstp_sock = std::make_shared<QTcpSocket>();
+    m_mftp_sock = std::make_shared<QUdpSocket>();
     connect_signals_and_slots();
   };
   /*
@@ -32,7 +34,8 @@ public slots:
    * Connects to the given host address and port via both UDP/TCP. Slot allows
    * UI to connect the client on signal
    */
-  bool establish_connection(const QHostAddress &host, quint16 port);
+  bool establish_connection(const QHostAddress &host, quint16 hstp_port,
+                            quint16 mftp_port);
 
   /*
    * Disconnects the TCP/UDP sockets. Slot allows UI to disconnect on signal.
@@ -42,7 +45,7 @@ public slots:
   /*
    * Informs the server that the client is sending out a chat message.
    */
-  void send_chat(const std::string &chat_msg);
+  bool talk_tuah(const std::string &chat_msg);
 
   /*
    * Connected to the readyRead signal of QTcpSocket. Will process the given
@@ -50,19 +53,12 @@ public slots:
    */
   void process_received_hstp_messages();
 
+  std::shared_ptr<HstpProcessor> hstp_processor() const
+  {
+    return m_hstp_processor_ptr;
+  }
+
 signals:
-
-  /*
-   * Emits that an echo option happened and prints the messsage to the logger.
-   * Slot should only be used for debugging purposes.
-   */
-  void emit_echo_option();
-
-  /*
-   * Default option for processing hstp messages, when no other emit option
-   * could be made. Should be used only for debugging and error states
-   */
-  std::shared_ptr<HSTP_Header> emit_generic_option();
 
 private:
   /*
@@ -80,4 +76,5 @@ private:
   std::string m_alias;
 
   HstpHandler m_hstp_handler;
+  std::shared_ptr<HstpProcessor> m_hstp_processor_ptr;
 };

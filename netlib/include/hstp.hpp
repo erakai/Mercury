@@ -123,9 +123,10 @@ private:
 
 class HstpProcessor : public QObject
 {
-  Q_OBJECT
+  Q_OBJECT;
+
 public:
-  explicit HstpProcessor(QObject *parent = nullptr);
+  explicit HstpProcessor(QObject *parent = nullptr) {}
 
   /*
    * Given a header, will emit a series of signals that can be slotted to when

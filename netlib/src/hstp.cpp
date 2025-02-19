@@ -1,7 +1,4 @@
 #include "hstp.hpp"
-#include <cstdint>
-#include <memory>
-#include <string>
 
 bool HstpHandler::init_msg(char sender_alias[18])
 {
@@ -88,9 +85,9 @@ std::shared_ptr<QByteArray> HstpHandler::output_msg()
   return bytes;
 }
 
-std::shared_ptr<HSTP_Header> HstpHandler::bytes_to_msg(QByteArray &buff)
+std::shared_ptr<HSTP_Header>
+HstpHandler::bytes_to_msg(const std::shared_ptr<QByteArray> &buff)
 {
-  std::shared_ptr<QByteArray> buff = std::shared_ptr<QByteArray>(buff);
   return _deserialize(buff);
 }
 

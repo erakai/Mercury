@@ -12,8 +12,13 @@ Options
 
 (ID: 0) Echo
 
+<<<<<<< HEAD
   Debugging tool used to test functionality. Sender expects nothing,
   receiver logs the message to the logger for debugging.
+=======
+  Debugging tool used to test functionality. Sender expects receiver
+  to send back what was sent.
+>>>>>>> 50bd3848c6fae2260fb50ceb60a051b1cd8b57b0
   Len: Variable
   Data:
     - char[len_of_message] message
@@ -35,5 +40,11 @@ Options
 
   Len: Variable
   Data:
+<<<<<<< HEAD
       - char[len_of_message] message
+=======
+    - char[18] alias_of_sender
+    - uint32_t len_of_message
+    - char[len_of_message] message
+>>>>>>> 50bd3848c6fae2260fb50ceb60a051b1cd8b57b0
 

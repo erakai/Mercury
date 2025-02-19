@@ -20,6 +20,8 @@ public:
     m_mftp_sock = std::make_shared<QUdpSocket>();
     connect_signals_and_slots();
   };
+  MercuryClient() {}
+
   /*
   Pops the next frame from the client's jitter buffer, and returns it packaged
   within the AV_Frame struct. Contains both audio and video.
@@ -77,4 +79,9 @@ private:
 
   HstpHandler m_hstp_handler;
   std::shared_ptr<HstpProcessor> m_hstp_processor_ptr;
+
+private:
+  // This class will require a jitter buffer ordered by sequence number for RTP
+  // implementation. Investigate: https://doc.qt.io/qt-6/qbuffer.html
+  std::vector<AV_Frame> jitter_buffer;
 };

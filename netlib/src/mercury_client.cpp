@@ -1,7 +1,4 @@
 #include "mercury_client.hpp"
-#include <QtCore/qobject.h>
-#include <QtNetwork/qabstractsocket.h>
-#include <memory>
 
 AV_Frame MercuryClient::retrieve_next_frame()
 {
@@ -59,8 +56,8 @@ void MercuryClient::process_received_hstp_messages()
   // TODO: get data correctly
   QByteArray data = m_hstp_sock->readAll();
 
-  std::shared_ptr<QByteArray> buff = std::make_shared<QByteArray>(data);
-  std::shared_ptr<HSTP_Header> hdr = m_hstp_handler.bytes_to_msg(buff);
+  // std::shared_ptr<QByteArray> buff = std::make_shared<QByteArray>(data);
+  // std::shared_ptr<HSTP_Header> hdr = m_hstp_handler.bytes_to_msg(buff);
 }
 
 void MercuryClient::connect_signals_and_slots()

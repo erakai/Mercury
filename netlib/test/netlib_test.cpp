@@ -39,7 +39,7 @@ public:
 
   random_bytes_engine rbe;
   MercuryServer server;
-  MercuryClient client;
+  // MercuryClient client;
 };
 
 TEST_F(NetlibTest, ServerClientBasic)

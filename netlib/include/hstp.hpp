@@ -7,6 +7,7 @@
 #include <QtCore/qtmetamacros.h>
 #include <QtCore/qtypes.h>
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 /*
@@ -20,9 +21,6 @@ and contains data specific to that option.
 
 These options will be documented in docs/hstp_options.txt.
 They are inspired by DHCP options: https://www.ietf.org/rfc/rfc2132.txt.
-
-HSTP Format:
-[sender_alias[ALIAS_SIZE], uint8_t option_count, options[]]
 */
 
 #define ALIAS_SIZE 18

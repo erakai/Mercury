@@ -55,7 +55,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QLineEdit" name="stream_name_line">
    <property name="geometry">
     <rect>
      <x>20</x>

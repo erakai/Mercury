@@ -1,6 +1,10 @@
 #pragma once
 
+#include "chatpane.hpp"
+#include "streamdisplay.hpp"
 #include "streamservice.hpp"
+#include <QGridLayout>
+#include <QLabel>
 #include <QMainWindow>
 
 using namespace std;
@@ -21,9 +25,10 @@ public:
   StreamWindow(std::string alias, shared_ptr<ClientService> client_data,
                QWidget *parent = nullptr);
 
-public slots:
+  bool is_host() { return mode == MercuryMode::HOST; }
+  bool is_client() { return mode == MercuryMode::CLIENT; }
 
-signals:
+public slots:
 
 private:
   /*
@@ -35,6 +40,17 @@ private:
   void initialize_primary_ui_widgets();
 
   // All important widgets we will be using to set up UI
+  // Because a main window only has one central widget, we will be creating a
+  // dummy one (display) to paste a layout onto.
+  // https://doc.qt.io/qt-6/qtwidgets-tutorials-widgets-nestedlayouts-example.html.
+  QWidget *display;
+  QGridLayout *main_layout;
+  ChatPane *chat_pane;
+  StreamDisplay *stream_display;
+  QGridLayout *below_stream_layout;
+
+  QLabel *stream_title;
+  QLabel *viewer_count;
 
   // Determines whether or not this window is a client or a host
   const MercuryMode mode;

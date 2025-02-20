@@ -11,9 +11,6 @@ HostStreamWindow::HostStreamWindow(QWidget *parent)
   // Get the ip address here to display
 
   ui->setupUi(this);
-
-  connect(ui->host_button, &QPushButton::released, this,
-          &HostStreamWindow::on_host_button_clicked);
 }
 
 HostStreamWindow::~HostStreamWindow()
@@ -35,7 +32,9 @@ void HostStreamWindow::on_pushButton_3_clicked()
 void HostStreamWindow::on_host_button_clicked()
 {
   // This sets itself to delete on close, so no memory leak (I think)
-  StreamWindow *w = new StreamWindow("test", std::make_shared<HostService>());
+  std::shared_ptr<HostService> serv = std::make_shared<HostService>();
+  serv->stream_name = ui->stream_name_line->text().toStdString();
+  StreamWindow *w = new StreamWindow("test", serv);
   w->show();
 
   parentWidget()->hide();

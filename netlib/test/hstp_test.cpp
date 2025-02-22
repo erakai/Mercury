@@ -49,7 +49,7 @@ TEST_F(HstpHandlerTest, SerializeTest_Basic)
 
   EXPECT_EQ(byte_array_ptr->toHex(':').toStdString(),
             std::string("41:6c:65:78:00:00:00:00:00:00:00:00:00:00:00:00:00:"
-                        "00:01:00:06:68:65:6c:6c:6f:00"));
+                        "00:08:00:01:00:06:68:65:6c:6c:6f:00"));
 }
 
 TEST_F(HstpHandlerTest, SerializeTest_18CharAlias)
@@ -70,9 +70,10 @@ TEST_F(HstpHandlerTest, SerializeTest_18CharAlias)
   std::shared_ptr<QByteArray> byte_array = std::make_shared<QByteArray>();
   byte_array = _serialize(header);
 
-  EXPECT_STREQ(byte_array->toHex(':').toStdString().c_str(),
-               "41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:01:00:06:"
-               "68:65:6c:6c:6f:00");
+  EXPECT_STREQ(
+      byte_array->toHex(':').toStdString().c_str(),
+      "41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:08:00:01:00:06:"
+      "68:65:6c:6c:6f:00");
 }
 
 TEST_F(HstpHandlerTest, DeserializeTest_Basic)

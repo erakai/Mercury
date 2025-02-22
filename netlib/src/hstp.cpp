@@ -1,9 +1,9 @@
 #include "hstp.hpp"
 
-bool HstpHandler::init_msg(char sender_alias[18])
+bool HstpHandler::init_msg(const char sender_alias[18])
 {
+  m_hdr = std::make_shared<HSTP_Header>();
   strcpy(m_hdr->sender_alias, sender_alias);
-
   m_current_status = MSG_STATUS::IN_PROGRESS;
 
   return true;
@@ -109,11 +109,23 @@ HstpHandler::_serialize(const std::shared_ptr<HSTP_Header> &hdr)
   std::shared_ptr<QByteArray> byte_array_ptr = std::make_shared<QByteArray>();
   QDataStream ds(byte_array_ptr.get(), QIODevice::WriteOnly);
 
+  // write alias
   ds.writeRawData(hdr->sender_alias, 18);
 
+  // write size of options
+  uint16_t size_opts = 0;
+  for (const auto &opt : hdr->options)
+  {
+    size_opts +=
+        (2 + opt.len); // 1 bye for type, 1 byte for len, opt.len bytes for data
+  }
+  ds << htons(size_opts);
+
+  // write # of options
   uint8_t s = hdr->options.size();
   ds << s;
 
+  // write options
   for (const auto &opt : hdr->options)
   {
     ds << opt.type;
@@ -133,6 +145,11 @@ HstpHandler::_deserialize(const std::shared_ptr<QByteArray> &buff)
 
   // get alias
   ds.readRawData(hdr->sender_alias, 18);
+
+  // get option len (no point in storing it cause we can get that from the
+  // vector fairly easily)
+  uint16_t opt_len;
+  ds >> opt_len;
 
   // get option count
   uint8_t opt_count;

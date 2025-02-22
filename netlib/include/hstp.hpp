@@ -25,6 +25,8 @@ They are inspired by DHCP options: https://www.ietf.org/rfc/rfc2132.txt.
 
 #define ALIAS_SIZE 18
 #define CHAT_SIZE_LIMIT 500
+#define HSTP_HEADER_SIZE                                                       \
+  ALIAS_SIZE * sizeof(char) + sizeof(uint16_t) + sizeof(uint8_t)
 
 struct Option
 {
@@ -83,7 +85,7 @@ public:
   HstpHandler() : m_current_status(MSG_STATUS::READY) {}
 
   // messaging processing, allows you to build a HSTP header
-  bool init_msg(char sender_alias[ALIAS_SIZE]);
+  bool init_msg(const char sender_alias[ALIAS_SIZE]);
 
   bool add_option_echo(const char *msg);
   bool add_option_establishment(bool is_start, uint16_t port);

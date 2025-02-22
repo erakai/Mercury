@@ -1,6 +1,8 @@
 #include "mainwindow.hpp"
 #include "mnet.hpp"
+#include "configControl/mconfig.hpp"
 
+#include <iostream>
 #include <QApplication>
 
 int main(int argc, char **argv)
@@ -11,6 +13,13 @@ int main(int argc, char **argv)
 
   MainWindow w;
   w.show();
+
+  if (mercury::check_config_file_presence())
+  {
+
+    mercury::curl_default_config();
+
+  }
 
   return a.exec();
 }

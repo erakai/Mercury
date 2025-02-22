@@ -6,6 +6,7 @@
 #include <QMediaPlayer>
 #include <QPainter>
 #include <QTimer>
+#include <QVideoWidget>
 #include <QWidget>
 #include <functional>
 
@@ -22,9 +23,6 @@ class StreamDisplay : public QWidget
 public:
   StreamDisplay(QWidget *parent, function<bool(QPixmap &)> get_next_video_frame,
                 function<bool(QAudioBuffer &)> get_next_audio_frame);
-
-  // Qt default paint method
-  void paintEvent(QPaintEvent *e) override;
 
   // Begins drawing and requesting frames
   void begin_playback();
@@ -48,6 +46,10 @@ private:
   // QMediaPlayer reads from.
   // https://stackoverflow.com/questions/35365600/play-a-qaudiobuffer
   // https://stackoverflow.com/questions/4473608/how-to-play-sound-with-qt
-  QMediaPlayer *audio;
+  QMediaPlayer *audio_player;
   QBuffer *audio_buffer;
+
+  QMediaPlayer *video_player;
+  QVideoWidget *video_widget;
+  QBuffer *video_buffer;
 };

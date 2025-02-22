@@ -1,4 +1,5 @@
 #include "streamdisplay.hpp"
+#include <QtMultimedia/qmediaplayer.h>
 
 StreamDisplay::StreamDisplay(
     QWidget *parent, function<bool(QPixmap &)> get_next_video_frame,
@@ -17,33 +18,41 @@ StreamDisplay::StreamDisplay(
   connect(fps_timer, &QTimer::timeout, this,
           &StreamDisplay::acquire_next_frame);
 
+  audio_player = new QMediaPlayer();
+  video_player = new QMediaPlayer();
+
   audio_buffer = new QBuffer();
   audio_buffer->open(QIODevice::ReadWrite);
+
+  video_buffer = new QBuffer();
+  video_buffer->open(QIODevice::ReadWrite);
+
+  video_widget = new QVideoWidget(this);
+  video_player->setVideoOutput(video_widget);
+  video_widget->show();
 }
 
 void StreamDisplay::begin_playback()
 {
-  fps_timer->start(1000 / 30.0);
-  audio->setSourceDevice(audio_buffer);
-  audio->play();
-}
+  audio_player->setSourceDevice(audio_buffer);
+  audio_player->play();
 
-void StreamDisplay::paintEvent(QPaintEvent *e)
-{
-  QPainter painter(this);
-  QRectF target(0, 0, 1280, 720);
-  QRectF source(0, 0, next_video_frame.width(), next_video_frame.height());
-  painter.drawPixmap(target, next_video_frame, source);
+  video_player->setSourceDevice(video_buffer);
+  video_player->play();
+
+  fps_timer->start(1000 / 30.0);
 }
 
 void StreamDisplay::acquire_next_frame()
 {
-  get_next_audio_frame(next_audio_frame);
-  // somehow add audio frame to audio buffer?
+  if (get_next_audio_frame(next_audio_frame))
+  {
+    // somehow add audio frame to audio buffer?
+  }
 
   if (get_next_video_frame(next_video_frame))
   {
-    // Calls paintEvent()
-    update();
+    // TODO: Investigate other video/audio encodings
+    next_video_frame.save(video_buffer, "PNG");
   }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hosttoolbar.hpp"
 #include "sidepane.hpp"
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
@@ -40,6 +41,9 @@ public slots:
   // called.
   void stream_fully_initialized();
 
+  // Called to close the stream (if hosting) or leave (if client)
+  void shut_down_window();
+
   // These are generic update slots that should be connected to a signal either
   // in the client or server
   void viewer_count_updated(int new_count);
@@ -55,7 +59,7 @@ private:
   Helper functions for setting the ui up.
   */
   void set_up();
-  void configure_menu_bar();
+  void configure_menu_and_tool_bar();
   void connect_signals_and_slots();
   void initialize_primary_ui_widgets();
 
@@ -71,6 +75,11 @@ private:
 
   QLabel *stream_title;
   QLabel *viewer_count;
+
+  QMenu *stream_menu;
+  QAction *stop_or_leave_stream_action;
+
+  HostToolBar *toolbar;
 
   // Determines whether or not this window is a client or a host
   const MercuryMode mode;

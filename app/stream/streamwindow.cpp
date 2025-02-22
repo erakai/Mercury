@@ -1,5 +1,7 @@
 #include "streamwindow.hpp"
+#include "hosttoolbar.hpp"
 #include <QApplication>
+#include <QMenuBar>
 #include <QScreen>
 
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
@@ -26,7 +28,7 @@ void StreamWindow::set_up()
 
   initialize_primary_ui_widgets();
   connect_signals_and_slots();
-  configure_menu_bar();
+  configure_menu_and_tool_bar();
 
   display->setLayout(main_layout);
   setCentralWidget(display);
@@ -38,17 +40,29 @@ void StreamWindow::set_up()
   below_stream_layout->addWidget(stream_title, 0, 0);
   below_stream_layout->addWidget(viewer_count, 0, 2);
 
+  if (is_host())
+    addToolBar(toolbar);
+
   // Center this window
   move(QGuiApplication::screens().at(0)->geometry().center() -
        frameGeometry().center());
 }
 
-void StreamWindow::configure_menu_bar()
+void StreamWindow::configure_menu_and_tool_bar()
 {
+  stream_menu = menuBar()->addMenu(tr("&Stream"));
+
+  std::string label = "&End Stream";
+  if (is_client())
+    label = "&Leave Stream";
+  stop_or_leave_stream_action = new QAction(tr(label.c_str()), this);
+  stream_menu->addAction(stop_or_leave_stream_action);
 }
 
 void StreamWindow::connect_signals_and_slots()
 {
+  connect(stop_or_leave_stream_action, &QAction::triggered, this,
+          &StreamWindow::shut_down_window);
 }
 
 void StreamWindow::initialize_primary_ui_widgets()
@@ -75,11 +89,27 @@ void StreamWindow::initialize_primary_ui_widgets()
   if (is_host() && host->stream_name.size() > 0)
     stream_title->setText(host->stream_name.c_str());
   viewer_count = new QLabel("Viewers: 1", this);
+
+  if (is_host())
+    toolbar = new HostToolBar(this);
 }
 
 void StreamWindow::stream_fully_initialized()
 {
   stream_display->begin_playback();
+}
+
+void StreamWindow::shut_down_window()
+{
+  /*
+  if (is_host())
+    // host->server->fully_disconnect_clients();
+
+  if (is_client())
+    // client->client->disconnect();
+  */
+
+  close();
 }
 
 bool StreamWindow::provide_next_video_frame(QPixmap &next_video)

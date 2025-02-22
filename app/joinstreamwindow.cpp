@@ -24,7 +24,9 @@ void JoinStreamWindow::on_cancelButton_clicked()
 
 void JoinStreamWindow::on_join_button_clicked()
 {
-  StreamWindow *w = new StreamWindow("test", std::make_shared<ClientService>());
+  std::shared_ptr<ClientService> serv = std::make_shared<ClientService>();
+  StreamWindow *w =
+      new StreamWindow(ui->displayNameTextEdit->text().toStdString(), serv);
   w->show();
 
   parentWidget()->hide();

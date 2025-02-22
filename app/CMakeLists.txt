@@ -5,7 +5,7 @@ qt_add_executable(mercury
   MANUAL_FINALIZATION
   stream/streamwindow.cpp stream/streamwindow.hpp
   stream/streamservice.hpp
-  stream/chatpane.cpp stream/chatpane.hpp
+  stream/sidepane.cpp stream/sidepane.hpp
   stream/streamdisplay.cpp stream/streamdisplay.hpp
   main.cpp
   mainwindow.cpp mainwindow.hpp mainwindow.ui

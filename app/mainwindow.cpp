@@ -13,21 +13,21 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 void MainWindow::on_settingsButton_clicked()
 {
-  SettingsWindow settingsWindow;
+  SettingsWindow settingsWindow(this);
   settingsWindow.setModal(true);
   settingsWindow.exec();
 }
 
 void MainWindow::on_hostButton_clicked()
 {
-  HostStreamWindow hostStreamWindow;
+  HostStreamWindow hostStreamWindow(this);
   hostStreamWindow.setModal(true);
   hostStreamWindow.exec();
 }
 
 void MainWindow::on_joinButton_clicked()
 {
-  JoinStreamWindow joinStreamWindow;
+  JoinStreamWindow joinStreamWindow(this);
   joinStreamWindow.setModal(true);
   joinStreamWindow.exec();
 }

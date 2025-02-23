@@ -3,6 +3,10 @@
 # The binary
 qt_add_executable(mercury
   MANUAL_FINALIZATION
+  stream/streamwindow.cpp stream/streamwindow.hpp
+  stream/streamservice.hpp
+  stream/sidepane.cpp stream/sidepane.hpp
+  stream/streamdisplay.cpp stream/streamdisplay.hpp
   main.cpp
   mainwindow.cpp mainwindow.hpp mainwindow.ui
   settingswindow.h settingswindow.cpp settingswindow.ui
@@ -11,7 +15,7 @@ qt_add_executable(mercury
 )
 
 # Qt set up
-target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network)
+target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets)
 
 # Prevents console window on windows (Qt stuff)
 set_target_properties(mercury PROPERTIES

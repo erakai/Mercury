@@ -2,7 +2,7 @@
 #include "hoststreamwindow.h"
 #include "joinstreamwindow.h"
 #include "settingswindow.h"
-#include "networkmanager.h"
+#include "utils.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {

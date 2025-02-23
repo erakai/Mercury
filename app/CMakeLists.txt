@@ -8,8 +8,8 @@ qt_add_executable(mercury
   settingswindow.h settingswindow.cpp settingswindow.ui
   hoststreamwindow.h hoststreamwindow.cpp hoststreamwindow.ui
   joinstreamwindow.h joinstreamwindow.cpp joinstreamwindow.ui
-  networkmanager.h networkmanager.cpp
-  networkmanager.h networkmanager.cpp
+  utils.h utils.cpp
+  utils.h utils.cpp
 
 )
 

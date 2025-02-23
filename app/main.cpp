@@ -2,8 +2,8 @@
 #include "mnet.hpp"
 #include "configControl/mconfig.hpp"
 
-#include <iostream>
 #include <QApplication>
+#include <iostream>
 
 int main(int argc, char **argv)
 {
@@ -14,9 +14,10 @@ int main(int argc, char **argv)
   MainWindow w;
   w.show();
 
-  if (mercury::check_config_file_presence())
+  if (!(mercury::check_config_file_presence()))
   {
 
+    std::cout << "Config file not found!" << std::endl;
     mercury::curl_default_config();
 
   }

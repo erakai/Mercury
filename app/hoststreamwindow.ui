@@ -114,7 +114,7 @@
     <string>IP Address</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_3">
+  <widget class="QPushButton" name="ip_address_button">
    <property name="geometry">
     <rect>
      <x>20</x>

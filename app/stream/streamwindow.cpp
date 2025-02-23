@@ -27,8 +27,8 @@ void StreamWindow::set_up()
   setAttribute(Qt::WA_DeleteOnClose);
 
   initialize_primary_ui_widgets();
-  connect_signals_and_slots();
   configure_menu_and_tool_bar();
+  connect_signals_and_slots();
 
   display->setLayout(main_layout);
   setCentralWidget(display);

@@ -8,17 +8,17 @@ qt_add_executable(mercury
   settingswindow.h settingswindow.cpp settingswindow.ui
   hoststreamwindow.h hoststreamwindow.cpp hoststreamwindow.ui
   joinstreamwindow.h joinstreamwindow.cpp joinstreamwindow.ui
-  grabwindowstest.h grabwindowstest.cpp grabwindowstest.ui
-  windowmanager.h
-  windowmanager.h
-  windowmanager.cpp
-  hoverlabel.h
+  streampreviewwindow.h streampreviewwindow.cpp
+
+  screenlistmodel.h screenlistmodel.cpp
+  windowlistmodel.h windowlistmodel.cpp
+  audioinputlistmodel.h audioinputlistmodel.cpp
 
 
 )
 
 # Qt set up
-target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network)
+target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Multimedia Qt6::MultimediaWidgets)
 
 # Prevents console window on windows (Qt stuff)
 set_target_properties(mercury PROPERTIES

@@ -1,6 +1,6 @@
 #include "mainwindow.hpp"
 #include "mnet.hpp"
-#include "windowmanager.h"
+#include "streampreviewwindow.h"
 
 #include <QApplication>
 
@@ -9,6 +9,9 @@ int main(int argc, char **argv)
   mercury::init_mercury_network();
 
   QApplication a(argc, argv);
+
+  StreamPreviewWindow spw;
+  spw.show();
 
   MainWindow w;
   w.show();

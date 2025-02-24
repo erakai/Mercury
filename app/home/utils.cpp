@@ -1,6 +1,6 @@
 #include "utils.h"
 
-NetworkManager::NetworkManager()
+Utils::Utils()
 {
   foreach (const QHostAddress &address, QNetworkInterface::allAddresses())
   {

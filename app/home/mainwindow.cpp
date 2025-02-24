@@ -11,27 +11,27 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
   // example is really good).
   ui.setupUi(this);
 
-  QString ip = NetworkManager::instance().getIpAddress();
+  QString ip = Utils::instance().getIpAddress();
   ui.ip_address_label->setText(ip);
 }
 
 void MainWindow::on_settingsButton_clicked()
 {
-  SettingsWindow settingsWindow;
+  SettingsWindow settingsWindow(this);
   settingsWindow.setModal(true);
   settingsWindow.exec();
 }
 
 void MainWindow::on_hostButton_clicked()
 {
-  HostStreamWindow hostStreamWindow;
+  HostStreamWindow hostStreamWindow(this);
   hostStreamWindow.setModal(true);
   hostStreamWindow.exec();
 }
 
 void MainWindow::on_joinButton_clicked()
 {
-  JoinStreamWindow joinStreamWindow;
+  JoinStreamWindow joinStreamWindow(this);
   joinStreamWindow.setModal(true);
   joinStreamWindow.exec();
 }

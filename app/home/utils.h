@@ -5,24 +5,24 @@
 #include <QObject>
 #include <QString>
 
-class NetworkManager : public QObject
+class Utils : public QObject
 {
 Q_OBJECT // Ensure this is in the header, not in the .cpp file
 
-    public : static NetworkManager &
+    public : static Utils &
              instance()
   {
-    static NetworkManager instance;
+    static Utils instance;
     return instance;
   }
 
   QString getIpAddress() const { return ipAddress; }
 
 private:
-  explicit NetworkManager();
-  ~NetworkManager() = default;
-  NetworkManager(const NetworkManager &) = delete;
-  NetworkManager &operator=(const NetworkManager &) = delete;
+  explicit Utils();
+  ~Utils() = default;
+  Utils(const Utils &) = delete;
+  Utils &operator=(const Utils &) = delete;
 
   QString ipAddress;
 };

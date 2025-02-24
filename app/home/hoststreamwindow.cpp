@@ -1,5 +1,6 @@
 #include "hoststreamwindow.h"
 #include "ui_hoststreamwindow.h"
+#include "../stream/streamwindow.hpp"
 #include "utils.h"
 
 #include <QAbstractSocket>
@@ -18,7 +19,7 @@ HostStreamWindow::HostStreamWindow(QWidget *parent)
 
   ui->setupUi(this);
 
-  QString ip = NetworkManager::instance().getIpAddress();
+  QString ip = Utils::instance().getIpAddress();
   ui->ip_address_button->setText(ip);
 }
 
@@ -35,7 +36,7 @@ void HostStreamWindow::on_pushButton_clicked()
 void HostStreamWindow::on_ip_address_button_clicked()
 {
   // Copy IP address to clipboard
-  QApplication::clipboard()->setText(NetworkManager::instance().getIpAddress());
+  QApplication::clipboard()->setText(Utils::instance().getIpAddress());
 
   // Create the notification label if it doesn't exist
   QLabel *notificationLabel = new QLabel(this);
@@ -83,4 +84,17 @@ void HostStreamWindow::on_ip_address_button_clicked()
           });
 
   fadeOut->start();
+}
+
+void HostStreamWindow::on_host_button_clicked()
+{
+  // This sets itself to delete on close, so no memory leak (I think)
+  std::shared_ptr<HostService> serv = std::make_shared<HostService>();
+  serv->stream_name = ui->streamNameLineEdit->text().toStdString();
+  StreamWindow *w =
+      new StreamWindow(ui->lineEdit_2->text().toStdString(), serv);
+  w->show();
+
+  parentWidget()->hide();
+  this->close();
 }

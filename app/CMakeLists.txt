@@ -3,22 +3,25 @@
 # The binary
 qt_add_executable(mercury
   MANUAL_FINALIZATION
-  src/main.cpp
-  src/mainwindow.cpp src/mainwindow.hpp src/mainwindow.ui
-  src/settingswindow.h src/settingswindow.cpp src/settingswindow.ui
-  src/hoststreamwindow.h src/hoststreamwindow.cpp src/hoststreamwindow.ui
-  src/joinstreamwindow.h src/joinstreamwindow.cpp src/joinstreamwindow.ui
-  src/utils.h src/utils.cpp
+  stream/streamwindow.cpp stream/streamwindow.hpp
+  stream/streamservice.hpp
+  stream/sidepane.cpp stream/sidepane.hpp
+  stream/streamdisplay.cpp stream/streamdisplay.hpp
+  home/main.cpp
+  home/mainwindow.cpp home/mainwindow.hpp home/mainwindow.ui
+  home/settingswindow.h home/settingswindow.cpp home/settingswindow.ui
+  home/hoststreamwindow.h home/hoststreamwindow.cpp home/hoststreamwindow.ui
+  home/joinstreamwindow.h home/joinstreamwindow.cpp home/joinstreamwindow.ui
+  home/utils.h home/utils.cpp
 )
 
 # Qt set up
-target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network)
+target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets)
 
-# Set include dir
-target_include_directories(mercury
-  PUBLIC ${PROJECT_SOURCE_DIR}/app/include
-  PUBLIC ${PROJECT_SOURCE_DIR}/app/ui
-)
+# # Set include dir
+# target_include_directories(mercury
+#   PUBLIC ${PROJECT_SOURCE_DIR}/app/stream
+# )
 
 # Prevents console window on windows (Qt stuff)
 set_target_properties(mercury PROPERTIES

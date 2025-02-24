@@ -69,7 +69,7 @@ HostStreamWindow {
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="lineEdit"/>
+    <widget class="QLineEdit" name="streamNameLineEdit"/>
    </item>
    <item>
     <widget class="QLabel" name="label_4">

@@ -2,6 +2,7 @@
 #include "hoststreamwindow.h"
 #include "joinstreamwindow.h"
 #include "settingswindow.h"
+#include "grabwindowstest.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -9,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
   // that don't rely on ui files, open an example in Qt Creator (the screenshot
   // example is really good).
   ui.setupUi(this);
+  grabwindowstest gwt;
+  gwt.exec();
 }
 
 void MainWindow::on_settingsButton_clicked()

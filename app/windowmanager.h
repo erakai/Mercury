@@ -3,6 +3,12 @@
 
 #include <QObject>
 
+// Structure to pass our QList pointer through the EnumWindows callback.
+struct GrabData {
+  QList<QPixmap>* pixmaps;
+  QList<std::string>* names;
+};
+
 // Inherits from QObject if you need signals/slots.
 class WindowManager : public QObject {
   Q_OBJECT
@@ -14,10 +20,7 @@ public:
     return instance;
   }
 
-  // Other public methods...
-  void hello();
-  QStringList get_windows();
-  void enumerateProcessesAndCaptureMainWindow();
+  std::pair<QList<QPixmap>, QList<std::string>> grab_pixmaps_of_active_windows();
 
 private:
   // Private constructor prevents direct instantiation.

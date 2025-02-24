@@ -12,6 +12,8 @@ qt_add_executable(mercury
   windowmanager.h
   windowmanager.h
   windowmanager.cpp
+  hoverlabel.h
+
 
 )
 

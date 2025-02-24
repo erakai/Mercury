@@ -16,6 +16,9 @@ public:
   explicit grabwindowstest(QWidget *parent = nullptr);
   ~grabwindowstest();
 
+private slots:
+  void on_button_grab_windows_clicked();
+
 private:
   Ui::grabwindowstest *ui;
 };

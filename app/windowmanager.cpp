@@ -2,182 +2,44 @@
 #include <QDebug>
 #include <QString>
 #include <QStringList>
+#include <QPixmap>
 
 #ifdef Q_OS_WIN
-#include <TlHelp32.h>
 #include <stdio.h>
 #include <windows.h>
-#endif
+#include <TlHelp32.h>
 
-#ifdef Q_OS_MAC
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreGraphics/CoreGraphics.h>
-#endif
-
-// --- Windows Helper Code ---
-
-#ifdef Q_OS_WIN
-
-// Structure used to find the main window for a process.
-struct MainWindowFinderData
+// This helper function captures the given window using PrintWindow,
+// checks if the capture is non-black, and returns the QPixmap.
+// If the capture fails or is completely black, an empty QPixmap is returned.
+static QPixmap captureWindowAsPixmap(HWND hwnd)
 {
-  DWORD processId;
-  HWND mainWindow;
-};
-
-// Callback used with EnumWindows to find the main window for a given process.
-BOOL CALLBACK EnumWindowsMainWindowProc(HWND hwnd, LPARAM lParam)
-{
-  MainWindowFinderData *data = reinterpret_cast<MainWindowFinderData *>(lParam);
-  DWORD wndProcessId = 0;
-  GetWindowThreadProcessId(hwnd, &wndProcessId);
-  if (wndProcessId != data->processId)
-    return TRUE; // Not this process.
-
-  // Heuristic: the main window is one with no owner.
-  if (GetWindow(hwnd, GW_OWNER) != nullptr)
-    return TRUE;
-
-  data->mainWindow = hwnd;
-  return FALSE; // Found it.
-}
-
-HWND GetMainWindowForProcess(DWORD processId)
-{
-  MainWindowFinderData data;
-  data.processId = processId;
-  data.mainWindow = nullptr;
-  EnumWindows(EnumWindowsMainWindowProc, reinterpret_cast<LPARAM>(&data));
-  return data.mainWindow;
-}
-
-// Helper function to save an HBITMAP as a BMP file using native Windows API.
-BOOL SaveHBITMAPToBMPFile(HBITMAP hBitmap, const std::wstring &filename)
-{
-  BITMAP bmp;
-  if (!GetObject(hBitmap, sizeof(BITMAP), &bmp))
-    return FALSE;
-
-  // Set up the BITMAPINFOHEADER.
-  BITMAPINFOHEADER bi;
-  ZeroMemory(&bi, sizeof(BITMAPINFOHEADER));
-  bi.biSize = sizeof(BITMAPINFOHEADER);
-  bi.biWidth = bmp.bmWidth;
-  bi.biHeight = bmp.bmHeight;
-  bi.biPlanes = 1;
-  bi.biBitCount = 32; // Force 32-bit
-  bi.biCompression = BI_RGB;
-  bi.biSizeImage = 0; // For BI_RGB can be 0
-
-  // Calculate the size of the image data.
-  int rowSize = ((bmp.bmWidth * bi.biBitCount + 31) / 32) * 4;
-  DWORD dwBmpSize = rowSize * bmp.bmHeight;
-
-  // Allocate memory for the pixel data.
-  char *lpPixels = new char[dwBmpSize];
-  if (!lpPixels)
-    return FALSE;
-
-  HDC hdcScreen = GetDC(NULL);
-  BITMAPINFO biInfo;
-  ZeroMemory(&biInfo, sizeof(BITMAPINFO));
-  biInfo.bmiHeader = bi;
-
-  // Retrieve the pixel data.
-  if (0 == GetDIBits(hdcScreen, hBitmap, 0, bmp.bmHeight, lpPixels, &biInfo,
-                     DIB_RGB_COLORS))
-  {
-    delete[] lpPixels;
-    ReleaseDC(NULL, hdcScreen);
-    return FALSE;
-  }
-  ReleaseDC(NULL, hdcScreen);
-
-  // Check if the entire bitmap is black.
-  // Each pixel is 4 bytes: Blue, Green, Red, Alpha.
-  bool isBlack = true;
-  for (DWORD i = 0; i < dwBmpSize; i += 4)
-  {
-    BYTE blue = lpPixels[i];
-    BYTE green = lpPixels[i + 1];
-    BYTE red = lpPixels[i + 2];
-    if (blue != 0 || green != 0 || red != 0)
-    {
-      isBlack = false;
-      break;
-    }
-  }
-  if (isBlack)
-  {
-    qDebug()
-        << "The captured bitmap is completely black. Skipping saving for file:"
-        << QString::fromStdWString(filename);
-    delete[] lpPixels;
-    return FALSE;
-  }
-
-  // Set up the BMP file header.
-  BITMAPFILEHEADER bmfHeader;
-  bmfHeader.bfType = 0x4D42; // "BM"
-  bmfHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-  bmfHeader.bfSize = bmfHeader.bfOffBits + dwBmpSize;
-  bmfHeader.bfReserved1 = 0;
-  bmfHeader.bfReserved2 = 0;
-
-  // Write the BMP file.
-  HANDLE hFile = CreateFile(filename.c_str(), GENERIC_WRITE, 0, NULL,
-                            CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-  if (hFile == INVALID_HANDLE_VALUE)
-  {
-    delete[] lpPixels;
-    return FALSE;
-  }
-  DWORD dwWritten = 0;
-  WriteFile(hFile, &bmfHeader, sizeof(BITMAPFILEHEADER), &dwWritten, NULL);
-  WriteFile(hFile, &bi, sizeof(BITMAPINFOHEADER), &dwWritten, NULL);
-  WriteFile(hFile, lpPixels, dwBmpSize, &dwWritten, NULL);
-  CloseHandle(hFile);
-  delete[] lpPixels;
-  return TRUE;
-}
-
-BOOL CaptureWindowToBMPFile(HWND hwnd, const std::wstring &filename)
-{
+  // Get window rectangle.
   RECT rect;
   if (!GetWindowRect(hwnd, &rect))
-  {
-    qDebug() << "GetWindowRect failed for hwnd:" << hwnd;
-    return FALSE;
-  }
+    return QPixmap();
   int width = rect.right - rect.left;
   int height = rect.bottom - rect.top;
   if (width <= 0 || height <= 0)
-  {
-    qDebug() << "Invalid window dimensions for hwnd:" << hwnd;
-    return FALSE;
-  }
+    return QPixmap();
 
   // Get the window's device context.
   HDC hdcWindow = GetDC(hwnd);
   if (!hdcWindow)
-  {
-    qDebug() << "GetDC failed for hwnd:" << hwnd;
-    return FALSE;
-  }
+    return QPixmap();
 
-  // Create a compatible memory DC and bitmap.
+  // Create a memory DC and compatible bitmap.
   HDC hdcMem = CreateCompatibleDC(hdcWindow);
   HBITMAP hBitmap = CreateCompatibleBitmap(hdcWindow, width, height);
   if (!hBitmap)
   {
-    qDebug() << "CreateCompatibleBitmap failed for hwnd:" << hwnd;
     DeleteDC(hdcMem);
     ReleaseDC(hwnd, hdcWindow);
-    return FALSE;
+    return QPixmap();
   }
   HGDIOBJ hOld = SelectObject(hdcMem, hBitmap);
 
-  // Use only PrintWindow with PW_RENDERFULLCONTENT.
+  // Capture using PrintWindow with PW_RENDERFULLCONTENT.
   BOOL printResult = PrintWindow(hwnd, hdcMem, PW_RENDERFULLCONTENT);
   if (!printResult)
   {
@@ -186,78 +48,222 @@ BOOL CaptureWindowToBMPFile(HWND hwnd, const std::wstring &filename)
     DeleteObject(hBitmap);
     DeleteDC(hdcMem);
     ReleaseDC(hwnd, hdcWindow);
-    return FALSE;
+    return QPixmap();
   }
-
   SelectObject(hdcMem, hOld);
 
-  // Save the captured bitmap as a BMP file.
-  BOOL result = SaveHBITMAPToBMPFile(hBitmap, filename);
-  if (!result)
+  // Prepare to extract pixel data.
+  BITMAP bmp;
+  if (!GetObject(hBitmap, sizeof(BITMAP), &bmp))
   {
-    qDebug() << "Failed to save BMP file for hwnd:" << hwnd;
+    DeleteObject(hBitmap);
+    DeleteDC(hdcMem);
+    ReleaseDC(hwnd, hdcWindow);
+    return QPixmap();
   }
+
+  BITMAPINFOHEADER bi;
+  ZeroMemory(&bi, sizeof(BITMAPINFOHEADER));
+  bi.biSize = sizeof(BITMAPINFOHEADER);
+  bi.biWidth = bmp.bmWidth;
+  // Use a negative height to create a top-down DIB.
+  bi.biHeight = -bmp.bmHeight;
+  bi.biPlanes = 1;
+  bi.biBitCount = 32; // Force 32-bit
+  bi.biCompression = BI_RGB;
+  int rowBytes = bmp.bmWidth * 4;
+  int imageSize = rowBytes * bmp.bmHeight;
+
+  // Allocate a buffer for pixel data.
+  QByteArray buffer;
+  buffer.resize(imageSize);
+  HDC hdcScreen = GetDC(NULL);
+  if (0 == GetDIBits(hdcScreen, hBitmap, 0, bmp.bmHeight, buffer.data(),
+                     reinterpret_cast<BITMAPINFO *>(&bi), DIB_RGB_COLORS))
+  {
+    ReleaseDC(NULL, hdcScreen);
+    DeleteObject(hBitmap);
+    DeleteDC(hdcMem);
+    ReleaseDC(hwnd, hdcWindow);
+    return QPixmap();
+  }
+  ReleaseDC(NULL, hdcScreen);
+
+  // Check if the capture is completely black.
+  bool allBlack = true;
+  const uchar *dataPtr = reinterpret_cast<const uchar *>(buffer.constData());
+  int pixelCount = bmp.bmWidth * bmp.bmHeight;
+  for (int i = 0; i < pixelCount; ++i)
+  {
+    int index = i * 4;
+    // Check Blue, Green, and Red channels.
+    if (dataPtr[index] != 0 || dataPtr[index + 1] != 0 ||
+        dataPtr[index + 2] != 0)
+    {
+      allBlack = false;
+      break;
+    }
+  }
+  if (allBlack)
+  {
+    qDebug() << "Captured window (hwnd:" << hwnd
+             << ") is completely black. Skipping.";
+    DeleteObject(hBitmap);
+    DeleteDC(hdcMem);
+    ReleaseDC(hwnd, hdcWindow);
+    return QPixmap();
+  }
+
+  // Create a QImage from the pixel data.
+  QImage image(reinterpret_cast<const uchar *>(buffer.constData()), bmp.bmWidth,
+               bmp.bmHeight, rowBytes, QImage::Format_ARGB32);
+  // Make a deep copy to detach from the temporary buffer.
+  QPixmap pixmap = QPixmap::fromImage(image.copy());
 
   // Cleanup.
   DeleteObject(hBitmap);
   DeleteDC(hdcMem);
   ReleaseDC(hwnd, hdcWindow);
-  return result;
+  return pixmap;
 }
 
+// Callback used with EnumWindows. For each window, try capturing a QPixmap.
+BOOL CALLBACK EnumWindowsGrabProc(HWND hwnd, LPARAM lParam)
+{
+  GrabData *data = reinterpret_cast<GrabData *>(lParam);
+  QPixmap pixmap = captureWindowAsPixmap(hwnd);
+  if (!pixmap.isNull())
+  {
+    data->pixmaps->append(pixmap);
+    data->names->append(std::to_string(reinterpret_cast<uintptr_t>(hwnd)));
+    qDebug() << "Captured a non-black pixmap from window:" << hwnd;
+  }
+  return TRUE; // Continue enumeration.
+}
 #endif // Q_OS_WIN
 
-// A simple demonstration method.
-void WindowManager::hello()
+#ifdef Q_OS_MAC
+#include <CoreGraphics/CoreGraphics.h>
+#include <CoreFoundation/CoreFoundation.h>
+
+// Helper function to convert a CGImageRef into a QImage.
+static QImage QImageFromCGImage(CGImageRef imageRef)
 {
-  qDebug() << "Hello, World from WindowManager!";
+  if (!imageRef)
+    return QImage();
+
+  size_t width = CGImageGetWidth(imageRef);
+  size_t height = CGImageGetHeight(imageRef);
+  // Create a QImage with the same dimensions in ARGB32 format.
+  QImage image(width, height, QImage::Format_ARGB32);
+
+  // Create a color space and bitmap context that writes directly into the
+  // QImage data.
+  CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+  CGContextRef context = CGBitmapContextCreate(image.bits(), width, height,
+                                               8, // bits per component
+                                               image.bytesPerLine(), colorSpace,
+                                               kCGImageAlphaPremultipliedFirst |
+                                                   kCGBitmapByteOrder32Little);
+  CGColorSpaceRelease(colorSpace);
+
+  if (!context)
+    return QImage();
+
+  // Draw the CGImage into the context (which writes into QImage::bits()).
+  CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef);
+  CGContextRelease(context);
+
+  return image;
 }
-// Enumerate processes, print process names, and capture the main window (if
-// found) using native API.
-void WindowManager::enumerateProcessesAndCaptureMainWindow()
+
+// Helper function that captures a window (by its CGWindowID) and returns a
+// QPixmap.
+static QPixmap captureWindowAsPixmap(CGWindowID windowID)
 {
-#ifdef Q_OS_WIN
-  // Create a snapshot of all processes.
-  HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  if (snapshot == INVALID_HANDLE_VALUE)
+  // Capture the window image. Using CGRectNull captures the entire window.
+  CGImageRef imageRef =
+      CGWindowListCreateImage(CGRectNull, kCGWindowListOptionIncludingWindow,
+                              windowID, kCGWindowImageDefault);
+  if (!imageRef)
+    return QPixmap();
+
+  QImage image = QImageFromCGImage(imageRef);
+  CGImageRelease(imageRef);
+
+  if (image.isNull())
+    return QPixmap();
+
+  // Optionally, check if the image is completely black.
+  bool allBlack = true;
+  for (int y = 0; y < image.height(); ++y)
   {
-    qDebug() << "Failed to create process snapshot.";
-    return;
+    const QRgb *line = reinterpret_cast<const QRgb *>(image.scanLine(y));
+    for (int x = 0; x < image.width(); ++x)
+    {
+      QRgb pixel = line[x];
+      if (qRed(pixel) != 0 || qGreen(pixel) != 0 || qBlue(pixel) != 0)
+      {
+        allBlack = false;
+        break;
+      }
+    }
+    if (!allBlack)
+      break;
+  }
+  if (allBlack)
+  {
+    qDebug() << "Captured window (ID:" << windowID
+             << ") is completely black. Skipping.";
+    return QPixmap();
   }
 
-  PROCESSENTRY32 pe;
-  pe.dwSize = sizeof(PROCESSENTRY32);
-  if (Process32First(snapshot, &pe))
-  {
-    do
-    {
-      DWORD processId = pe.th32ProcessID;
-      QString processName = QString::fromWCharArray(pe.szExeFile);
-      HWND mainWindow = GetMainWindowForProcess(processId);
-      qDebug() << "Process:" << processName << "PID:" << processId
-               << "MainWindow:" << mainWindow;
-      if (mainWindow)
-      {
-        QString filename = QString("%1_%2.bmp").arg(processName).arg(processId);
-        std::wstring wfilename = filename.toStdWString();
-        if (CaptureWindowToBMPFile(mainWindow, wfilename))
-          qDebug() << "Captured screenshot for process:" << processName;
-        else
-          qDebug() << "Failed to capture screenshot for process:"
-                   << processName;
-      }
-    } while (Process32Next(snapshot, &pe));
-  }
-  else
-  {
-    qDebug() << "Failed to retrieve first process.";
-  }
-  CloseHandle(snapshot);
-#elif defined(Q_OS_MAC)
-  qDebug() << "enumerateProcessesAndCaptureMainWindow() not implemented for "
-              "macOS yet.";
+  return QPixmap::fromImage(image);
+}
+#endif // Q_OS_MAC
+
+// Now implement grab_pixmaps_of_active_windows
+std::pair<QList<QPixmap>, QList<std::string>>
+WindowManager::grab_pixmaps_of_active_windows()
+{
+  QList<QPixmap> pixmaps;
+  QList<std::string> names;
+#ifdef Q_OS_WIN
+  GrabData data;
+  data.pixmaps = &pixmaps;
+  data.names = &names;
+  EnumWindows(EnumWindowsGrabProc, reinterpret_cast<LPARAM>(&data));
 #else
-  qDebug() << "enumerateProcessesAndCaptureMainWindow() not implemented on "
-              "this platform.";
+  // Retrieve on-screen windows while excluding desktop elements.
+  CFArrayRef windowList = CGWindowListCopyWindowInfo(
+      kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements,
+      kCGNullWindowID);
+  if (windowList)
+  {
+    CFIndex count = CFArrayGetCount(windowList);
+    for (CFIndex i = 0; i < count; i++)
+    {
+      CFDictionaryRef windowInfo =
+          static_cast<CFDictionaryRef>(CFArrayGetValueAtIndex(windowList, i));
+      // Get the window's unique ID.
+      CFNumberRef windowNumberRef = static_cast<CFNumberRef>(
+          CFDictionaryGetValue(windowInfo, kCGWindowNumber));
+      if (windowNumberRef)
+      {
+        int windowID;
+        CFNumberGetValue(windowNumberRef, kCFNumberIntType, &windowID);
+        QPixmap pixmap =
+            captureWindowAsPixmap(static_cast<CGWindowID>(windowID));
+        if (!pixmap.isNull())
+        {
+          pixmaps.append(pixmap);
+          names.append(std::to_string(windowID));
+          qDebug() << "Captured a non-black pixmap from window:" << windowID;
+        }
+      }
+    }
+    CFRelease(windowList);
+  }
 #endif
+  return {pixmaps, names};
 }

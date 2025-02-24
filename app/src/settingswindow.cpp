@@ -11,3 +11,9 @@ SettingsWindow::~SettingsWindow()
 {
   delete ui;
 }
+
+void SettingsWindow::on_closeButton_clicked()
+{
+  this->close();
+}
+

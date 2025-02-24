@@ -56,7 +56,7 @@ void HostStreamWindow::on_ip_address_button_clicked()
 
   // Center it at the bottom (adjust as needed)
   int x = (width() - notificationLabel->width()) / 2;
-  int y = height() - notificationLabel->height() - 20;
+  int y = (height() - notificationLabel->height()) / 2;
   notificationLabel->move(x, y);
 
   // Apply opacity effect

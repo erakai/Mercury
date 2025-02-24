@@ -3,18 +3,22 @@
 # The binary
 qt_add_executable(mercury
   MANUAL_FINALIZATION
-  main.cpp
-  mainwindow.cpp mainwindow.hpp mainwindow.ui
-  settingswindow.h settingswindow.cpp settingswindow.ui
-  hoststreamwindow.h hoststreamwindow.cpp hoststreamwindow.ui
-  joinstreamwindow.h joinstreamwindow.cpp joinstreamwindow.ui
-  utils.h utils.cpp
-  utils.h utils.cpp
-
+  src/main.cpp
+  src/mainwindow.cpp src/mainwindow.hpp src/mainwindow.ui
+  src/settingswindow.h src/settingswindow.cpp src/settingswindow.ui
+  src/hoststreamwindow.h src/hoststreamwindow.cpp src/hoststreamwindow.ui
+  src/joinstreamwindow.h src/joinstreamwindow.cpp src/joinstreamwindow.ui
+  src/utils.h src/utils.cpp
 )
 
 # Qt set up
 target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network)
+
+# Set include dir
+target_include_directories(mercury
+  PUBLIC ${PROJECT_SOURCE_DIR}/app/include
+  PUBLIC ${PROJECT_SOURCE_DIR}/app/ui
+)
 
 # Prevents console window on windows (Qt stuff)
 set_target_properties(mercury PROPERTIES

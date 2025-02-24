@@ -225,5 +225,3 @@ bool StreamPreviewWindow::isActive() const
     return false;
   }
 }
-
-#include "moc_StreamPreviewWindow.cpp"

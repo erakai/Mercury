@@ -16,4 +16,3 @@ void SettingsWindow::on_closeButton_clicked()
 {
   this->close();
 }
-

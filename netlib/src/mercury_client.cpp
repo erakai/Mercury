@@ -11,8 +11,6 @@ AV_Frame MercuryClient::retrieve_next_frame()
 bool MercuryClient::establish_connection(const QHostAddress &host,
                                          quint16 hstp_port, quint16 mftp_port)
 {
-  // TODO: send an establishment message
-
   if (host.isNull())
   {
     log("Invalid QHostAddress", ll::ERROR);
@@ -33,6 +31,16 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
     std::string address = host.toString().toStdString();
     log("Connected to client at %s with HSTP: %d, MFTP: %d", address.c_str(),
         hstp_port, mftp_port, ll::NOTE);
+
+    // send establishment message
+    m_hstp_handler.init_msg(m_alias.c_str());
+    m_hstp_handler.add_option_establishment(true, mftp_port);
+    if (!m_hstp_handler.output_msg_to_socket(m_hstp_sock))
+    {
+      log("Failed to send establishment message to socket", ll::ERROR);
+      return false;
+    }
+
     return true;
   }
   else
@@ -52,7 +60,15 @@ bool MercuryClient::disconnect()
 
 bool MercuryClient::talk_tuah(const std::string &chat_msg)
 {
-  return false;
+  m_hstp_handler.init_msg(m_alias.c_str());
+  m_hstp_handler.add_option_chat(m_alias.c_str(), chat_msg.c_str());
+  if (!m_hstp_handler.output_msg_to_socket(m_hstp_sock))
+  {
+    log("Failed to send chat message to socket", ll::ERROR);
+    return false;
+  }
+
+  return true;
 }
 
 void MercuryClient::process_received_hstp_messages()

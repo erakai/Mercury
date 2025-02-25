@@ -91,12 +91,37 @@ std::shared_ptr<QByteArray> HstpHandler::output_msg()
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
     log("Unable to emit message, uninitalized message.", ll::ERROR);
+    clear_msg();
     return nullptr;
   }
 
   std::shared_ptr<QByteArray> bytes = _serialize(m_hdr);
   clear_msg();
   return bytes;
+}
+
+bool HstpHandler::output_msg_to_socket(const std::shared_ptr<QTcpSocket> &sock)
+{
+  std::shared_ptr<QByteArray> establish_msg = output_msg();
+  if (!establish_msg->isEmpty() && sock &&
+      sock->state() == QAbstractSocket::ConnectedState && sock->isWritable())
+  {
+    if (sock->write(*establish_msg) == establish_msg->size())
+    {
+      return true;
+    }
+    else
+    {
+      log("Failed to write all HSTP message bytes", ll::ERROR);
+      return false;
+    }
+  }
+  else
+  {
+    log("Failed to output HSTP message to socket, issue with message or socket",
+        ll::ERROR);
+    return false;
+  }
 }
 
 std::shared_ptr<HSTP_Header>

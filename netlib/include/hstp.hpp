@@ -7,6 +7,7 @@
 #include <QtCore/qobject.h>
 #include <QtCore/qtmetamacros.h>
 #include <QtCore/qtypes.h>
+#include <QtNetwork/qtcpsocket.h>
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -95,6 +96,7 @@ public:
 
   void clear_msg();
   std::shared_ptr<QByteArray> output_msg();
+  bool output_msg_to_socket(const std::shared_ptr<QTcpSocket> &sock);
 
   static std::shared_ptr<HSTP_Header>
   bytes_to_msg(const std::shared_ptr<QByteArray> &buff);

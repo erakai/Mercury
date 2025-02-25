@@ -67,3 +67,45 @@ void mercury::change_host_settings()
   settings.setValue("HostSettings/StreamResolution", 1440);
 
 }
+
+bool mercury::get_visual_mode(QSettings &settings)
+{
+
+  return settings.value("GeneralSettings/VisualMode").toBool();
+
+}
+
+QString mercury::get_alias(QSettings &settings)
+{
+
+  return settings.value("GeneralSettings/Alias").toString();
+
+}
+
+int mercury::get_client_stream_res(QSettings &settings)
+{
+
+  return settings.value("ClientSettings/StreamResolution").toInt();
+
+}
+
+int mercury::get_host_stream_res(QSettings &settings)
+{
+
+  return settings.value("HostSettings/StreamResolution").toInt();
+
+}
+
+int mercury::get_host_stream_fps(QSettings &settings)
+{
+
+  return settings.value("HostSettings/StreamFrameRate").toInt();
+
+}
+
+int mercury::get_host_max_viewers(QSettings &settings)
+{
+
+  return settings.value("HostSettings/MaxViewers").toInt();
+
+}

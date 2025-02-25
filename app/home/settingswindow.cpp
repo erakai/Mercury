@@ -1,8 +1,10 @@
 #include "settingswindow.h"
 #include "toastnotification.h"
 #include "ui_settingswindow.h"
+#include "../configControl/mconfig.hpp"
 
 #include <QDebug>
+#include <QSettings>
 
 SettingsWindow::SettingsWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::SettingsWindow)
@@ -26,70 +28,64 @@ void SettingsWindow::set_button_ids()
 { // A helper to set button group buttonIds for easy reference
   // Client Stream Resolution
   ui->clientStreamResolutionButtonGroup->setId(ui->clientStreamResolutionRadio1,
-                                               1);
+                                               360);
   ui->clientStreamResolutionButtonGroup->setId(ui->clientStreamResolutionRadio2,
-                                               2);
+                                               720);
   ui->clientStreamResolutionButtonGroup->setId(ui->clientStreamResolutionRadio3,
-                                               3);
+                                               1080);
   ui->clientStreamResolutionButtonGroup->setId(ui->clientStreamResolutionRadio4,
-                                               4);
+                                               1440);
   // Host Stream Resolution
-  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio1, 1);
-  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio2, 2);
-  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio3, 3);
-  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio4, 4);
+  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio1, 360);
+  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio2, 720);
+  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio3, 1080);
+  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio4, 1440);
   // Host framerate
-  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio1, 1);
-  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio2, 2);
-  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio3, 3);
+  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio1, 15);
+  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio2, 30);
+  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio3, 60);
 }
 
 void SettingsWindow::set_up()
-{ // Grab all settings to update the ui
-  // Kris put settings here
-  // GENERAL
+{
+  // Grab all settings to update the ui
+  QSettings settings("../../config/MercuryClientSettings.ini", QSettings::IniFormat);
 
-  ui->displayNameLineEdit->setText("Hungry Banana"); // TODO @Kris set this
-  ui->darkModeCheckBox->setChecked(true);            // TODO @Kris set this
+  // GENERAL SETTINGS SETUP
 
-  // CLIENT
+  ui->displayNameLineEdit->setText(mercury::get_alias(settings));
+  ui->darkModeCheckBox->setChecked(mercury::get_visual_mode(settings));
 
-  // TODO @Kris you can set this to whatever you like, just change the
-  // corresponding values in the set_button_ids above AND in the error check
-  // below
-  int clientStreamResOption = 4;
-  if (clientStreamResOption > 4 || clientStreamResOption < 1)
+  // CLIENT SETTINGS SETUP
+
+  int clientStreamResOption = mercury::get_client_stream_res(settings);
+
+  if (clientStreamResOption != 360 && clientStreamResOption != 720 && clientStreamResOption != 1080 && clientStreamResOption != 1440)
   {
-    clientStreamResOption = 2;
+    clientStreamResOption = 720;
   }
   ui->clientStreamResolutionButtonGroup->button(clientStreamResOption)
       ->setChecked(true);
 
-  // HOST
+  // HOST SETTINGS SETUP
 
-  // TODO @Kris you can set this to whatever you like, just change the
-  // corresponding values in the set_button_ids above AND in the error check
-  // below
-  int hostStreamResOption = 4;
-  if (hostStreamResOption > 4 || hostStreamResOption < 1)
+  int hostStreamResOption = mercury::get_host_stream_res(settings);
+  if (hostStreamResOption != 360 && hostStreamResOption != 720 && hostStreamResOption != 1080 && hostStreamResOption != 1440)
   {
-    hostStreamResOption = 2;
+    hostStreamResOption = 720;
   }
   ui->hostStreamResolutionButtonGroup->button(hostStreamResOption)
       ->setChecked(true);
 
-  // TODO @Kris you can set this to whatever you like, just change the
-  // corresponding values in the set_button_ids above AND in the error check
-  // below
-  int streamFramerateOption = 3;
-  if (streamFramerateOption > 3 || streamFramerateOption < 1)
+  int streamFramerateOption = mercury::get_host_stream_fps(settings);
+  if (streamFramerateOption != 15 && streamFramerateOption != 30 && streamFramerateOption != 60)
   {
-    streamFramerateOption = 2;
+    streamFramerateOption = 60;
   }
   ui->hostStreamFramerateButtonGroup->button(streamFramerateOption)
       ->setChecked(true);
 
-  ui->maxViewerCountSpinBox->setValue(40); // TODO @Kris set this
+  ui->maxViewerCountSpinBox->setValue(mercury::get_host_max_viewers(settings));
 }
 
 void SettingsWindow::on_applyButton_clicked()

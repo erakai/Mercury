@@ -31,10 +31,11 @@ public:
     app = new QCoreApplication(argc, argv);
 
     hstp_handler.init_msg("Alice");
-    hstp_handler.add_option_echo("echo!");
+    hstp_handler.add_option_establishment(true, 12345);
+    hstp_handler.add_option_chat("Chatter", "Poggers!");
     payload_1 = hstp_handler.output_msg();
 
-    ASSERT_TRUE(test_server.listen(QHostAddress::LocalHost, 12345));
+    ASSERT_TRUE(test_server.listen(QHostAddress::LocalHost, 10202));
 
     get_hstp_sock()->connectToHost(QHostAddress::LocalHost,
                                    test_server.serverPort());
@@ -58,17 +59,30 @@ public:
   }
 };
 
-TEST_F(MercuryClientTest, ProcessEchoOption)
+TEST_F(MercuryClientTest, ProcessChatEstablishmentOption)
 {
   QEventLoop loop;
   QByteArray receivedData;
 
-  QObject::connect(&client, &MercuryClient::test_readyread_callback,
-                   [&]()
+  QObject::connect(
+      client.hstp_processor().get(), &HstpProcessor::received_establishment,
+      [&](const char alias[ALIAS_SIZE], bool is_start, uint16_t mftp_port)
+      {
+        EXPECT_STREQ(alias, "Alice");
+        EXPECT_EQ(is_start, true);
+        EXPECT_EQ(mftp_port, 12345);
+      });
+
+  QObject::connect(client.hstp_processor().get(), &HstpProcessor::received_chat,
+                   [&](const char alias[ALIAS_SIZE],
+                       const char alias_of_chatter[ALIAS_SIZE],
+                       const std::string &chat)
                    {
+                     EXPECT_STREQ(alias, "Alice");
+                     EXPECT_STREQ(alias_of_chatter, "Chatter");
+                     EXPECT_STREQ(chat.c_str(), "Poggers!");
                      loop.quit(); // Quit the loop when data is received
                    });
 
   loop.exec();
-  EXPECT_EQ(1, 1);
 }

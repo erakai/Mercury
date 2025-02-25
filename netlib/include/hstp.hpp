@@ -1,6 +1,7 @@
 #pragma once
 
 #include "logger.hpp"
+#include "mftp.hpp"
 #include <QHostAddress>
 #include <QTcpSocket>
 #include <QtCore/qobject.h>
@@ -89,12 +90,13 @@ public:
 
   bool add_option_echo(const char *msg);
   bool add_option_establishment(bool is_start, uint16_t port);
-  bool add_option_chat(const char *chat_msg);
+  bool add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
+                       const char *chat_msg);
 
   void clear_msg();
   std::shared_ptr<QByteArray> output_msg();
 
-  std::shared_ptr<HSTP_Header>
+  static std::shared_ptr<HSTP_Header>
   bytes_to_msg(const std::shared_ptr<QByteArray> &buff);
 
   // status
@@ -103,9 +105,9 @@ public:
 private:
   MSG_STATUS m_current_status;
 
-  std::shared_ptr<QByteArray>
+  static std::shared_ptr<QByteArray>
   _serialize(const std::shared_ptr<HSTP_Header> &hdr);
-  std::shared_ptr<HSTP_Header>
+  static std::shared_ptr<HSTP_Header>
   _deserialize(const std::shared_ptr<QByteArray> &buff);
 
   std::shared_ptr<HSTP_Header> m_hdr;
@@ -129,10 +131,15 @@ public:
   explicit HstpProcessor(QObject *parent = nullptr) {}
 
   /*
+   * Takes a single chunk of TCP packet information and attempt to process it.
+   */
+  void process(const QByteArray &chunk);
+
+  /*
    * Given a header, will emit a series of signals that can be slotted to when
    * HSTP packets arrive
    */
-  void process(const std::shared_ptr<HSTP_Header> &hdr_ptr);
+  void emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr);
 
 signals:
 
@@ -141,26 +148,38 @@ signals:
    * will be emitted for the option with a header only containing the malformed
    * option. Should be handled in error states and debugging.
    */
-  void emit_generic(const std::shared_ptr<HSTP_Header> &hdr_ptr);
+  void received_generic(const std::shared_ptr<HSTP_Header> &hdr_ptr);
 
   /*
-   * Emits the fact an emit option occured, the function will print the
+   * Emits the fact an echo option occured, the function will print the
    * echo. This signal should be intercepted for debug reasons.
    */
-  void emit_echo(const char alias[ALIAS_SIZE], const std::string &msg);
+  void received_echo(const char alias[ALIAS_SIZE], const std::string &msg);
 
   /*
    * Emits during establishment of the client and server for basic syncing
    */
-  void emit_establishment(const char alias[ALIAS_SIZE], bool is_start,
-                          uint16_t mftp_port);
+  void received_establishment(const char alias[ALIAS_SIZE], bool is_start,
+                              uint16_t mftp_port);
   /*
    * Emtis when a chat option is used informing user of a new chat.
    */
-  void emit_chat(const char alias[ALIAS_SIZE], const std::string &chat);
+  void received_chat(const char alias[ALIAS_SIZE],
+                     const char alias_of_chatter[ALIAS_SIZE],
+                     const std::string &chat);
 
 private:
 #define HANDLER_PARAMS const char alias[ALIAS_SIZE], const Option &opt
+
+  QByteArray m_hstp_buffer;
+  uint16_t m_hstp_opt_len = -1;
+
+  /*
+   * Attempts to process a single HSTP header from the hstp_buffer. On success,
+   * calls HstpHandler.process(header) and emits option signals and returns
+   * the number of bytes read. On failure logs an error and returns -1.
+   */
+  qint16 process_single_hstp_message(qint16 opt_size);
 
   void handle_default(HANDLER_PARAMS);       // n/a
   void handle_echo(HANDLER_PARAMS);          // 0

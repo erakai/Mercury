@@ -45,8 +45,7 @@ Options
 
   Len: Variable
   Data:
-    - char[len_of_message] message
-    - char[18] alias_of_sender
+    - char[18] alias_of_chatter
     - uint32_t len_of_message
     - char[len_of_message] message
 

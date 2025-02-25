@@ -1,4 +1,7 @@
 #include "hstp.hpp"
+#include <cstdint>
+#include <cstring>
+#include <sys/_endian.h>
 
 bool HstpHandler::init_msg(const char sender_alias[18])
 {
@@ -45,11 +48,15 @@ bool HstpHandler::add_option_establishment(bool is_start, uint16_t port)
   uint16_t network_port = htons(port);
   std::memcpy(&opt.data[1], &network_port, sizeof(uint16_t));
 
+  m_hdr->options.push_back(opt);
+
   return true;
 }
 
-bool HstpHandler::add_option_chat(const char *chat_msg)
+bool HstpHandler::add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
+                                  const char *chat_msg)
 {
+  // TODO: needs to be fixed, not up to standard
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
     log("Unable to add option, uninitalized message.", ll::ERROR);
@@ -62,9 +69,13 @@ bool HstpHandler::add_option_chat(const char *chat_msg)
     str_chat_msg = str_chat_msg.substr(0, CHAT_SIZE_LIMIT);
   }
   Option opt;
-  opt.type = 0;
-  opt.len = str_chat_msg.length();
+  opt.type = 2;
+  opt.len = ALIAS_SIZE + sizeof(uint32_t) + str_chat_msg.length();
   opt.data = std::shared_ptr<char[]>(new char[opt.len]);
+
+  uint32_t net_len_of_msg = htonl(str_chat_msg.length());
+  std::memcpy(opt.data.get(), alias_of_chatter, ALIAS_SIZE);
+  std::memcpy(opt.data.get(), &net_len_of_msg, sizeof(uint32_t));
   std::memcpy(opt.data.get(), str_chat_msg.c_str(), str_chat_msg.length());
 
   m_hdr->options.push_back(opt);
@@ -144,7 +155,7 @@ HstpHandler::_deserialize(const std::shared_ptr<QByteArray> &buff)
   QDataStream ds(buff.get(), QIODevice::ReadOnly);
 
   // get alias
-  ds.readRawData(hdr->sender_alias, 18);
+  ds.readRawData(hdr->sender_alias, ALIAS_SIZE);
 
   // get option len (no point in storing it cause we can get that from the
   // vector fairly easily)
@@ -170,7 +181,31 @@ HstpHandler::_deserialize(const std::shared_ptr<QByteArray> &buff)
   return hdr;
 }
 
-void HstpProcessor::process(const std::shared_ptr<HSTP_Header> &hdr_ptr)
+void HstpProcessor::process(const QByteArray &chunk)
+{
+  if (chunk.isNull() || chunk.isEmpty())
+  {
+    return;
+  }
+
+  m_hstp_buffer.append(chunk);
+  while (m_hstp_buffer.size() >= HSTP_HEADER_SIZE)
+  {
+    // get size of options
+    quint16 opt_size =
+        (static_cast<uchar>(m_hstp_buffer[ALIAS_SIZE - 1 + 1]) << 8) |
+        static_cast<uchar>(m_hstp_buffer[ALIAS_SIZE - 1 + 2]);
+    opt_size = ntohs(opt_size);
+
+    if (m_hstp_buffer.size() >= HSTP_HEADER_SIZE + opt_size)
+    {
+      qint16 bytes_processed = process_single_hstp_message(opt_size);
+      m_hstp_buffer.remove(0, bytes_processed);
+    }
+  }
+}
+
+void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
 {
   /*
    * The CIA wants you think that the switch statement is nothing but if
@@ -195,13 +230,31 @@ void HstpProcessor::process(const std::shared_ptr<HSTP_Header> &hdr_ptr)
   }
 }
 
+qint16 HstpProcessor::process_single_hstp_message(qint16 opt_size)
+{
+  std::shared_ptr<QByteArray> buff = std::make_shared<QByteArray>();
+
+  if (m_hstp_buffer.size() >= HSTP_HEADER_SIZE + opt_size)
+  {
+    buff->append(m_hstp_buffer.mid(0, HSTP_HEADER_SIZE + opt_size));
+  }
+  else
+  {
+    log("Issue reading HSTP single packet", ll::ERROR);
+    return -1;
+  }
+
+  std::shared_ptr<HSTP_Header> hdr_ptr = HstpHandler::bytes_to_msg(buff);
+  emit_header(hdr_ptr);
+  return buff->size();
+}
 void HstpProcessor::handle_default(HANDLER_PARAMS)
 {
   std::shared_ptr<HSTP_Header> hdr_ptr = std::make_shared<HSTP_Header>();
   std::strcpy(hdr_ptr->sender_alias, alias);
   hdr_ptr->options.push_back(opt);
 
-  emit emit_generic(hdr_ptr);
+  emit received_generic(hdr_ptr);
 }
 
 void HstpProcessor::handle_echo(HANDLER_PARAMS)
@@ -209,7 +262,7 @@ void HstpProcessor::handle_echo(HANDLER_PARAMS)
   std::string msg(opt.data.get());
   log(msg.c_str(), ll::NOTE);
 
-  emit emit_echo(alias, msg);
+  emit received_echo(alias, msg);
 }
 
 void HstpProcessor::handle_establishment(const char alias[18],
@@ -229,7 +282,7 @@ void HstpProcessor::handle_establishment(const char alias[18],
   std::memcpy(&mftp_port, &opt.data[1], sizeof(uint16_t));
   mftp_port = ntohs(mftp_port);
 
-  emit emit_establishment(alias, is_start, mftp_port);
+  emit received_establishment(alias, is_start, mftp_port);
 }
 
 void HstpProcessor::handle_chat(HANDLER_PARAMS)
@@ -241,6 +294,15 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
     return;
   }
 
-  std::string msg(opt.data.get());
-  emit emit_chat(alias, msg);
+  char alias_of_chatter[ALIAS_SIZE];
+  uint32_t len_of_message;
+  char *chat_msg = {0};
+
+  std::memcpy(alias_of_chatter, &opt.data[0], sizeof(char) * ALIAS_SIZE);
+  std::memcpy(&len_of_message, &opt.data[ALIAS_SIZE], sizeof(uint32_t));
+  len_of_message = ntohl(len_of_message);
+  std::memcpy(chat_msg, &opt.data[ALIAS_SIZE + sizeof(uint32_t)],
+              len_of_message);
+
+  emit received_chat(alias, alias_of_chatter, std::string(chat_msg));
 }

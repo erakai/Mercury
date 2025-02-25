@@ -20,6 +20,7 @@ public:
   {
     m_hstp_sock = std::make_shared<QTcpSocket>();
     m_mftp_sock = std::make_shared<QUdpSocket>();
+    m_hstp_processor_ptr = std::make_shared<HstpProcessor>();
     connect_signals_and_slots();
   };
 
@@ -61,21 +62,11 @@ public slots:
     return m_hstp_processor_ptr;
   }
 
-signals:
-  void test_readyread_callback(); // used only in testing purposes
-
 private:
   /*
   Private method to help set up the signals/slots of the client.
   */
   void connect_signals_and_slots();
-
-  /*
-   * Attempts to process a single HSTP header from the hstp_buffer. On success,
-   * calls HstpHandler.process(header) and emits option signals and returns
-   * the number of bytes read. On failure logs an error and returns -1.
-   */
-  qint16 process_single_hstp_message(qint16 opt_size);
 
   // This class will require a jitter buffer ordered by sequence number for RTP
   // implementation. Investigate: https://doc.qt.io/qt-6/qbuffer.html
@@ -88,7 +79,4 @@ private:
 
   HstpHandler m_hstp_handler;
   std::shared_ptr<HstpProcessor> m_hstp_processor_ptr;
-
-  QByteArray m_hstp_buffer;
-  uint16_t m_hstp_opt_len = -1;
 };

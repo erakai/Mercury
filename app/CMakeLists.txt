@@ -13,10 +13,16 @@ qt_add_executable(mercury
   home/hoststreamwindow.h home/hoststreamwindow.cpp home/hoststreamwindow.ui
   home/joinstreamwindow.h home/joinstreamwindow.cpp home/joinstreamwindow.ui
   home/utils.h home/utils.cpp
+  configControl/mconfig.cpp
+  configControl/mconfig.hpp
 )
 
 # Qt set up
 target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets)
+
+# Curl set up
+find_package(CURL REQUIRED)
+target_link_libraries(mercury PRIVATE CURL::libcurl)
 
 # # Set include dir
 # target_include_directories(mercury

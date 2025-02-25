@@ -1,6 +1,6 @@
 #include "mainwindow.hpp"
 #include "mnet.hpp"
-#include "configControl/mconfig.hpp"
+#include "../configControl/mconfig.hpp"
 
 #include <QApplication>
 #include <iostream>

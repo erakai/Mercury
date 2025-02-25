@@ -109,3 +109,16 @@ int mercury::get_host_max_viewers(QSettings &settings)
   return settings.value("HostSettings/MaxViewers").toInt();
 
 }
+
+void mercury::save_all_settings(QString displayName, bool darkMode, int clientStreamResOption, int hostStreamResOption, int hostFramerateOption, int maxViewerCount)
+{
+  QSettings settings("../../config/MercuryClientSettings.ini", QSettings::IniFormat);
+
+  settings.setValue("GeneralSettings/Alias", displayName);
+  settings.setValue("GeneralSettings/VisualMode", darkMode);
+  settings.setValue("ClientSettings/StreamResolution", clientStreamResOption);
+  settings.setValue("HostSettings/StreamResolution", hostStreamResOption);
+  settings.setValue("HostSettings/FrameRate", hostFramerateOption);
+  settings.setValue("HostSettings/MaxViewers", maxViewerCount);
+
+}

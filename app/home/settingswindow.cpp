@@ -99,6 +99,8 @@ void SettingsWindow::on_applyButton_clicked()
   int hostFramerateOption = ui->hostStreamFramerateButtonGroup->checkedId();
   int maxViewerCount = ui->maxViewerCountSpinBox->value();
 
+  mercury::save_all_settings(displayName, darkMode, clientStreamResOption, hostStreamResOption, hostFramerateOption, maxViewerCount);
+
   qDebug() << displayName << darkMode << clientStreamResOption
            << hostStreamResOption << hostFramerateOption << maxViewerCount;
 

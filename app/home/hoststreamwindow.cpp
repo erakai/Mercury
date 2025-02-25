@@ -1,6 +1,6 @@
 #include "hoststreamwindow.h"
-#include "ui_hoststreamwindow.h"
 #include "../stream/streamwindow.hpp"
+#include "ui_hoststreamwindow.h"
 #include "utils.h"
 
 #include <QAbstractSocket>
@@ -72,10 +72,6 @@ void HostStreamWindow::on_ip_address_button_clicked()
   fadeOut->setStartValue(1.0);
   fadeOut->setEndValue(0.0);
 
-  /*connect(fadeOut, &QPropertyAnimation::finished, notificationLabel,
-  [notificationLabel]() { notificationLabel->deleteLater();
-  });*/
-
   connect(fadeOut, &QPropertyAnimation::finished, this,
           [notificationLabel, opacityEffect]()
           {
@@ -86,7 +82,7 @@ void HostStreamWindow::on_ip_address_button_clicked()
   fadeOut->start();
 }
 
-void HostStreamWindow::on_host_button_clicked()
+void HostStreamWindow::on_hostButton_clicked()
 {
   // This sets itself to delete on close, so no memory leak (I think)
   std::shared_ptr<HostService> serv = std::make_shared<HostService>();

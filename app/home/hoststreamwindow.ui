@@ -37,9 +37,11 @@ QPushButton#hostButton:pressed {
 QLabel {
 	color: rgb(223, 234, 237);
 }
+QLabel[header=true] {
+	font-size: 30px;
+}
 
-
-HostStreamWindow {
+QDialog#HostStreamWindow {
 	background-color: rgb(11, 17, 20);
 }</string>
   </property>
@@ -49,12 +51,15 @@ HostStreamWindow {
      <property name="text">
       <string>Host Stream</string>
      </property>
+     <property name="header" stdset="0">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
     <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Display Name</string>
+      <string>Display Name:</string>
      </property>
     </widget>
    </item>
@@ -64,7 +69,7 @@ HostStreamWindow {
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Stream Name</string>
+      <string>Stream Name:</string>
      </property>
     </widget>
    </item>
@@ -93,6 +98,19 @@ HostStreamWindow {
       <bool>false</bool>
      </property>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

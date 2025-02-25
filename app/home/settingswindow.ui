@@ -38,7 +38,6 @@ QLabel {
 	color: rgb(223, 234, 237);
 }
 QLabel[sectionHeader=true] {
-	color: green;
 	font-size: 30px;
 }
 
@@ -116,14 +115,14 @@ QWidget#scrollAreaWidgetContents {
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="QLabel" name="label_4">
+              <widget class="QLabel" name="displayNameLabel">
                <property name="text">
                 <string>Display Name (max 15 characters):</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="lineEdit"/>
+              <widget class="QLineEdit" name="displayNameLineEdit"/>
              </item>
              <item>
               <spacer name="horizontalSpacer_2">
@@ -143,14 +142,14 @@ QWidget#scrollAreaWidgetContents {
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_6">
              <item>
-              <widget class="QLabel" name="label_5">
+              <widget class="QLabel" name="darkModeLabel">
                <property name="text">
                 <string>Dark Mode:</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QCheckBox" name="checkBox">
+              <widget class="QCheckBox" name="darkModeCheckBox">
                <property name="text">
                 <string/>
                </property>
@@ -198,14 +197,14 @@ QWidget#scrollAreaWidgetContents {
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_8">
              <item>
-              <widget class="QLabel" name="label_7">
+              <widget class="QLabel" name="hostStreamResolutionLabel">
                <property name="text">
                 <string>Stream Resolution: </string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_7">
+              <widget class="QRadioButton" name="hostStreamResolutionRadio1">
                <property name="text">
                 <string>360p</string>
                </property>
@@ -215,7 +214,7 @@ QWidget#scrollAreaWidgetContents {
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_5">
+              <widget class="QRadioButton" name="hostStreamResolutionRadio2">
                <property name="text">
                 <string>720p</string>
                </property>
@@ -228,7 +227,7 @@ QWidget#scrollAreaWidgetContents {
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_6">
+              <widget class="QRadioButton" name="hostStreamResolutionRadio3">
                <property name="text">
                 <string>1080p</string>
                </property>
@@ -238,7 +237,7 @@ QWidget#scrollAreaWidgetContents {
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_8">
+              <widget class="QRadioButton" name="hostStreamResolutionRadio4">
                <property name="text">
                 <string>1440p</string>
                </property>
@@ -265,14 +264,14 @@ QWidget#scrollAreaWidgetContents {
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_10">
              <item>
-              <widget class="QLabel" name="label_8">
+              <widget class="QLabel" name="streamFramerateLabel">
                <property name="text">
                 <string>Stream Framerate:</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_11">
+              <widget class="QRadioButton" name="streamFramerateRadio1">
                <property name="text">
                 <string>15 fps</string>
                </property>
@@ -282,7 +281,7 @@ QWidget#scrollAreaWidgetContents {
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_10">
+              <widget class="QRadioButton" name="streamFramerateRadio2">
                <property name="text">
                 <string>30 fps</string>
                </property>
@@ -295,7 +294,7 @@ QWidget#scrollAreaWidgetContents {
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButton_9">
+              <widget class="QRadioButton" name="streamFramerateRadio3">
                <property name="text">
                 <string>60 fps</string>
                </property>
@@ -322,14 +321,18 @@ QWidget#scrollAreaWidgetContents {
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_11">
              <item>
-              <widget class="QLabel" name="label_9">
+              <widget class="QLabel" name="maxViewCountLabel">
                <property name="text">
                 <string>Max Viewer Count: </string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QSpinBox" name="spinBox"/>
+              <widget class="QSpinBox" name="maxViewerCountSpinBox">
+               <property name="specialValueText">
+                <string>3</string>
+               </property>
+              </widget>
              </item>
              <item>
               <spacer name="horizontalSpacer_7">
@@ -343,17 +346,6 @@ QWidget#scrollAreaWidgetContents {
                 </size>
                </property>
               </spacer>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_13">
-             <item>
-              <widget class="QLabel" name="label_10">
-               <property name="text">
-                <string>IP Blacklist:</string>
-               </property>
-              </widget>
              </item>
             </layout>
            </item>
@@ -395,14 +387,14 @@ QWidget#scrollAreaWidgetContents {
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_7">
            <item>
-            <widget class="QLabel" name="label_6">
+            <widget class="QLabel" name="clientStreamResolutionLabel">
              <property name="text">
               <string>Stream Resolution:</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton">
+            <widget class="QRadioButton" name="clientStreamResolutionRadio1">
              <property name="text">
               <string>360p</string>
              </property>
@@ -412,7 +404,7 @@ QWidget#scrollAreaWidgetContents {
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton_2">
+            <widget class="QRadioButton" name="clientStreamResolutionRadio2">
              <property name="text">
               <string>720p</string>
              </property>
@@ -425,7 +417,7 @@ QWidget#scrollAreaWidgetContents {
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton_3">
+            <widget class="QRadioButton" name="clientStreamResolutionRadio3">
              <property name="text">
               <string>1080p</string>
              </property>
@@ -435,7 +427,7 @@ QWidget#scrollAreaWidgetContents {
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton_4">
+            <widget class="QRadioButton" name="clientStreamResolutionRadio4">
              <property name="text">
               <string>1440p</string>
              </property>
@@ -557,7 +549,7 @@ QWidget#scrollAreaWidgetContents {
  <connections/>
  <buttongroups>
   <buttongroup name="clientStreamResolutionButtonGroup"/>
-  <buttongroup name="hostStreamResolutionButtonGroup"/>
   <buttongroup name="hostStreamFramerateButtonGroup"/>
+  <buttongroup name="hostStreamResolutionButtonGroup"/>
  </buttongroups>
 </ui>

@@ -19,7 +19,7 @@ public:
 private slots:
   void on_pushButton_clicked();
   void on_ip_address_button_clicked();
-  void on_host_button_clicked();
+  void on_hostButton_clicked();
 
 private:
   Ui::HostStreamWindow *ui;

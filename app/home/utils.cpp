@@ -12,3 +12,9 @@ Utils::Utils()
     }
   }
 }
+
+QString Utils::getDisplayName()
+{
+  // TODO @Kris get alias from your singleton and return
+  return "Hungry Banana";
+}

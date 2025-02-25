@@ -1,4 +1,5 @@
 #include "settingswindow.h"
+#include "toastnotification.h"
 #include "ui_settingswindow.h"
 
 #include <QDebug>
@@ -104,4 +105,7 @@ void SettingsWindow::on_applyButton_clicked()
 
   qDebug() << displayName << darkMode << clientStreamResOption
            << hostStreamResOption << hostFramerateOption << maxViewerCount;
+
+  // TODO @Kris if the end of writing is a call back, call this after
+  ToastNotification::showToast(this, "All changes saved!");
 }

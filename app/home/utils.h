@@ -17,6 +17,7 @@ Q_OBJECT // Ensure this is in the header, not in the .cpp file
   }
 
   QString getIpAddress() const { return ipAddress; }
+  QString getDisplayName();
 
 private:
   explicit Utils();

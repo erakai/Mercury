@@ -13,6 +13,7 @@ qt_add_executable(mercury
   home/hoststreamwindow.h home/hoststreamwindow.cpp home/hoststreamwindow.ui
   home/joinstreamwindow.h home/joinstreamwindow.cpp home/joinstreamwindow.ui
   home/utils.h home/utils.cpp
+  home/toastnotification.h home/toastnotification.cpp
 )
 
 # Qt set up

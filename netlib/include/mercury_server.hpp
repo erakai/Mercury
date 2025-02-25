@@ -27,7 +27,7 @@ struct Client
   uint16_t mftp_port = 0;
 
   // QTcpServer generates this for us upon connection.
-  HstpHandler hstp_messager;
+  HstpHandler handler;
   std::shared_ptr<QTcpSocket> hstp_sock;
 
   // Keeps track of the sequence number of the protocol.
@@ -40,8 +40,8 @@ class MercuryServer : public QTcpServer
 
 public:
   MercuryServer() {}
-  MercuryServer(int tcp_port, int udp_port)
-      : tcp_port(tcp_port), udp_port(udp_port) {};
+  MercuryServer(std::string alias, int tcp_port, int udp_port)
+      : host_alias(alias), tcp_port(tcp_port), udp_port(udp_port) {};
 
   /*
     Starts the server on the given port, meaning it will accept inbound
@@ -114,6 +114,14 @@ public slots:
   */
   void validate_client(int id, char alias[18], int mftp_port);
 
+  /*
+  This slot will be connected to every client's processor and go off whenever a
+  chat message is received. This will then forward it to every other client, and
+  emit the chat_message_received signal.
+  */
+  void forward_chat_message(int sender_id, std::string alias,
+                            std::string message);
+
 signals:
   /*
   This is emitted whenever a QTcpSocket emits stateChanged (connect signal to
@@ -128,11 +136,20 @@ signals:
   */
   void client_connected(int id, std::string alias);
 
+  /*
+  This signal will be emitted anytime a chat message is received, from any
+  client.
+  */
+  void chat_message_received(std::string alias, std::string message);
+
 private:
   /*
   Private method to help set up the signals/slots of the server.
   */
   void connect_signals_and_slots();
+
+  // The host's alias
+  std::string host_alias;
 
   // Global UDP socket that all clients will be contacted with
   std::shared_ptr<QUdpSocket> mftp_sock = nullptr;

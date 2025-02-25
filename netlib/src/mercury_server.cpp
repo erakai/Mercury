@@ -105,7 +105,7 @@ void MercuryServer::add_new_client()
   QTcpSocket *connection = nextPendingConnection();
   new_client.id = ++id_counter;
   new_client.hstp_sock = std::shared_ptr<QTcpSocket>(connection);
-  new_client.hstp_messager = HstpHandler();
+  new_client.handler = HstpHandler();
 
   // NOT VALIDATED until first establishing HSTP message received.
   // Please read validate_client().
@@ -130,16 +130,18 @@ void MercuryServer::validate_client(int id, char alias[18], int mftp_port)
   new_client.mftp_port = mftp_port;
   strcpy(new_client.alias, alias);
 
+  // Connect relevant signals to slots
+
   emit client_connected(id, std::string(alias));
 }
 
 void MercuryServer::force_disconnect_client(int id)
 {
-  // Waiting on HSTP to be implemnted.
+  // Inform the client that they have been disconnected
   Client client = clients[id];
-  client.hstp_messager.init_msg(client.alias);
-  // client.hstp_messager.add_option_establishing(0);
-  // client.hstp_messager.send_msg();
+  client.handler.init_msg(host_alias.c_str());
+  client.handler.add_option_establishment(false, 0);
+  client.hstp_sock->write(*(client.handler.output_msg()));
 
   disconnect_client(id);
 }
@@ -156,7 +158,6 @@ void MercuryServer::disconnect_client(int id)
   if (client.validated)
   {
     emit client_disconnected(id, std::string(client.alias));
-    //  free(client.hstp_sock);
     log("Client %s has disconnected.", client.alias, ll::NOTE);
   }
 }
@@ -165,6 +166,22 @@ void MercuryServer::process_received_hstp_messages(int id)
 {
   // If this is an establishment message: validate_client();
   // Waiting on HSTP to be implemented.
+}
+
+void MercuryServer::forward_chat_message(int sender_id, std::string alias,
+                                         std::string message)
+{
+  for (auto &[id, client] : clients)
+  {
+    if (id != sender_id)
+    {
+      client.handler.init_msg(host_alias.c_str());
+      client.handler.add_option_chat(alias.c_str(), message.c_str());
+      client.hstp_sock->write(*(client.handler.output_msg()));
+    }
+  }
+
+  emit chat_message_received(alias, message);
 }
 
 int MercuryServer::send_frame(char source[12], QAudioBuffer audio,

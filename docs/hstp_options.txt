@@ -35,9 +35,9 @@ Options
   Len: 3
   Data:
     - uint8_t start_or_stop
-    - is 0 on start and 1 on stop
+      - is 0 on start and 1 on stop
     - uint16_t mftp_port
-    - only relevant on start, filled with 0s on stop
+      - only relevant on start, filled with 0s on stop
 
 (ID: 2) Chat
 

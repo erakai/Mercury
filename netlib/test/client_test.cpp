@@ -36,12 +36,10 @@ public:
 
     ASSERT_TRUE(test_server.listen(QHostAddress::LocalHost, 12345));
 
-    // Connect client to server
     get_hstp_sock()->connectToHost(QHostAddress::LocalHost,
                                    test_server.serverPort());
     ASSERT_TRUE(get_hstp_sock()->waitForConnected(1000));
 
-    // Accept the connection on the server side
     QObject::connect(&test_server, &QTcpServer::newConnection,
                      [&]()
                      {
@@ -65,7 +63,6 @@ TEST_F(MercuryClientTest, ProcessEchoOption)
   QEventLoop loop;
   QByteArray receivedData;
 
-  // Run the event loop to wait for the data
   QObject::connect(&client, &MercuryClient::test_readyread_callback,
                    [&]()
                    {
@@ -73,6 +70,5 @@ TEST_F(MercuryClientTest, ProcessEchoOption)
                    });
 
   loop.exec();
-  // Verify that the data received matches what was sent
   EXPECT_EQ(1, 1);
 }

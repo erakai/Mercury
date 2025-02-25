@@ -55,9 +55,6 @@ void MercuryClient::process_received_hstp_messages()
 {
   // read everything given
   m_hstp_buffer.append(m_hstp_sock->readAll());
-
-  printf("buffer size: %lld\n", m_hstp_sock->size());
-
   while (m_hstp_buffer.size() >= HSTP_HEADER_SIZE)
   {
     // get size of options
@@ -90,8 +87,8 @@ qint16 MercuryClient::process_single_hstp_message(qint16 opt_size)
     return -1;
   }
 
-  // std::shared_ptr<HSTP_Header> hdr_ptr = m_hstp_handler.bytes_to_msg(buff);
-  // m_hstp_processor_ptr->process(hdr_ptr);
+  std::shared_ptr<HSTP_Header> hdr_ptr = m_hstp_handler.bytes_to_msg(buff);
+  m_hstp_processor_ptr->process(hdr_ptr);
   return buff->size();
 }
 

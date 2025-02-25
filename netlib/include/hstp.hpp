@@ -89,7 +89,7 @@ public:
 
   bool add_option_echo(const char *msg);
   bool add_option_establishment(bool is_start, uint16_t port);
-  bool add_option_chat(const char *chat_msg);
+  bool add_option_chat(const char *sender_alias, const char *chat_msg);
 
   void clear_msg();
   std::shared_ptr<QByteArray> output_msg();

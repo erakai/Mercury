@@ -7,8 +7,15 @@
 #include <QtNetwork/qhostaddress.h>
 #include <QtNetwork/qtcpsocket.h>
 #include <QtNetwork/qudpsocket.h>
+#include <deque>
 #include <memory>
-#include <vector>
+
+struct JitterEntry
+{
+  uint16_t seq_num;
+  uint32_t timestamp;
+  AV_Frame frame;
+};
 
 class MercuryClient : public QObject
 {
@@ -71,6 +78,12 @@ private:
   void connect_signals_and_slots();
 
   /*
+  Insert a new frame into the jitter buffer, using the MFTP header to evaluate
+  where to put it.
+  */
+  void insert_into_jitter_buffer(MFTP_Header header, AV_Frame frame);
+
+  /*
    * Attempts to process a single HSTP header from the hstp_buffer. On success,
    * calls HstpHandler.process(header) and emits option signals and returns
    * the number of bytes read. On failure logs an error and returns -1.
@@ -79,7 +92,7 @@ private:
 
   // This class will require a jitter buffer ordered by sequence number for RTP
   // implementation. Investigate: https://doc.qt.io/qt-6/qbuffer.html
-  std::vector<AV_Frame> m_jitter_buffer;
+  std::deque<JitterEntry> m_jitter_buffer;
 
   std::shared_ptr<QUdpSocket> m_mftp_sock;
   std::shared_ptr<QTcpSocket> m_hstp_sock;

@@ -2,8 +2,9 @@
 
 AV_Frame MercuryClient::retrieve_next_frame()
 {
-  AV_Frame frame;
-  return frame;
+  AV_Frame first = m_jitter_buffer[0].frame;
+  m_jitter_buffer.pop_front();
+  return first;
 }
 
 bool MercuryClient::establish_connection(const QHostAddress &host,
@@ -96,4 +97,21 @@ void MercuryClient::connect_signals_and_slots()
 {
   connect(m_hstp_sock.get(), &QTcpSocket::readyRead, this,
           &MercuryClient::process_received_hstp_messages);
+}
+
+void MercuryClient::insert_into_jitter_buffer(MFTP_Header header,
+                                              AV_Frame frame)
+{
+  JitterEntry new_entry = {header.seq_num, header.timestamp, frame};
+
+  for (auto it = m_jitter_buffer.rbegin(); it != m_jitter_buffer.rend(); ++it)
+  {
+    if (it->seq_num < header.seq_num)
+    {
+      m_jitter_buffer.insert(it.base(), new_entry);
+      return;
+    }
+  }
+
+  m_jitter_buffer.push_front(new_entry);
 }

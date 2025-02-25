@@ -48,7 +48,8 @@ bool HstpHandler::add_option_establishment(bool is_start, uint16_t port)
   return true;
 }
 
-bool HstpHandler::add_option_chat(const char *chat_msg)
+bool HstpHandler::add_option_chat(const char *sender_alias,
+                                  const char *chat_msg)
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
@@ -56,16 +57,24 @@ bool HstpHandler::add_option_chat(const char *chat_msg)
     return false;
   }
 
+  // First construct the three different variables we are serializing
+  char alias_buffer[18] = {0};
+  strcpy(alias_buffer, sender_alias);
+
   std::string str_chat_msg = std::string(chat_msg);
   if (str_chat_msg.length() > CHAT_SIZE_LIMIT)
-  {
     str_chat_msg = str_chat_msg.substr(0, CHAT_SIZE_LIMIT);
-  }
+
+  uint32_t len_of_message = str_chat_msg.length();
+
+  // Then create the option and copy the adta into it
   Option opt;
   opt.type = 0;
-  opt.len = str_chat_msg.length();
+  opt.len = 18 + 4 + len_of_message;
   opt.data = std::shared_ptr<char[]>(new char[opt.len]);
-  std::memcpy(opt.data.get(), str_chat_msg.c_str(), str_chat_msg.length());
+  memcpy(&opt.data[0], alias_buffer, 18);
+  memcpy(&opt.data[18], &len_of_message, 4);
+  memcpy(&opt.data[18 + 4], str_chat_msg.c_str(), str_chat_msg.length());
 
   m_hdr->options.push_back(opt);
 

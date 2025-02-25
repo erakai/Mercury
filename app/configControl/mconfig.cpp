@@ -1,10 +1,13 @@
 #include "mconfig.hpp"
 
-#include <iostream>
-#include <fstream>
+
 #include <curl/curl.h>
+#include <fstream>
+#include <iostream>
+#include <QSettings>
 #include <sys/stat.h>
 
+/* Checks to see if config file is present */
 bool mercury::check_config_file_presence()
 {
 
@@ -14,12 +17,16 @@ bool mercury::check_config_file_presence()
 
 }
 
+
+/* Driver function for curl_default_settings */
 size_t WriteCallback(void* ptr, size_t size, size_t nmemb, void* userdata) {
   std::ofstream* outFile = static_cast<std::ofstream*>(userdata);
   outFile->write(static_cast<const char*>(ptr), size * nmemb);
   return size * nmemb;
 }
 
+
+/* Curls default settings file from github */
 void mercury::curl_default_config()
 {
 
@@ -48,5 +55,15 @@ void mercury::curl_default_config()
 
   outFile.close();
   curl_easy_cleanup(curl);
+
+}
+
+void mercury::change_host_settings()
+{
+
+  QSettings settings("../../config/MercuryClientSettings.ini", QSettings::IniFormat);
+
+  std::cout << "Stream Resolution: " << settings.value("HostSettings/StreamResolution").toInt() << std::endl;
+  settings.setValue("HostSettings/StreamResolution", 1440);
 
 }

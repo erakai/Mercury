@@ -8,6 +8,8 @@ bool check_config_file_presence();
 
 void curl_default_config();
 
+void change_host_settings();
+
 }
 
 #endif // MCONFIG_HPP

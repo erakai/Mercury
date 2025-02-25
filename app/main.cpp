@@ -22,5 +22,7 @@ int main(int argc, char **argv)
 
   }
 
+  mercury::change_host_settings();
+
   return a.exec();
 }

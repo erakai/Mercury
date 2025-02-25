@@ -2,6 +2,7 @@
 #include "hoststreamwindow.h"
 #include "joinstreamwindow.h"
 #include "settingswindow.h"
+#include "utils.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -9,25 +10,28 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
   // that don't rely on ui files, open an example in Qt Creator (the screenshot
   // example is really good).
   ui.setupUi(this);
+
+  QString ip = Utils::instance().getIpAddress();
+  ui.ip_address_label->setText(ip);
 }
 
 void MainWindow::on_settingsButton_clicked()
 {
-  SettingsWindow settingsWindow;
+  SettingsWindow settingsWindow(this);
   settingsWindow.setModal(true);
   settingsWindow.exec();
 }
 
 void MainWindow::on_hostButton_clicked()
 {
-  HostStreamWindow hostStreamWindow;
+  HostStreamWindow hostStreamWindow(this);
   hostStreamWindow.setModal(true);
   hostStreamWindow.exec();
 }
 
 void MainWindow::on_joinButton_clicked()
 {
-  JoinStreamWindow joinStreamWindow;
+  JoinStreamWindow joinStreamWindow(this);
   joinStreamWindow.setModal(true);
   joinStreamWindow.exec();
 }

@@ -66,7 +66,7 @@ QMainWindow {
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="ip_address_title_label">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -79,7 +79,7 @@ QMainWindow {
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_4">
+           <widget class="QLabel" name="ip_address_label">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -189,7 +189,7 @@ QMainWindow {
      <x>0</x>
      <y>0</y>
      <width>344</width>
-     <height>36</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

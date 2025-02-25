@@ -15,6 +15,7 @@ qt_add_executable(mercury
   home/utils.h home/utils.cpp
   configControl/mconfig.cpp
   configControl/mconfig.hpp
+  home/toastnotification.h home/toastnotification.cpp
 )
 
 # Qt set up

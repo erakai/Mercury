@@ -1,8 +1,10 @@
 #include "streamwindow.hpp"
+#include "../home/mainwindow.hpp"
 #include "hosttoolbar.hpp"
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
+#include <QtDebug>
 
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
                            QWidget *parent)
@@ -108,7 +110,6 @@ void StreamWindow::shut_down_window()
   if (is_client())
     // client->client->disconnect();
   */
-
   close();
 }
 

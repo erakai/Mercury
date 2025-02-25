@@ -10,9 +10,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
   // that don't rely on ui files, open an example in Qt Creator (the screenshot
   // example is really good).
   ui.setupUi(this);
-
-  QString ip = Utils::instance().getIpAddress();
-  ui.ip_address_label->setText(ip);
+  ui.settingsButton->setText(Utils::instance().getDisplayName());
 }
 
 void MainWindow::on_settingsButton_clicked()

@@ -1,4 +1,5 @@
 #include "mercury_server.hpp"
+#include "hstp.hpp"
 #include "logger.hpp"
 #include "mftp.hpp"
 
@@ -106,6 +107,7 @@ void MercuryServer::add_new_client()
   new_client.id = ++id_counter;
   new_client.hstp_sock = std::shared_ptr<QTcpSocket>(connection);
   new_client.handler = HstpHandler();
+  new_client.processor = std::make_shared<HstpProcessor>();
 
   // NOT VALIDATED until first establishing HSTP message received.
   // Please read validate_client().
@@ -117,10 +119,20 @@ void MercuryServer::add_new_client()
   connect(new_client.hstp_sock.get(), &QAbstractSocket::disconnected, this,
           [=, this]() { this->disconnect_client(new_client.id); });
 
+  // Allow for validation if we receive an establishment message
+  connect(
+      new_client.processor.get(), &HstpProcessor::received_establishment, this,
+      [=, this](const char alias[ALIAS_SIZE], bool is_start, uint16_t mftp_port)
+      {
+        this->validate_client(new_client.id, is_start, std::string(alias),
+                              mftp_port);
+      });
+
   clients[new_client.id] = new_client;
 }
 
-void MercuryServer::validate_client(int id, char alias[18], int mftp_port)
+void MercuryServer::validate_client(int id, bool is_start, std::string alias,
+                                    int mftp_port)
 {
   Client new_client = clients[id];
 
@@ -128,9 +140,17 @@ void MercuryServer::validate_client(int id, char alias[18], int mftp_port)
 
   new_client.validated = true;
   new_client.mftp_port = mftp_port;
-  strcpy(new_client.alias, alias);
+  strcpy(new_client.alias, alias.c_str());
 
   // Connect relevant signals to slots
+  connect(new_client.processor.get(), &HstpProcessor::received_chat, this,
+          [=, this](const char alias[ALIAS_SIZE],
+                    const char alias_of_chatter[ALIAS_SIZE],
+                    const std::string &chat)
+          {
+            this->forward_chat_message(new_client.id,
+                                       std::string(alias_of_chatter), chat);
+          });
 
   emit client_connected(id, std::string(alias));
 }
@@ -164,8 +184,16 @@ void MercuryServer::disconnect_client(int id)
 
 void MercuryServer::process_received_hstp_messages(int id)
 {
-  // If this is an establishment message: validate_client();
-  // Waiting on HSTP to be implemented.
+  Client client = clients[id];
+
+  if (client.hstp_sock->state() == QAbstractSocket::ConnectedState)
+  {
+    QByteArray data = client.hstp_sock->readAll();
+    client.processor->process(data);
+    return;
+  }
+
+  log("Issue processing received hstp message.", ll::ERROR);
 }
 
 void MercuryServer::forward_chat_message(int sender_id, std::string alias,

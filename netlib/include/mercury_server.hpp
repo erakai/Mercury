@@ -26,8 +26,9 @@ struct Client
   // UDP socket the client gave to send MFTP messages to
   uint16_t mftp_port = 0;
 
-  // QTcpServer generates this for us upon connection.
+  // HSTP utility classes
   HstpHandler handler;
+  std::shared_ptr<HstpProcessor> processor; // must be pointer
   std::shared_ptr<QTcpSocket> hstp_sock;
 
   // Keeps track of the sequence number of the protocol.
@@ -73,7 +74,7 @@ public:
   void set_ports(int tcp_port, int udp_port);
   int get_tcp_port() { return tcp_port; };
   int get_udp_port() { return udp_port; }
-  Client get_client(int id) { return clients[id]; }
+  Client &get_client(int id) { return clients[id]; }
 
 public slots:
   /*
@@ -112,7 +113,7 @@ public slots:
   Handles a client's initial establishment message and validates the client,
   enabling it to receive MFTP data.
   */
-  void validate_client(int id, char alias[18], int mftp_port);
+  void validate_client(int id, bool is_start, std::string alias, int mftp_port);
 
   /*
   This slot will be connected to every client's processor and go off whenever a

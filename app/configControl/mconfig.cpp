@@ -98,7 +98,7 @@ int mercury::get_host_stream_res(QSettings &settings)
 int mercury::get_host_stream_fps(QSettings &settings)
 {
 
-  return settings.value("HostSettings/StreamFrameRate").toInt();
+  return settings.value("HostSettings/FrameRate").toInt();
 }
 
 int mercury::get_host_max_viewers(QSettings &settings)

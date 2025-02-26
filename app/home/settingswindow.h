@@ -16,8 +16,15 @@ public:
   explicit SettingsWindow(QWidget *parent = nullptr);
   ~SettingsWindow();
 
+private slots:
+  void on_closeButton_clicked();
+
+  void on_applyButton_clicked();
+
 private:
   Ui::SettingsWindow *ui;
+  void set_button_ids();
+  void set_up();
 };
 
 #endif // SETTINGSWINDOW_H

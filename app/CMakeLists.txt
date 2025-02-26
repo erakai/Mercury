@@ -16,11 +16,15 @@ qt_add_executable(mercury
   configControl/mconfig.cpp
   configControl/mconfig.hpp
   home/toastnotification.h home/toastnotification.cpp
+
+  streampreview/streampreviewwindow.h streampreview/streampreviewwindow.cpp
+  streampreview/screenlistmodel.h streampreview/screenlistmodel.cpp
+  streampreview/windowlistmodel.h streampreview/windowlistmodel.cpp
+  streampreview/audioinputlistmodel.h streampreview/audioinputlistmodel.cpp
 )
 
 # Qt set up
 target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets)
-
 # Curl set up
 find_package(CURL REQUIRED)
 target_link_libraries(mercury PRIVATE CURL::libcurl)

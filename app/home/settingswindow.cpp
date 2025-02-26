@@ -36,10 +36,14 @@ void SettingsWindow::set_button_ids()
   ui->clientStreamResolutionButtonGroup->setId(ui->clientStreamResolutionRadio4,
                                                1440);
   // Host Stream Resolution
-  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio1, 360);
-  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio2, 720);
-  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio3, 1080);
-  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio4, 1440);
+  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio1,
+                                             360);
+  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio2,
+                                             720);
+  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio3,
+                                             1080);
+  ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio4,
+                                             1440);
   // Host framerate
   ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio1, 15);
   ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio2, 30);
@@ -49,7 +53,8 @@ void SettingsWindow::set_button_ids()
 void SettingsWindow::set_up()
 {
   // Grab all settings to update the ui
-  QSettings settings("../../config/MercuryClientSettings.ini", QSettings::IniFormat);
+  QSettings settings("../../config/MercuryClientSettings.ini",
+                     QSettings::IniFormat);
 
   // GENERAL SETTINGS SETUP
 
@@ -60,7 +65,8 @@ void SettingsWindow::set_up()
 
   int clientStreamResOption = mercury::get_client_stream_res(settings);
 
-  if (clientStreamResOption != 360 && clientStreamResOption != 720 && clientStreamResOption != 1080 && clientStreamResOption != 1440)
+  if (clientStreamResOption != 360 && clientStreamResOption != 720 &&
+      clientStreamResOption != 1080 && clientStreamResOption != 1440)
   {
     clientStreamResOption = 720;
   }
@@ -70,7 +76,8 @@ void SettingsWindow::set_up()
   // HOST SETTINGS SETUP
 
   int hostStreamResOption = mercury::get_host_stream_res(settings);
-  if (hostStreamResOption != 360 && hostStreamResOption != 720 && hostStreamResOption != 1080 && hostStreamResOption != 1440)
+  if (hostStreamResOption != 360 && hostStreamResOption != 720 &&
+      hostStreamResOption != 1080 && hostStreamResOption != 1440)
   {
     hostStreamResOption = 720;
   }
@@ -78,7 +85,8 @@ void SettingsWindow::set_up()
       ->setChecked(true);
 
   int streamFramerateOption = mercury::get_host_stream_fps(settings);
-  if (streamFramerateOption != 15 && streamFramerateOption != 30 && streamFramerateOption != 60)
+  if (streamFramerateOption != 15 && streamFramerateOption != 30 &&
+      streamFramerateOption != 60)
   {
     streamFramerateOption = 60;
   }
@@ -98,7 +106,9 @@ void SettingsWindow::on_applyButton_clicked()
   int hostFramerateOption = ui->hostStreamFramerateButtonGroup->checkedId();
   int maxViewerCount = ui->maxViewerCountSpinBox->value();
 
-  mercury::save_all_settings(displayName, darkMode, clientStreamResOption, hostStreamResOption, hostFramerateOption, maxViewerCount);
+  mercury::save_all_settings(displayName, darkMode, clientStreamResOption,
+                             hostStreamResOption, hostFramerateOption,
+                             maxViewerCount);
 
   qDebug() << displayName << darkMode << clientStreamResOption
            << hostStreamResOption << hostFramerateOption << maxViewerCount;

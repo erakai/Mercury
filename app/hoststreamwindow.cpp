@@ -1,4 +1,6 @@
 #include "hoststreamwindow.h"
+#include "stream/streamservice.hpp"
+#include "stream/streamwindow.hpp"
 #include "ui_hoststreamwindow.h"
 
 #include <QClipboard>
@@ -25,4 +27,17 @@ void HostStreamWindow::on_pushButton_3_clicked()
 {
   QClipboard *cb = QApplication::clipboard();
   cb->setText(QString("copied IP address"));
+}
+
+void HostStreamWindow::on_host_button_clicked()
+{
+  // This sets itself to delete on close, so no memory leak (I think)
+  std::shared_ptr<HostService> serv = std::make_shared<HostService>();
+  serv->stream_name = ui->stream_name_line->text().toStdString();
+  StreamWindow *w =
+      new StreamWindow(ui->lineEdit_2->text().toStdString(), serv);
+  w->show();
+
+  parentWidget()->hide();
+  this->close();
 }

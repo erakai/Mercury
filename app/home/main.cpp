@@ -21,7 +21,6 @@ int main(int argc, char **argv)
 
     std::cout << "Config file not found!" << std::endl;
     mercury::curl_default_config();
-
   }
 
   mercury::change_host_settings();

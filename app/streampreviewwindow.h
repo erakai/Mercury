@@ -28,7 +28,7 @@ QT_END_NAMESPACE
 
 QT_USE_NAMESPACE
 
-    class StreamPreviewWindow : public QWidget
+class StreamPreviewWindow : public QWidget
 {
   Q_OBJECT
 
@@ -45,7 +45,11 @@ private slots:
   void onStartStopButtonClicked();
 
 private:
-  enum class SourceType { Screen, Window };
+  enum class SourceType
+  {
+    Screen,
+    Window
+  };
 
   void updateActive(SourceType sourceType, bool active);
   void updateStartStopButtonText();

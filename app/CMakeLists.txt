@@ -26,7 +26,6 @@ qt_add_executable(mercury
 
 # Qt set up
 target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets)
-
 # Curl set up
 find_package(CURL REQUIRED)
 target_link_libraries(mercury PRIVATE CURL::libcurl)

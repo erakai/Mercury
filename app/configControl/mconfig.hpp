@@ -24,13 +24,9 @@ int get_host_stream_fps(QSettings &settings);
 
 int get_host_max_viewers(QSettings &settings);
 
-void save_all_settings(
-                       QString displayName,
-                       bool darkMode,
-                       int clientStreamResOption,
-                       int hostStreamResOption,
-                       int hostFramerateOption,
-                       int maxViewerCount);
-}
+void save_all_settings(QString displayName, bool darkMode,
+                       int clientStreamResOption, int hostStreamResOption,
+                       int hostFramerateOption, int maxViewerCount);
+} // namespace mercury
 
 #endif // MCONFIG_HPP

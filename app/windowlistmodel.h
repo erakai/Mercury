@@ -9,7 +9,7 @@
 
 QT_USE_NAMESPACE
 
-    class WindowListModel : public QAbstractListModel
+class WindowListModel : public QAbstractListModel
 {
   Q_OBJECT
 
@@ -17,7 +17,8 @@ public:
   explicit WindowListModel(QObject *parent = nullptr);
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override;
 
   QCapturableWindow window(const QModelIndex &index) const;
 

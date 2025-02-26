@@ -35,7 +35,7 @@ elseif (UNIX)
 endif()
 
 # Install qt
-find_package(Qt6 REQUIRED COMPONENTS Widgets Network MultimediaWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Network Multimedia MultimediaWidgets)
 qt_standard_project_setup()
 
 ###################################Add components

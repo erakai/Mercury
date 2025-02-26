@@ -39,7 +39,7 @@
     <string>Cancel</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_2">
+  <widget class="QPushButton" name="host_button">
    <property name="geometry">
     <rect>
      <x>280</x>
@@ -55,7 +55,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QLineEdit" name="stream_name_line">
    <property name="geometry">
     <rect>
      <x>20</x>

@@ -9,6 +9,7 @@
 #include <QtCore/qtypes.h>
 #include <QtNetwork/qtcpsocket.h>
 #include <cstdint>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -46,6 +47,17 @@ struct Option
       return true; // Both are empty
     }
     return std::memcmp(data.get(), other.data.get(), len) == 0;
+  }
+
+  friend std::ostream &operator<<(std::ostream &os, const Option &option)
+  {
+    for (size_t i = 0; i < option.len; ++i)
+    {
+      os << "0x" << std::hex << std::uppercase << std::setw(2)
+         << std::setfill('0')
+         << static_cast<int>(static_cast<unsigned char>(option.data[i])) << " ";
+    }
+    return os << std::dec; // Reset to decimal format
   }
 };
 

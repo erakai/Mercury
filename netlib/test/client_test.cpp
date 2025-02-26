@@ -78,6 +78,9 @@ TEST_F(MercuryClientTest, ProcessChatEstablishmentOption)
                        const char alias_of_chatter[ALIAS_SIZE],
                        const std::string &chat)
                    {
+                     ASSERT_STRNE(alias, "");
+                     ASSERT_STRNE(alias_of_chatter, "");
+                     ASSERT_FALSE(chat.empty());
                      EXPECT_STREQ(alias, "Alice");
                      EXPECT_STREQ(alias_of_chatter, "Chatter");
                      EXPECT_STREQ(chat.c_str(), "Poggers!");

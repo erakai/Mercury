@@ -1,7 +1,6 @@
 #include "hstp.hpp"
 #include <cstdint>
 #include <cstring>
-#include <sys/_endian.h>
 
 bool HstpHandler::init_msg(const char sender_alias[18])
 {
@@ -55,7 +54,6 @@ bool HstpHandler::add_option_establishment(bool is_start, uint16_t port)
 bool HstpHandler::add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
                                   const char *chat_msg)
 {
-  // TODO: needs to be fixed, not up to standard
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
     log("Unable to add option, uninitalized message.", ll::ERROR);
@@ -63,8 +61,8 @@ bool HstpHandler::add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
   }
 
   // First construct the three different variables we are serializing
-  char alias_buffer[18] = {0};
-  strcpy(alias_buffer, alias_buffer);
+  char alias_buffer[ALIAS_SIZE] = {0};
+  std::memcpy(alias_buffer, alias_of_chatter, strlen(alias_of_chatter));
 
   std::string str_chat_msg = std::string(chat_msg);
   if (str_chat_msg.length() > CHAT_SIZE_LIMIT)
@@ -76,10 +74,11 @@ bool HstpHandler::add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
   opt.len = ALIAS_SIZE + sizeof(uint32_t) + str_chat_msg.length();
   opt.data = std::shared_ptr<char[]>(new char[opt.len]);
 
-  uint32_t net_len_of_msg = htonl(str_chat_msg.length());
   std::memcpy(opt.data.get(), alias_buffer, ALIAS_SIZE);
-  std::memcpy(opt.data.get(), &net_len_of_msg, sizeof(uint32_t));
-  std::memcpy(opt.data.get(), str_chat_msg.c_str(), str_chat_msg.length());
+  uint32_t net_len_of_msg = htonl(str_chat_msg.length());
+  std::memcpy(opt.data.get() + ALIAS_SIZE, &net_len_of_msg, sizeof(uint32_t));
+  std::memcpy(opt.data.get() + ALIAS_SIZE + sizeof(uint32_t),
+              str_chat_msg.c_str(), str_chat_msg.length());
 
   m_hdr->options.push_back(opt);
 
@@ -315,22 +314,33 @@ void HstpProcessor::handle_establishment(const char alias[18],
 
 void HstpProcessor::handle_chat(HANDLER_PARAMS)
 {
-  if (!opt.data && opt.len != 0)
+  if (!opt.data || opt.len == 0)
   {
     log("Something went wrong with handling a chat option...", ll::ERROR);
     handle_default(alias, opt);
     return;
   }
 
-  char alias_of_chatter[ALIAS_SIZE];
+  char alias_of_chatter[ALIAS_SIZE] = {0};
   uint32_t len_of_message;
-  char *chat_msg = {0};
 
-  std::memcpy(alias_of_chatter, &opt.data[0], sizeof(char) * ALIAS_SIZE);
-  std::memcpy(&len_of_message, &opt.data[ALIAS_SIZE], sizeof(uint32_t));
+  std::memcpy(&alias_of_chatter, opt.data.get(), sizeof(char) * ALIAS_SIZE);
+  std::memcpy(&len_of_message, opt.data.get() + ALIAS_SIZE, sizeof(uint32_t));
+  if (len_of_message == 0)
+  {
+    log("Something went wrong with handling chat message", ll::ERROR);
+    return;
+  }
+
   len_of_message = ntohl(len_of_message);
-  std::memcpy(chat_msg, &opt.data[ALIAS_SIZE + sizeof(uint32_t)],
-              len_of_message);
 
-  emit received_chat(alias, alias_of_chatter, std::string(chat_msg));
+  std::string chat_msg(opt.data.get() + ALIAS_SIZE + sizeof(uint32_t));
+
+  if (chat_msg.empty() || std::strlen(alias_of_chatter) == 0)
+  {
+    log("Something went wrong with handling chat message", ll::ERROR);
+    return;
+  }
+
+  emit received_chat(alias, alias_of_chatter, chat_msg);
 }

@@ -2,9 +2,9 @@
 
 #include "hstp.hpp"
 #include <QAudioBuffer>
-#include <QPixmap>
 #include <QTcpServer>
 #include <QUdpSocket>
+#include <QVideoFrame>
 
 #include <chrono>
 #include <memory>
@@ -40,7 +40,7 @@ class MercuryServer : public QTcpServer
   Q_OBJECT;
 
 public:
-  MercuryServer() {}
+  MercuryServer(std::string alias) : host_alias(alias) {}
   MercuryServer(std::string alias, int tcp_port, int udp_port)
       : host_alias(alias), tcp_port(tcp_port), udp_port(udp_port) {};
 
@@ -107,7 +107,7 @@ public slots:
   client in the client list. Returns the number of clients it tried to send the
   frame too.
   */
-  int send_frame(char source[12], QAudioBuffer audio, QPixmap video);
+  int send_frame(char const *source, QAudioBuffer audio, QVideoFrame video);
 
   /*
   Handles a client's initial establishment message and validates the client,

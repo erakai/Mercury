@@ -1,10 +1,13 @@
 #pragma once
 
+#include <QAudioBuffer>
 #include <QByteArray>
 #include <QNetworkDatagram>
 #include <QUdpSocket>
 
 #include <memory>
+
+#define FRAMES_TO_TRY_TO_REASSEMBLE 2
 
 constexpr uint8_t MFTP_VERSION = 1;
 
@@ -15,13 +18,15 @@ process_datagram implementation as well, or everything breaks.
 
 struct MFTP_Header
 {
-  uint8_t version;       // 1 byte
-  uint16_t payload_type; // 2 bytes
-  uint16_t seq_num;      // 2 bytes
-  uint32_t timestamp;    // 4 bytes
-  uint16_t audio_len;    // 2 bytes
-  uint16_t video_len;    // 2 bytes
-  char source_name[12];  // 12 bytes
+  uint8_t version;          // 1 byte
+  uint16_t payload_type;    // 2 bytes
+  uint16_t seq_num;         // 2 bytes
+  uint16_t total_fragments; // 2 bytes
+  uint16_t fragment_num;    // 2 bytes
+  uint32_t timestamp;       // 4 bytes
+  uint16_t audio_len;       // 2 bytes
+  uint16_t video_len;       // 2 bytes
+  char source_name[12];     // 12 bytes
 
   // Used in testing
   bool operator==(const MFTP_Header &other) const
@@ -38,6 +43,22 @@ struct AV_Frame
 {
   QByteArray audio;
   QByteArray video;
+};
+
+/*
+Processor class that re-assembles the fragmented datagrams into one big one.
+*/
+class MFTP_Processor : public QObject
+{
+  Q_OBJECT;
+
+public slots:
+  void process_ready_datagrams(std::shared_ptr<QUdpSocket> socket);
+
+signals:
+  void frame_ready(MFTP_Header header, QAudioBuffer audio, QImage video);
+
+private:
 };
 
 /*

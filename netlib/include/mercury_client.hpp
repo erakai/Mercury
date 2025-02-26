@@ -2,6 +2,7 @@
 
 #include "hstp.hpp"
 #include "mftp.hpp"
+#include <QImage>
 #include <QtCore/qstringview.h>
 #include <QtCore/qtypes.h>
 #include <QtNetwork/qhostaddress.h>
@@ -14,7 +15,8 @@ struct JitterEntry
 {
   uint16_t seq_num;
   uint32_t timestamp;
-  AV_Frame frame;
+  QImage video;
+  QAudioBuffer audio;
 };
 
 class MercuryClient : public QObject
@@ -28,6 +30,7 @@ public:
     m_hstp_sock = std::make_shared<QTcpSocket>();
     m_mftp_sock = std::make_shared<QUdpSocket>();
     m_hstp_processor_ptr = std::make_shared<HstpProcessor>();
+    m_mftp_processor = std::make_shared<MFTP_Processor>();
     connect_signals_and_slots();
   };
 
@@ -38,17 +41,22 @@ public:
   todo: should it be deserialized here instead and return as an audio/video
   object? what audio/video objects would we use?
   */
-  AV_Frame retrieve_next_frame();
+  JitterEntry retrieve_next_frame();
 
   std::shared_ptr<HstpProcessor> hstp_processor() const
   {
     return m_hstp_processor_ptr;
   }
 
+  std::string get_alias() { return m_alias; }
+
 public slots:
   /*
    * Connects to the given host address and port via both UDP/TCP. Slot allows
-   * UI to connect the client on signal
+   * UI to connect the client on signal.
+   *
+   * The hstp port is the port the server is on (for tcp), and the mftp port is
+   * the port the client is on (for udp).
    */
   bool establish_connection(const QHostAddress &host, quint16 hstp_port,
                             quint16 mftp_port);
@@ -70,22 +78,17 @@ public slots:
   void process_received_hstp_messages();
 
   /*
-   * Upon readyRead of QUdpSocket, attempt to read out a full datagram of
-   * mftp. Then, process the datagram.
-   */
-  void process_received_mftp_datagrams();
+  Insert a new frame into the jitter buffer, using the MFTP header to evaluate
+  where to put it.
+  */
+  void insert_into_jitter_buffer(MFTP_Header header, QAudioBuffer audio,
+                                 QImage video);
 
 private:
   /*
   Private method to help set up the signals/slots of the client.
   */
   void connect_signals_and_slots();
-
-  /*
-  Insert a new frame into the jitter buffer, using the MFTP header to evaluate
-  where to put it.
-  */
-  void insert_into_jitter_buffer(MFTP_Header header, AV_Frame frame);
 
   // This class will require a jitter buffer ordered by sequence number for RTP
   // implementation. Investigate: https://doc.qt.io/qt-6/qbuffer.html
@@ -98,4 +101,6 @@ private:
 
   HstpHandler m_hstp_handler;
   std::shared_ptr<HstpProcessor> m_hstp_processor_ptr;
+
+  std::shared_ptr<MFTP_Processor> m_mftp_processor;
 };

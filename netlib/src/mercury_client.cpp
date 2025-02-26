@@ -2,9 +2,9 @@
 #include "mftp.hpp"
 #include <memory>
 
-AV_Frame MercuryClient::retrieve_next_frame()
+JitterEntry MercuryClient::retrieve_next_frame()
 {
-  AV_Frame first = m_jitter_buffer[0].frame;
+  JitterEntry first = m_jitter_buffer[0];
   m_jitter_buffer.pop_front();
   return first;
 }
@@ -90,36 +90,26 @@ void MercuryClient::process_received_hstp_messages()
   }
 }
 
-void MercuryClient::process_received_mftp_datagrams()
-{
-  while (m_mftp_sock->hasPendingDatagrams())
-  {
-    QNetworkDatagram datagram = m_mftp_sock->receiveDatagram();
-    MFTP_Header header;
-    AV_Frame payload;
-    if (!process_datagram(m_mftp_sock, header, payload))
-    {
-      log("Failed to process mftp datagram", ll::ERROR);
-      return;
-    }
-
-    insert_into_jitter_buffer(header, payload);
-  }
-}
-
 void MercuryClient::connect_signals_and_slots()
 {
   connect(m_hstp_sock.get(), &QTcpSocket::readyRead, this,
           &MercuryClient::process_received_hstp_messages);
 
-  connect(m_mftp_sock.get(), &QUdpSocket::readyRead, this,
-          &MercuryClient::process_received_mftp_datagrams);
+  connect(m_mftp_sock.get(), &QUdpSocket::readyRead, this, [=, this]()
+          { m_mftp_processor->process_ready_datagrams(m_mftp_sock); });
+
+  connect(m_mftp_processor.get(), &MFTP_Processor::frame_ready, this,
+          &MercuryClient::insert_into_jitter_buffer);
 }
 
 void MercuryClient::insert_into_jitter_buffer(MFTP_Header header,
-                                              AV_Frame frame)
+                                              QAudioBuffer audio, QImage video)
 {
-  JitterEntry new_entry = {header.seq_num, header.timestamp, frame};
+  JitterEntry new_entry;
+  new_entry.seq_num = header.seq_num;
+  new_entry.timestamp = header.timestamp;
+  new_entry.video = video;
+  new_entry.audio = audio;
 
   for (auto it = m_jitter_buffer.rbegin(); it != m_jitter_buffer.rend(); ++it)
   {

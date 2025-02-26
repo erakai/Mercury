@@ -12,3 +12,5 @@ Makefile
 .VSCodeCounter/
 
 CMakeLists.txt.user
+
+a.out

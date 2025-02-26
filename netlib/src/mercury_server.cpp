@@ -21,12 +21,17 @@ bool MercuryServer::start_server()
     return false;
   }
 
-  mftp_sock = acquire_mftp_socket(udp_port);
-
   if (!listen(QHostAddress::Any, tcp_port))
   {
     log("Error: Unable to start server.", ll::CRITICAL);
     close();
+    return false;
+  }
+
+  mftp_sock = acquire_mftp_socket(udp_port);
+  if (mftp_sock == nullptr)
+  {
+    log("Unable to construct MFTP socket.", ll::ERROR);
     return false;
   }
 
@@ -212,18 +217,34 @@ void MercuryServer::forward_chat_message(int sender_id, std::string alias,
   emit chat_message_received(alias, message);
 }
 
-int MercuryServer::send_frame(char source[12], QAudioBuffer audio,
-                              QPixmap video)
+int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
+                              QVideoFrame video)
 {
+  if (strlen(source) > 12)
+  {
+    log("Source passed to send_frame too long - should be <= 12, instead is %d",
+        strlen(source), ll::ERROR);
+    return -1;
+  }
+
   // Send to every client and increment their frame seq num
   MFTP_Header header;
   AV_Frame payload;
 
-  // Serialize data to payload
+  // Serialize audio to payload
   payload.audio.append(audio.constData<char>(), audio.byteCount());
+
+  // Serialize video to payload
+  QImage video_image = video.toImage();
+
   QBuffer buffer(&payload.video);
   buffer.open(QIODevice::WriteOnly);
-  video.save(&buffer, "PNG");
+
+  if (!video_image.save(&buffer, "JPG"))
+  {
+    log("Unable to serialize QImage.", ll::ERROR);
+    return -1;
+  }
 
   // Set up header fields
   header.version = MFTP_VERSION;

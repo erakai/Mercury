@@ -40,6 +40,11 @@ public:
   */
   AV_Frame retrieve_next_frame();
 
+  std::shared_ptr<HstpProcessor> hstp_processor() const
+  {
+    return m_hstp_processor_ptr;
+  }
+
 public slots:
   /*
    * Connects to the given host address and port via both UDP/TCP. Slot allows
@@ -64,10 +69,11 @@ public slots:
    */
   void process_received_hstp_messages();
 
-  std::shared_ptr<HstpProcessor> hstp_processor() const
-  {
-    return m_hstp_processor_ptr;
-  }
+  /*
+   * Upon readyRead of QUdpSocket, attempt to read out a full datagram of
+   * mftp. Then, process the datagram.
+   */
+  void process_received_mftp_datagrams();
 
 private:
   /*

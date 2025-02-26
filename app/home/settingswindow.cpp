@@ -90,7 +90,6 @@ void SettingsWindow::set_up()
 
 void SettingsWindow::on_applyButton_clicked()
 {
-  // TODO @Kris write the current values to ini
   QString displayName = ui->displayNameLineEdit->text();
   bool darkMode = ui->darkModeCheckBox->isChecked();
   int clientStreamResOption =
@@ -104,6 +103,5 @@ void SettingsWindow::on_applyButton_clicked()
   qDebug() << displayName << darkMode << clientStreamResOption
            << hostStreamResOption << hostFramerateOption << maxViewerCount;
 
-  // TODO @Kris if the end of writing is a call back, call this after
   ToastNotification::showToast(this, "All changes saved!");
 }

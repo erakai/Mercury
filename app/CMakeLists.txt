@@ -17,11 +17,10 @@ qt_add_executable(mercury
   configControl/mconfig.hpp
   home/toastnotification.h home/toastnotification.cpp
 
-  streampreviewwindow.h streampreviewwindow.cpp
-
-  screenlistmodel.h screenlistmodel.cpp
-  windowlistmodel.h windowlistmodel.cpp
-  audioinputlistmodel.h audioinputlistmodel.cpp
+  streampreview/streampreviewwindow.h streampreview/streampreviewwindow.cpp
+  streampreview/screenlistmodel.h streampreview/screenlistmodel.cpp
+  streampreview/windowlistmodel.h streampreview/windowlistmodel.cpp
+  streampreview/audioinputlistmodel.h streampreview/audioinputlistmodel.cpp
 )
 
 # Qt set up

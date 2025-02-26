@@ -6,6 +6,8 @@
 #include <QMediaPlayer>
 #include <QPainter>
 #include <QTimer>
+#include <QVideoFrame>
+#include <QVideoSink>
 #include <QVideoWidget>
 #include <QWidget>
 #include <functional>
@@ -39,7 +41,7 @@ private:
   // methods to ensure we know what to next display
   function<bool(QImage &)> get_next_video_frame;
   function<bool(QAudioBuffer &)> get_next_audio_frame;
-  QImage next_video_frame;
+  QImage next_video_image;
   QAudioBuffer next_audio_frame;
 
   // I think that audio will have to somehow be written to a QIODevice that a
@@ -51,5 +53,5 @@ private:
 
   QMediaPlayer *video_player;
   QVideoWidget *video_widget;
-  QBuffer *video_buffer;
+  QVideoSink *video_sink;
 };

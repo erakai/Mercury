@@ -1,5 +1,6 @@
 #include "streamwindow.hpp"
 #include "hosttoolbar.hpp"
+#include "logger.hpp"
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
@@ -122,6 +123,14 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
   {
     // acquire video frame from jitter buffer
   }
+
+  // Testing
+  if (!next_video.load("assets/iamcomingtokillyou.jpg", "JPG"))
+  {
+    log("failed to load picture", ll::ERROR);
+    return false;
+  };
+  return true;
 
   return false;
 }

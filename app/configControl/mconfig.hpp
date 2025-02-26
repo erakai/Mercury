@@ -12,7 +12,7 @@ void curl_default_config();
 
 void change_host_settings();
 
-bool get_visual_mode(QSettings &settings);
+bool get_dark_mode(QSettings &settings);
 
 QString get_alias(QSettings &settings);
 

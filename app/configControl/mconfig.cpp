@@ -68,10 +68,10 @@ void mercury::change_host_settings()
 
 }
 
-bool mercury::get_visual_mode(QSettings &settings)
+bool mercury::get_dark_mode(QSettings &settings)
 {
 
-  return settings.value("GeneralSettings/VisualMode").toBool();
+  return settings.value("GeneralSettings/DarkMode").toBool();
 
 }
 
@@ -115,7 +115,7 @@ void mercury::save_all_settings(QString displayName, bool darkMode, int clientSt
   QSettings settings("../../config/MercuryClientSettings.ini", QSettings::IniFormat);
 
   settings.setValue("GeneralSettings/Alias", displayName);
-  settings.setValue("GeneralSettings/VisualMode", darkMode);
+  settings.setValue("GeneralSettings/DarkMode", darkMode);
   settings.setValue("ClientSettings/StreamResolution", clientStreamResOption);
   settings.setValue("HostSettings/StreamResolution", hostStreamResOption);
   settings.setValue("HostSettings/FrameRate", hostFramerateOption);

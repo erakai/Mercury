@@ -54,7 +54,7 @@ void SettingsWindow::set_up()
   // GENERAL SETTINGS SETUP
 
   ui->displayNameLineEdit->setText(mercury::get_alias(settings));
-  ui->darkModeCheckBox->setChecked(mercury::get_visual_mode(settings));
+  ui->darkModeCheckBox->setChecked(mercury::get_dark_mode(settings));
 
   // CLIENT SETTINGS SETUP
 

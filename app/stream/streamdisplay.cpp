@@ -2,7 +2,7 @@
 #include <QtMultimedia/qmediaplayer.h>
 
 StreamDisplay::StreamDisplay(
-    QWidget *parent, function<bool(QPixmap &)> get_next_video_frame,
+    QWidget *parent, function<bool(QImage &)> get_next_video_frame,
     function<bool(QAudioBuffer &)> get_next_audio_frame)
     : QWidget(parent), get_next_video_frame(get_next_video_frame),
       get_next_audio_frame(get_next_audio_frame)

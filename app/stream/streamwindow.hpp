@@ -30,7 +30,7 @@ public:
   bool is_host() { return mode == MercuryMode::HOST; }
   bool is_client() { return mode == MercuryMode::CLIENT; }
 
-  bool provide_next_video_frame(QPixmap &next_video);
+  bool provide_next_video_frame(QImage &next_video);
   bool provide_next_audio_frame(QAudioBuffer &next_audio);
 
 public slots:

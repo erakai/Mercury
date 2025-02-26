@@ -111,3 +111,7 @@ bool process_datagram(std::shared_ptr<QUdpSocket> sock, MFTP_Header &header,
 
   return true;
 }
+
+void MFTP_Processor::process_ready_datagrams(std::shared_ptr<QUdpSocket> socket)
+{
+}

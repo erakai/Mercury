@@ -21,7 +21,7 @@ class StreamDisplay : public QWidget
   Q_OBJECT;
 
 public:
-  StreamDisplay(QWidget *parent, function<bool(QPixmap &)> get_next_video_frame,
+  StreamDisplay(QWidget *parent, function<bool(QImage &)> get_next_video_frame,
                 function<bool(QAudioBuffer &)> get_next_audio_frame);
 
   // Begins drawing and requesting frames
@@ -37,9 +37,9 @@ private:
   QTimer *fps_timer;
 
   // methods to ensure we know what to next display
-  function<bool(QPixmap &)> get_next_video_frame;
+  function<bool(QImage &)> get_next_video_frame;
   function<bool(QAudioBuffer &)> get_next_audio_frame;
-  QPixmap next_video_frame;
+  QImage next_video_frame;
   QAudioBuffer next_audio_frame;
 
   // I think that audio will have to somehow be written to a QIODevice that a

@@ -136,7 +136,7 @@ QDialog#JoinStreamWindow {
          <item>
           <widget class="QLabel" name="passwordLabel">
            <property name="text">
-            <string>Password</string>
+            <string>Password:</string>
            </property>
           </widget>
          </item>

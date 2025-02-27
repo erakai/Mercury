@@ -267,3 +267,11 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
 
   return client_sent_to_count;
 }
+
+void MercuryServer::send_hstp_message_to_all_clients(QByteArray msg)
+{
+  for (auto &[id, client] : clients)
+  {
+    client.hstp_sock->write(msg);
+  }
+}

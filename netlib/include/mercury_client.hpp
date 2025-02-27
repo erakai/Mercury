@@ -95,11 +95,6 @@ signals:
   void client_disconnected();
 
   /*
-  Emitted whenever anybody sends a chat message.
-  */
-  void chat_message_received(std::string alias, std::string message);
-
-  /*
   Emitted when the jitter buffer has enough frames to begin playback.
   */
   void jitter_buffer_sufficiently_full();

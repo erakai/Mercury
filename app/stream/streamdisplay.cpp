@@ -7,13 +7,6 @@ StreamDisplay::StreamDisplay(QWidget *parent,
     : QWidget(parent), get_next_video_frame(get_next_video_frame),
       get_next_audio_frame(get_next_audio_frame)
 {
-  // PLACEHOLDER ==========================
-  QPalette pal = QPalette();
-  pal.setColor(QPalette::Window, Qt::blue);
-  setAutoFillBackground(true);
-  setPalette(pal);
-  // END PLACEHOLDER ==========================
-
   // TODO: Add Audio
 
   fps_timer = new QTimer(this);

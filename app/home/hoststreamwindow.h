@@ -23,6 +23,7 @@ private slots:
   void open_stream_window();
   void on_ipAddressButton_clicked();
   void on_cancelButton_clicked();
+  void tutorial_button_press();
 
 private:
   Ui::HostStreamWindow *ui;

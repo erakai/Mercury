@@ -5,6 +5,7 @@
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
 #include <QAudioBuffer>
+#include <QFile>
 #include <QGridLayout>
 #include <QLabel>
 #include <QMainWindow>
@@ -31,7 +32,7 @@ public:
   bool is_client() { return mode == MercuryMode::CLIENT; }
 
   bool provide_next_video_frame(QImage &next_video);
-  bool provide_next_audio_frame(QAudioBuffer &next_audio);
+  bool provide_next_audio_frame(QBuffer &next_audio);
 
 public slots:
   // This should be connected to a signal from either MercuryClient (if this is

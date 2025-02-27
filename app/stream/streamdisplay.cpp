@@ -1,11 +1,9 @@
 #include "streamdisplay.hpp"
-#include "logger.hpp"
-#include <QtMultimedia/qmediaplayer.h>
-#include <QtMultimedia/qvideoframe.h>
+#include <QtMultimedia/qaudiosink.h>
 
-StreamDisplay::StreamDisplay(
-    QWidget *parent, function<bool(QImage &)> get_next_video_frame,
-    function<bool(QAudioBuffer &)> get_next_audio_frame)
+StreamDisplay::StreamDisplay(QWidget *parent,
+                             function<bool(QImage &)> get_next_video_frame,
+                             function<bool(QBuffer &)> get_next_audio_frame)
     : QWidget(parent), get_next_video_frame(get_next_video_frame),
       get_next_audio_frame(get_next_audio_frame)
 {
@@ -22,17 +20,26 @@ StreamDisplay::StreamDisplay(
   connect(fps_timer, &QTimer::timeout, this,
           &StreamDisplay::acquire_next_frame);
 
-  // audio_player = new QMediaPlayer();
-  video_player = new QMediaPlayer(this);
+  // AUDIO TESTING ===
+  QAudioFormat format;
+  // Set up the format, eg.
+  format.setSampleRate(44100);
+  format.setChannelCount(1);
+  format.setSampleFormat(QAudioFormat::Int16);
 
-  // audio_buffer = new QBuffer();
-  // audio_buffer->open(QIODevice::ReadWrite);
+  audio_sink = new QAudioSink(format, this);
+  sourceFile.setFileName("assets/fart.raw");
+  sourceFile.open(QIODevice::ReadOnly);
+  // audio_sink->start(&sourceFile);
+  // AUDIO TESTING END ====
+
+  video_player = new QMediaPlayer(this);
 
   video_widget = new QVideoWidget(this);
   video_sink = video_widget->videoSink();
   video_player->setVideoOutput(video_sink);
 
-  video_widget->setMinimumWidth(1280);
+  video_widget->setMinimumWidth(1280); // TODO: No idea if this right
   video_widget->setMinimumHeight(720);
 
   video_widget->show();
@@ -42,9 +49,6 @@ StreamDisplay::StreamDisplay(
 
 void StreamDisplay::begin_playback()
 {
-  // audio_player->setSourceDevice(audio_buffer);
-  // audio_player->play();
-
   video_player->play();
 
   fps_timer->start(1000 / 30.0);

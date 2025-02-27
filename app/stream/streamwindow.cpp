@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
+#include <QtMultimedia/qaudiosink.h>
 
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
                            QWidget *parent)
@@ -79,7 +80,7 @@ void StreamWindow::initialize_primary_ui_widgets()
 
   std::function<bool(QImage &)> video_func = std::bind(
       &StreamWindow::provide_next_video_frame, this, std::placeholders::_1);
-  std::function<bool(QAudioBuffer &)> audio_func = std::bind(
+  std::function<bool(QBuffer &)> audio_func = std::bind(
       &StreamWindow::provide_next_audio_frame, this, std::placeholders::_1);
   stream_display = new StreamDisplay(this, video_func, audio_func);
 
@@ -135,7 +136,7 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
   return false;
 }
 
-bool StreamWindow::provide_next_audio_frame(QAudioBuffer &next_audio)
+bool StreamWindow::provide_next_audio_frame(QBuffer &next_audio)
 {
   if (is_host())
   {
@@ -145,6 +146,24 @@ bool StreamWindow::provide_next_audio_frame(QAudioBuffer &next_audio)
   {
     // acquire audio frame from jitter buffer
   }
+
+  // TESTING!:
+  QFile fart_file("assets/fart.mp3");
+  if (!fart_file.open(QIODevice::ReadOnly))
+  {
+    // Handle error opening file
+    log("failed to load audio file", ll::ERROR);
+    return false;
+  }
+
+  QByteArray audio_byte_array = fart_file.readAll();
+  fart_file.close();
+
+  next_audio.open(QIODevice::WriteOnly);
+  next_audio.write(audio_byte_array);
+  next_audio.close();
+
+  return true;
 
   return false;
 }

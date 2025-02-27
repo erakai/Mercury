@@ -147,6 +147,7 @@ void MercuryServer::validate_client(int id, bool is_start, std::string alias,
   new_client.validated = true;
   new_client.mftp_port = mftp_port;
   strcpy(new_client.alias, alias.c_str());
+  log("Client \"%s\" has connected.", new_client.alias, ll::NOTE);
 
   // Connect relevant signals to slots
   connect(new_client.processor.get(), &HstpProcessor::received_chat, this,

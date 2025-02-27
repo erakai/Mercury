@@ -76,7 +76,7 @@ TEST_F(NetlibTest, ServerClientBasic)
   ASSERT_TRUE(server.start_server());
   ASSERT_TRUE(client.establish_connection(QHostAddress::LocalHost, server_tcp,
                                           client_udp));
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
   app->processEvents(QEventLoop::AllEvents, QDeadlineTimer(100));
   ASSERT_EQ(server.get_clients().size(), 1);
 

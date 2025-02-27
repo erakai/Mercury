@@ -210,7 +210,6 @@ bool MFTPProcessor::process_datagram(QNetworkDatagram datagram)
   }
   partial_frames[MAX_FRAMES_TO_REASSEMBLE - 1] = new_frame;
 
-  print_partial_frame_array();
   return true;
 }
 

@@ -1,6 +1,7 @@
 #ifndef HOSTSTREAMWINDOW_H
 #define HOSTSTREAMWINDOW_H
 
+#include "streampreview/streampreviewwindow.h"
 #include <QDialog>
 
 namespace Ui
@@ -21,8 +22,12 @@ private slots:
   void on_ip_address_button_clicked();
   void on_hostButton_clicked();
 
+  void open_stream_window();
+
 private:
   Ui::HostStreamWindow *ui;
+
+  StreamPreviewWindow *spw = nullptr;
 };
 
 #endif // HOSTSTREAMWINDOW_H

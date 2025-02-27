@@ -1,5 +1,6 @@
 #include "hoststreamwindow.h"
-#include "../stream/streamwindow.hpp"
+#include "singleton/videomanager.h"
+#include "stream/streamwindow.hpp"
 #include "toastnotification.h"
 #include "ui_hoststreamwindow.h"
 #include "utils.h"
@@ -40,13 +41,31 @@ void HostStreamWindow::on_ip_address_button_clicked()
 
 void HostStreamWindow::on_hostButton_clicked()
 {
-  // This sets itself to delete on close, so no memory leak (I think)
+  hide();
+
+  spw = new StreamPreviewWindow();
+  spw->show();
+  spw->raise();          // for MacOS
+  spw->activateWindow(); // for Windows
+
+  connect(spw, &StreamPreviewWindow::closed, this,
+          &HostStreamWindow::open_stream_window);
+}
+
+void HostStreamWindow::open_stream_window()
+{
+  delete (spw);
+
+  if (!VideoManager::instance().mediaCaptureIsSet())
+    return;
+
   std::string alias = ui->lineEdit_2->text().toStdString();
 
   std::shared_ptr<HostService> serv =
       std::make_shared<HostService>(alias, 23333, 32222);
   serv->stream_name = ui->streamNameLineEdit->text().toStdString();
   serv->server->start_server();
+  // This sets itself to delete on close, so no memory leak (I think)
   StreamWindow *w = new StreamWindow(alias, serv);
   w->show();
 

@@ -1,11 +1,12 @@
 #include "streamwindow.hpp"
 #include "hosttoolbar.hpp"
 #include "logger.hpp"
+#include "singleton/videomanager.h"
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
 #include <QtDebug>
-#include <QtMultimedia/qaudiosink.h>
+#include <QAudioSink>
 
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
                            QWidget *parent)
@@ -151,6 +152,8 @@ void StreamWindow::closeEvent(QCloseEvent *event)
   // Client already calls this from the disconnected signal on the socket
   if (is_host())
     shut_down_window();
+
+  QWidget::closeEvent(event);
 }
 
 void StreamWindow::shut_down_window()
@@ -171,25 +174,20 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
   if (is_host())
   {
     // acquire video frame from desktop
-
-    QPixmap video = QGuiApplication::primaryScreen()->grabWindow(0);
-    QImage sent_image = video.toImage();
-
-    if (sent_image.isNull())
-      return false;
-
-    servh->server->send_frame("desktop", QAudioBuffer(),
-                              QVideoFrame(sent_image));
-    next_video = sent_image;
-
-    /*
-    // Placeholder:
-    if (!next_video.load("assets/iamcomingtokillyou.jpg", "JPG"))
+    QImage img;
+    if (VideoManager::instance().GetVideoImage(img) ==
+        VideoManager::VideoImageStatus::SUCCESS)
     {
-      log("failed to load picture", ll::ERROR);
+      servh->server->send_frame("desktop", QAudioBuffer(), QVideoFrame(img));
+      next_video = img;
+      return true;
+    }
+    else
+    {
+      log("Unable to retrieve video image from manager.", ll::WARNING);
       return false;
-    };
-    */
+    }
+
     return true;
   }
   else

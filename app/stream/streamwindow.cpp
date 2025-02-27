@@ -82,6 +82,10 @@ void StreamWindow::connect_signals_and_slots()
     connect(servc->client.get(), &MercuryClient::chat_message_received, this,
             &StreamWindow::new_chat_message);
 
+  // connect chat message sent on side pane
+  connect(side_pane, &SidePane::send_chat_message, this,
+          &StreamWindow::send_chat_message);
+
   // connect viewer count updated for host
   if (is_host())
   {
@@ -238,6 +242,14 @@ bool StreamWindow::provide_next_audio_frame(QBuffer &next_audio)
   */
 
   return false;
+}
+
+void StreamWindow::send_chat_message(string message)
+{
+  if (is_host())
+    servh->server->forward_chat_message(-1, alias, message);
+  if (is_client())
+    servc->client->send_chat_message(message);
 }
 
 void StreamWindow::viewer_count_updated(int new_count)

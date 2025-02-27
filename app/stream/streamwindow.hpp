@@ -48,6 +48,9 @@ public slots:
   // Called to close the stream (if hosting) or leave (if client)
   void shut_down_window();
 
+  // Sends a chat message out
+  void send_chat_message(string message);
+
   // These are generic update slots that should be connected to a signal either
   // in the client or server
   void viewer_count_updated(int new_count);

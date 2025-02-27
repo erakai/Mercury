@@ -41,10 +41,13 @@ void HostStreamWindow::on_ip_address_button_clicked()
 void HostStreamWindow::on_hostButton_clicked()
 {
   // This sets itself to delete on close, so no memory leak (I think)
-  std::shared_ptr<HostService> serv = std::make_shared<HostService>();
+  std::string alias = ui->lineEdit_2->text().toStdString();
+
+  std::shared_ptr<HostService> serv =
+      std::make_shared<HostService>(alias, 23333, 32222);
   serv->stream_name = ui->streamNameLineEdit->text().toStdString();
-  StreamWindow *w =
-      new StreamWindow(ui->lineEdit_2->text().toStdString(), serv);
+  serv->server->start_server();
+  StreamWindow *w = new StreamWindow(alias, serv);
   w->show();
 
   parentWidget()->hide();

@@ -68,12 +68,14 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
 
 bool MercuryClient::disconnect()
 {
-  m_mftp_sock->close();
-  m_hstp_sock->close();
+  if (m_mftp_sock->isOpen())
+    m_mftp_sock->close();
+  if (m_hstp_sock->isOpen())
+    m_hstp_sock->close();
   return true;
 }
 
-bool MercuryClient::talk_tuah(const std::string &chat_msg)
+bool MercuryClient::send_chat_message(const std::string &chat_msg)
 {
   m_hstp_handler.init_msg(m_alias.c_str());
   m_hstp_handler.add_option_chat(m_alias.c_str(), chat_msg.c_str());
@@ -104,11 +106,20 @@ void MercuryClient::connect_signals_and_slots()
   connect(m_hstp_sock.get(), &QTcpSocket::readyRead, this,
           &MercuryClient::process_received_hstp_messages);
 
+  connect(m_hstp_sock.get(), &QTcpSocket::disconnected, this,
+          &MercuryClient::client_disconnected);
+
   connect(m_mftp_sock.get(), &QUdpSocket::readyRead, this,
           [&]() { m_mftp_processor->process_ready_datagrams(m_mftp_sock); });
 
   connect(m_mftp_processor.get(), &MFTPProcessor::frame_ready, this,
           &MercuryClient::insert_into_jitter_buffer);
+
+  connect(m_hstp_processor_ptr.get(), &HstpProcessor::received_chat, this,
+          [=, this](const char alias[ALIAS_SIZE],
+                    const char alias_of_chatter[ALIAS_SIZE],
+                    const std::string &chat)
+          { emit chat_message_received(std::string(alias_of_chatter), chat); });
 }
 
 void MercuryClient::insert_into_jitter_buffer(MFTP_Header header,
@@ -130,4 +141,12 @@ void MercuryClient::insert_into_jitter_buffer(MFTP_Header header,
   }
 
   m_jitter_buffer.push_front(new_entry);
+
+  if (!begun_playback &&
+      m_jitter_buffer.size() >= MINIMUM_FRAME_COUNT_FOR_PLAYBACK)
+  {
+    begun_playback = true;
+
+    emit jitter_buffer_sufficiently_full();
+  }
 }

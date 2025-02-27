@@ -91,6 +91,6 @@ private:
   // Only one of these will not be null - check mode first
   // These contain all specific data to being a host/client (networking, viewer
   // count, stream name, etc)
-  const shared_ptr<HostService> host = nullptr;
-  const shared_ptr<ClientService> client = nullptr;
+  const shared_ptr<HostService> servh = nullptr;
+  const shared_ptr<ClientService> servc = nullptr;
 };

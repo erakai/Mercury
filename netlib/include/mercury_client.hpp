@@ -11,6 +11,8 @@
 #include <deque>
 #include <memory>
 
+#define MINIMUM_FRAME_COUNT_FOR_PLAYBACK 5
+
 struct JitterEntry
 {
   uint16_t seq_num;
@@ -71,7 +73,7 @@ public slots:
   /*
    * Informs the server that the client is sending out a chat message.
    */
-  bool talk_tuah(const std::string &chat_msg);
+  bool send_chat_message(const std::string &chat_msg);
 
   /*
    * Connected to the readyRead signal of QTcpSocket. Will process the given
@@ -86,7 +88,26 @@ public slots:
   void insert_into_jitter_buffer(MFTP_Header header, QAudioBuffer audio,
                                  QImage video);
 
+signals:
+  /*
+  Emitted when this client is forcibly disconnected from the server.
+  */
+  void client_disconnected();
+
+  /*
+  Emitted whenever anybody sends a chat message.
+  */
+  void chat_message_received(std::string alias, std::string message);
+
+  /*
+  Emitted when the jitter buffer has enough frames to begin playback.
+  */
+  void jitter_buffer_sufficiently_full();
+
 private:
+  // Represents whether this client has begun playback
+  bool begun_playback = false;
+
   /*
   Private method to help set up the signals/slots of the client.
   */

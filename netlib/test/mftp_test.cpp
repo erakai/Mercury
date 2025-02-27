@@ -98,7 +98,10 @@ TEST_F(MftpTest, SendAndProcessBasic)
   auto now = std::chrono::system_clock::now();
   auto elapsed =
       std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
-  printf("Elapsed (1 frame): %lld ms.\n", elapsed.count());
+  std::cout << "\u001b[32m[          ] \u001b[33m"
+            << std::format("Elapsed (1 frame): {} ms", elapsed.count())
+            << "\u001b[0m\n"
+            << std::flush;
 
   // This will vary
   sent_header.fragment_num = received_header.fragment_num;

@@ -1,6 +1,7 @@
 #include "hstp.hpp"
 #include <cstdint>
 #include <cstring>
+#include <sys/_endian.h>
 
 bool HstpHandler::init_msg(const char sender_alias[18])
 {
@@ -206,6 +207,53 @@ HstpHandler::_deserialize(const std::shared_ptr<QByteArray> &buff)
   }
 
   return hdr;
+}
+
+bool HstpHandler::add_option_generic_string(uint8_t type, const char *gen_str)
+{
+  if (get_status() != MSG_STATUS::IN_PROGRESS)
+  {
+    log("Unable to add option, uninitalized message.", ll::ERROR);
+    return false;
+  }
+
+  std::string str(gen_str);
+  if (str.size() > MAX_STRING_SIZE)
+  {
+    str.substr(0, MAX_STRING_SIZE);
+  }
+
+  Option opt;
+  opt.type = type;
+  opt.len = str.length();
+  opt.data = std::shared_ptr<char[]>(new char[opt.len]);
+
+  std::memcpy(opt.data.get(), str.c_str(), opt.len);
+
+  m_hdr->options.push_back(opt);
+
+  return true;
+}
+
+bool HstpHandler::add_option_generic_uint32(uint8_t type, uint32_t uint32)
+{
+  if (get_status() != MSG_STATUS::IN_PROGRESS)
+  {
+    log("Unable to add option, uninitalized message.", ll::ERROR);
+    return false;
+  }
+
+  Option opt;
+  opt.type = 4;
+  opt.len = sizeof(uint32_t);
+  opt.data = std::shared_ptr<char[]>(new char[opt.len]);
+
+  uint32_t net_int = htonl(uint32);
+  std::memcpy(opt.data.get(), &net_int, sizeof(uint32_t));
+
+  m_hdr->options.push_back(opt);
+
+  return true;
 }
 
 void HstpProcessor::process(const QByteArray &chunk)

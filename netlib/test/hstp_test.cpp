@@ -1,9 +1,11 @@
 #include <QtCore/qcontainerfwd.h>
 #include <QtCore/qstringview.h>
 #include <cstddef>
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <hstp.hpp>
 #include <memory>
+#include <sys/types.h>
 
 class HstpHandlerTest : public testing::Test
 {
@@ -127,4 +129,32 @@ TEST_F(HstpHandlerTest, DeserializeTest_BasicFailure)
   EXPECT_EQ(*header1, *deserialized_header1);
   EXPECT_EQ(*header2, *deserialized_header2);
   EXPECT_NE(*deserialized_header1, *deserialized_header2);
+}
+
+TEST_F(HstpHandlerTest, HstpHandler_StreamTitle)
+{
+  HstpHandler handler;
+
+  handler.init_msg("Alex");
+  handler.add_option_stream_title("Epic Stream!");
+  std::shared_ptr<QByteArray> bytes = handler.output_msg();
+
+  const char *c = &bytes->constData()[ALIAS_SIZE + sizeof(uint32_t) + 1];
+
+  EXPECT_STREQ(c, "Epic Stream!");
+}
+
+TEST_F(HstpHandlerTest, HstpHandler_ViewerCount)
+{
+  HstpHandler handler;
+
+  handler.init_msg("Alex");
+  handler.add_option_viewer_count(127);
+  std::shared_ptr<QByteArray> bytes = handler.output_msg();
+
+  uint32_t viewers;
+  std::memcpy(&viewers, bytes->right(4).constData(), sizeof(uint32_t));
+  viewers = qFromBigEndian(viewers);
+
+  EXPECT_EQ(viewers, 127);
 }

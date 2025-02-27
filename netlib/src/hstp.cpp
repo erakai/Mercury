@@ -1,4 +1,5 @@
 #include "hstp.hpp"
+#include <QtCore/qendian.h>
 #include <cstdint>
 #include <cstring>
 #include <sys/_endian.h>
@@ -45,7 +46,7 @@ bool HstpHandler::add_option_establishment(bool is_start, uint16_t port)
   opt.len = 3;
   opt.data = std::shared_ptr<char[]>(new char[opt.len]);
   opt.data[0] = is_start ? 0 : 1;
-  uint16_t network_port = htons(port);
+  uint16_t network_port = qToBigEndian((uint16_t) port);
   std::memcpy(&opt.data[1], &network_port, sizeof(uint16_t));
 
   m_hdr->options.push_back(opt);
@@ -76,7 +77,7 @@ bool HstpHandler::add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
   opt.data = std::shared_ptr<char[]>(new char[opt.len]);
 
   std::memcpy(opt.data.get(), alias_buffer, ALIAS_SIZE);
-  uint32_t net_len_of_msg = htonl(str_chat_msg.length());
+  uint32_t net_len_of_msg = qToBigEndian((uint32_t) str_chat_msg.length());
   std::memcpy(opt.data.get() + ALIAS_SIZE, &net_len_of_msg, sizeof(uint32_t));
   std::memcpy(opt.data.get() + ALIAS_SIZE + sizeof(uint32_t),
               str_chat_msg.c_str(), str_chat_msg.length());
@@ -158,7 +159,7 @@ HstpHandler::_serialize(const std::shared_ptr<HSTP_Header> &hdr)
     size_opts +=
         (2 + opt.len); // 1 bye for type, 1 byte for len, opt.len bytes for data
   }
-  ds << htons(size_opts);
+  ds << qToBigEndian((uint16_t) size_opts);
 
   // write # of options
   uint8_t s = hdr->options.size();
@@ -248,7 +249,7 @@ bool HstpHandler::add_option_generic_uint32(uint8_t type, uint32_t uint32)
   opt.len = sizeof(uint32_t);
   opt.data = std::shared_ptr<char[]>(new char[opt.len]);
 
-  uint32_t net_int = htonl(uint32);
+  uint32_t net_int = qToBigEndian((uint32_t) uint32);
   std::memcpy(opt.data.get(), &net_int, sizeof(uint32_t));
 
   m_hdr->options.push_back(opt);
@@ -270,7 +271,7 @@ void HstpProcessor::process(const QByteArray &chunk)
     quint16 opt_size =
         (static_cast<uchar>(m_hstp_buffer[ALIAS_SIZE - 1 + 1]) << 8) |
         static_cast<uchar>(m_hstp_buffer[ALIAS_SIZE - 1 + 2]);
-    opt_size = ntohs(opt_size);
+    opt_size = qFromBigEndian((uint16_t) opt_size);
 
     if (m_hstp_buffer.size() >= HSTP_HEADER_SIZE + opt_size)
     {
@@ -298,6 +299,12 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
       break;
     case 2: // chat
       handle_chat(hdr_ptr->sender_alias, opt);
+      break;
+    case 3: // stream title
+      handle_stream_title(hdr_ptr->sender_alias, opt);
+      break;
+    case 4: // viewer count
+      handle_viewer_count(hdr_ptr->sender_alias, opt);
       break;
     default:
       handle_default(hdr_ptr->sender_alias, opt);
@@ -355,7 +362,7 @@ void HstpProcessor::handle_establishment(const char alias[18],
 
   uint16_t mftp_port;
   std::memcpy(&mftp_port, &opt.data[1], sizeof(uint16_t));
-  mftp_port = ntohs(mftp_port);
+  mftp_port = qFromBigEndian((uint16_t) mftp_port);
 
   emit received_establishment(alias, is_start, mftp_port);
 }
@@ -374,13 +381,14 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
 
   std::memcpy(&alias_of_chatter, opt.data.get(), sizeof(char) * ALIAS_SIZE);
   std::memcpy(&len_of_message, opt.data.get() + ALIAS_SIZE, sizeof(uint32_t));
+
+  len_of_message = qFromBigEndian((uint32_t) len_of_message);
   if (len_of_message == 0)
   {
+    std::cout << opt << std::endl;
     log("Something went wrong with handling chat message", ll::ERROR);
     return;
   }
-
-  len_of_message = ntohl(len_of_message);
 
   std::string chat_msg(opt.data.get() + ALIAS_SIZE + sizeof(uint32_t));
 
@@ -391,4 +399,37 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
   }
 
   emit received_chat(alias, alias_of_chatter, chat_msg);
+}
+
+void HstpProcessor::handle_string(
+    HANDLER_PARAMS, void (HstpProcessor::*signal)(const char alias[ALIAS_SIZE],
+                                                  const char *str))
+{
+  if (!opt.data || opt.len == 0)
+  {
+    log("Something went wrong with handling a string option...", ll::ERROR);
+    handle_default(alias, opt);
+    return;
+  }
+
+  std::string str(opt.data.get());
+  emit(this->*signal)(alias, str.c_str());
+}
+
+void HstpProcessor::handle_uint32(
+    HANDLER_PARAMS, void (HstpProcessor::*signal)(const char alias[ALIAS_SIZE],
+                                                  uint32_t uint32))
+{
+  if (!opt.data || opt.len == 0)
+  {
+    log("Something went wrong with handling a uint32 option...", ll::ERROR);
+    handle_default(alias, opt);
+    return;
+  }
+
+  uint32_t uint32;
+  std::memcpy(&uint32, opt.data.get(), sizeof(uint32_t));
+  uint32 = qFromBigEndian((uint32_t) uint32);
+
+  emit(this->*signal)(alias, uint32);
 }

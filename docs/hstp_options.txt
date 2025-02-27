@@ -55,8 +55,7 @@ Options
 
   Len: Variable
   Data:
-    - uint32_t len_of_title
-    - char[len_of_title] title
+    - char[len_of_message] title
 
 (ID: 4) Viewer Count
 

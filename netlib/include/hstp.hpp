@@ -9,10 +9,11 @@
 #include <QtCore/qtypes.h>
 #include <QtNetwork/qtcpsocket.h>
 #include <cstdint>
-#include <functional>
 #include <iostream>
 #include <memory>
+#include <sys/_endian.h>
 #include <vector>
+#include <QtEndian>
 
 /*
 Packet formatting.
@@ -204,7 +205,7 @@ signals:
   /*
    * Emits when a (new) viewer count is received.
    */
-  void received_viewer_count(const char *alias[ALIAS_SIZE], uint32_t viewers);
+  void received_viewer_count(const char alias[ALIAS_SIZE], uint32_t viewers);
 
 private:
 #define HANDLER_PARAMS const char alias[ALIAS_SIZE], const Option &opt
@@ -221,10 +222,12 @@ private:
   qint16 process_single_hstp_message(qint16 opt_size);
 
   // generic handlers: used to prevent code duplication:
-  void handle_string(HANDLER_PARAMS, void (HstpProcessor::*signal)());
+  void handle_string(HANDLER_PARAMS,
+                     void (HstpProcessor::*signal)(const char alias[ALIAS_SIZE],
+                                                   const char *str));
   void handle_uint32(HANDLER_PARAMS,
-                     void (*signal_func)(const char alias[ALIAS_SIZE],
-                                         uint32_t uint32));
+                     void (HstpProcessor::*signal)(const char alias[ALIAS_SIZE],
+                                                   uint32_t uint32));
 
   void handle_default(HANDLER_PARAMS);       // n/a
   void handle_echo(HANDLER_PARAMS);          // 0
@@ -232,7 +235,10 @@ private:
   void handle_chat(HANDLER_PARAMS);          // 2
   void handle_stream_title(HANDLER_PARAMS)   // 3
   {
-    handle_string(alias, opt, HstpProcessor::received_stream_title);
-  } // 3
-  void handle_viewer_count(HANDLER_PARAMS); // 4
+    handle_string(alias, opt, &HstpProcessor::received_stream_title);
+  }
+  void handle_viewer_count(HANDLER_PARAMS) // 4
+  {
+    handle_uint32(alias, opt, &HstpProcessor::received_viewer_count);
+  }
 };

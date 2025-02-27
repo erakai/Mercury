@@ -1,6 +1,8 @@
 #include "utils.h"
+#include "configcontrol/mconfig.hpp"
 
 Utils::Utils()
+    : settings("../../config/MercuryClientSettings.ini", QSettings::IniFormat)
 {
   foreach (const QHostAddress &address, QNetworkInterface::allAddresses())
   {
@@ -15,6 +17,5 @@ Utils::Utils()
 
 QString Utils::getDisplayName()
 {
-  // TODO @Kris get alias from your singleton and return
-  return "Hungry Banana";
+  return mercury::get_alias(settings);
 }

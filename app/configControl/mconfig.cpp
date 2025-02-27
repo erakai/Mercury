@@ -64,10 +64,6 @@ void mercury::change_host_settings()
 
   QSettings settings("../../config/MercuryClientSettings.ini",
                      QSettings::IniFormat);
-
-  std::cout << "Stream Resolution: "
-            << settings.value("HostSettings/StreamResolution").toInt()
-            << std::endl;
   settings.setValue("HostSettings/StreamResolution", 1440);
 }
 

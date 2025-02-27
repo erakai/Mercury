@@ -69,10 +69,16 @@ void MercuryServer::close_server()
   }
 
   clients.clear();
-  mftp_sock->close();
-  close();
 
-  log("Server closed.", ll::NOTE);
+  if (isListening() || mftp_sock->isOpen())
+  {
+    mftp_sock->close();
+    close();
+
+    log("Gracefully shutting down...", ll::NOTE);
+    log("Server closed.", ll::NOTE);
+  }
+
   id_counter = 0;
 }
 

@@ -162,8 +162,6 @@ void StreamWindow::closeEvent(QCloseEvent *event)
 
 void StreamWindow::shut_down_window()
 {
-  log("Gracefully shutting down...", ll::NOTE);
-
   if (is_host())
     servh->server->close_server();
 

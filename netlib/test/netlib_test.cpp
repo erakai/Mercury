@@ -76,8 +76,18 @@ TEST_F(NetlibTest, ServerClientBasic)
   ASSERT_TRUE(server.start_server());
   ASSERT_TRUE(client.establish_connection(QHostAddress::LocalHost, server_tcp,
                                           client_udp));
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  app->processEvents(QEventLoop::AllEvents, QDeadlineTimer(100));
+  auto before = std::chrono::system_clock::now();
+  while (server.get_clients().size() != 1 ||
+         !server.get_clients().begin()->second.validated)
+  {
+    auto now = std::chrono::system_clock::now();
+    auto elapsed =
+        std::chrono::duration_cast<std::chrono::milliseconds>(now - before);
+
+    app->processEvents(QEventLoop::AllEvents, QDeadlineTimer(100));
+
+    ASSERT_LE(elapsed.count(), 1000);
+  }
   ASSERT_EQ(server.get_clients().size(), 1);
 
   // Test validation
@@ -95,7 +105,17 @@ TEST_F(NetlibTest, ServerClientBasic)
 
   // Need to also test sending a bunch of frames out of order (in a different
   // test case) to make sure client reorders them
+
+  auto before_send = std::chrono::system_clock::now();
   ASSERT_EQ(server.send_frame("test", audio, video_frame), 1);
+  auto after_send = std::chrono::system_clock::now();
+  auto send_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+      after_send - before_send);
+  std::cout << "\u001b[32m[          ] \u001b[33m"
+            << std::format("Elapsed (Sending 1 frame): {} ms",
+                           send_time.count())
+            << "\u001b[0m\n"
+            << std::flush;
 
   // Wait until full frame arrives
   auto start = std::chrono::system_clock::now();
@@ -116,7 +136,8 @@ TEST_F(NetlibTest, ServerClientBasic)
   auto elapsed =
       std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
   std::cout << "\u001b[32m[          ] \u001b[33m"
-            << std::format("Elapsed (1 frame): {} ms", elapsed.count())
+            << std::format("Elapsed (Receiving 1 frame): {} ms",
+                           elapsed.count())
             << "\u001b[0m\n"
             << std::flush;
 

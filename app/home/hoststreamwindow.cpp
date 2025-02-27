@@ -9,6 +9,7 @@
 #include <QHostAddress>
 #include <QLabel>
 #include <QNetworkInterface>
+#include <QDebug>
 
 HostStreamWindow::HostStreamWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::HostStreamWindow)
@@ -18,25 +19,18 @@ HostStreamWindow::HostStreamWindow(QWidget *parent)
   ui->setupUi(this);
 
   QString ip = Utils::instance().getIpAddress();
-  ui->ip_address_button->setText(ip);
+  ui->ipAddressButton->setText(ip);
+
+  // Default ports (should be moved to settings)
+  ui->tcpPortLineEdit->setText("54332");
+  ui->udpPortLineEdit->setText("34332");
+
+  ui->streamNameLineEdit->setFocus();
 }
 
 HostStreamWindow::~HostStreamWindow()
 {
   delete ui;
-}
-
-void HostStreamWindow::on_pushButton_clicked()
-{
-  this->close();
-}
-
-void HostStreamWindow::on_ip_address_button_clicked()
-{
-  // Copy IP address to clipboard
-  QApplication::clipboard()->setText(Utils::instance().getIpAddress());
-
-  ToastNotification::showToast(this, "Copied IP address to clipboard!", 1500);
 }
 
 void HostStreamWindow::on_hostButton_clicked()
@@ -52,6 +46,19 @@ void HostStreamWindow::on_hostButton_clicked()
           &HostStreamWindow::open_stream_window);
 }
 
+void HostStreamWindow::on_ipAddressButton_clicked()
+{
+  // Copy IP address to clipboard
+  QApplication::clipboard()->setText(Utils::instance().getIpAddress());
+
+  ToastNotification::showToast(this, "Copied IP address to clipboard!", 1500);
+}
+
+void HostStreamWindow::on_cancelButton_clicked()
+{
+  this->close();
+}
+
 void HostStreamWindow::open_stream_window()
 {
   delete (spw);
@@ -59,10 +66,12 @@ void HostStreamWindow::open_stream_window()
   if (!VideoManager::instance().mediaCaptureIsSet())
     return;
 
-  std::string alias = ui->lineEdit_2->text().toStdString();
+  std::string alias = ui->displayNameLineEdit->text().toStdString();
+  quint16 tcpPort = ui->tcpPortLineEdit->text().toUShort();
+  quint16 udpPort = ui->udpPortLineEdit->text().toUShort();
 
   std::shared_ptr<HostService> serv =
-      std::make_shared<HostService>(alias, 23333, 32222);
+      std::make_shared<HostService>(alias, tcpPort, udpPort);
   serv->stream_name = ui->streamNameLineEdit->text().toStdString();
   serv->server->start_server();
   // This sets itself to delete on close, so no memory leak (I think)

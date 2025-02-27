@@ -71,7 +71,10 @@ bool MercuryClient::disconnect()
   if (m_mftp_sock->isOpen())
     m_mftp_sock->close();
   if (m_hstp_sock->isOpen())
+  {
+    log("Gracefully shutting down...", ll::NOTE);
     m_hstp_sock->close();
+  }
   return true;
 }
 

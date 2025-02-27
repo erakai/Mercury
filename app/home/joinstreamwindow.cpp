@@ -3,11 +3,19 @@
 #include "stream/streamwindow.hpp"
 #include "home/toastnotification.h"
 #include "ui_joinstreamwindow.h"
+#include "toastnotification.h"
+#include "utils.h"
+
+#include <QDebug>
 
 JoinStreamWindow::JoinStreamWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::JoinStreamWindow)
 {
   ui->setupUi(this);
+
+  // Default ports (should move this to settings)
+  ui->hostTcpPortLineEdit->setText("54332");
+  ui->clientUdpPortLineEdit->setText("34342");
 }
 
 JoinStreamWindow::~JoinStreamWindow()
@@ -26,9 +34,11 @@ void JoinStreamWindow::on_joinButton_clicked()
   std::string server_address = ui->ipAddressTextEdit->text().toStdString();
   QHostAddress address(server_address.c_str());
 
+  quint16 hostTcpPort = ui->hostTcpPortLineEdit->text().toUShort();
+  quint16 clientUdpPort = ui->clientUdpPortLineEdit->text().toUShort();
   std::shared_ptr<ClientService> serv = std::make_shared<ClientService>(alias);
 
-  if (!serv->client->establish_connection(address, 23333, 48484))
+  if (!serv->client->establish_connection(address, hostTcpPort, clientUdpPort))
   {
     ToastNotification::showToast(this, "No server could be found on that IP.",
                                  4000);

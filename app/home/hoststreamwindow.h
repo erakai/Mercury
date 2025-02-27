@@ -18,11 +18,11 @@ public:
   ~HostStreamWindow();
 
 private slots:
-  void on_pushButton_clicked();
-  void on_ip_address_button_clicked();
   void on_hostButton_clicked();
 
   void open_stream_window();
+  void on_ipAddressButton_clicked();
+  void on_cancelButton_clicked();
 
 private:
   Ui::HostStreamWindow *ui;

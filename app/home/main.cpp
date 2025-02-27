@@ -1,5 +1,5 @@
 #include "mainwindow.hpp"
-#include "configcontrol/mconfig.hpp"
+#include "config/mconfig.hpp"
 
 #include <QApplication>
 #include <iostream>

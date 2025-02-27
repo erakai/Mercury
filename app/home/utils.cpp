@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "configcontrol/mconfig.hpp"
+#include "config/mconfig.hpp"
 
 Utils::Utils()
     : settings("../../config/MercuryClientSettings.ini", QSettings::IniFormat)

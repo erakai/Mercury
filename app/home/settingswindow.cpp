@@ -1,7 +1,7 @@
 #include "settingswindow.h"
 #include "toastnotification.h"
 #include "ui_settingswindow.h"
-#include "configcontrol/mconfig.hpp"
+#include "config/mconfig.hpp"
 
 #include <QDebug>
 #include <QSettings>

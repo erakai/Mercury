@@ -12,7 +12,6 @@ JoinStreamWindow::JoinStreamWindow(QWidget *parent)
 
 JoinStreamWindow::~JoinStreamWindow()
 {
-  qDebug() << "join stream window destructor was called";
   delete ui;
 }
 

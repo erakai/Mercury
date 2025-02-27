@@ -11,12 +11,12 @@
 #include <deque>
 #include <memory>
 
-#define MINIMUM_FRAME_COUNT_FOR_PLAYBACK 5
+#define MINIMUM_FRAME_COUNT_FOR_PLAYBACK 1
 
 struct JitterEntry
 {
-  uint16_t seq_num;
-  uint32_t timestamp;
+  int16_t seq_num;
+  int32_t timestamp;
   QImage video;
   QAudioBuffer audio;
 };

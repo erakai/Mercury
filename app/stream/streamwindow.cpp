@@ -142,6 +142,7 @@ void StreamWindow::initialize_primary_ui_widgets()
 
 void StreamWindow::stream_fully_initialized()
 {
+  log("Beginning stream playback.", ll::NOTE);
   stream_display->begin_playback();
 }
 
@@ -162,19 +163,39 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
   {
     // acquire video frame from desktop
 
+    QPixmap video = QGuiApplication::primaryScreen()->grabWindow(0);
+    QImage sent_image = video.toImage();
+
+    if (sent_image.isNull())
+      return false;
+
+    servh->server->send_frame("desktop", QAudioBuffer(),
+                              QVideoFrame(sent_image));
+    next_video = sent_image;
+
+    /*
     // Placeholder:
     if (!next_video.load("assets/iamcomingtokillyou.jpg", "JPG"))
     {
       log("failed to load picture", ll::ERROR);
       return false;
     };
+    */
     return true;
   }
   else
   {
     // acquire video frame from jitter buffer
     JitterEntry jitter = servc->client->retrieve_next_frame();
+
+    if (jitter.seq_num == -1)
+    {
+      log("Invalid video frame returned.", ll::ERROR);
+      return false;
+    }
+
     next_video = jitter.video;
+    return true;
   }
 
   return false;

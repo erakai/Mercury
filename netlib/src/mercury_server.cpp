@@ -184,7 +184,7 @@ void MercuryServer::disconnect_client(int id)
   if (client.validated)
   {
     emit client_disconnected(id, std::string(client.alias));
-    log("Client %s has disconnected.", client.alias, ll::NOTE);
+    log("Client \"%s\" has disconnected.", client.alias, ll::NOTE);
   }
 }
 

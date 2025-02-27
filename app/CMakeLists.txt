@@ -21,11 +21,19 @@ qt_add_executable(mercury
   streampreview/screenlistmodel.h streampreview/screenlistmodel.cpp
   streampreview/windowlistmodel.h streampreview/windowlistmodel.cpp
   streampreview/audioinputlistmodel.h streampreview/audioinputlistmodel.cpp
+
+  singleton/videomanager.h singleton/videomanager.cpp
 )
 
 # Qt set up
 target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets)
 # Curl set up
+
+# so leo can build this shit for now
+if(WIN32)
+set(CURL_ROOT "C:/Program Files/curl")
+endif()
+
 find_package(CURL REQUIRED)
 target_link_libraries(mercury PRIVATE CURL::libcurl)
 

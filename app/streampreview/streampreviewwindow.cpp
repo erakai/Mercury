@@ -5,6 +5,7 @@
 #include "screenlistmodel.h"
 #include "windowlistmodel.h"
 #include "audioinputlistmodel.h"
+#include "../singleton/videomanager.h"
 
 #include <QMediaCaptureSession>
 #include <QScreenCapture>
@@ -61,6 +62,8 @@ StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
 
   captureWindowAudioButton->setText(tr("Capture audio for this source"));
   captureWindowAudioButton->setChecked(true);
+
+  startStopButton->setText(tr("Start Stream"));
 
   gridLayout->addWidget(screenLabel, 0, 0);
   gridLayout->addWidget(screenListView, 1, 0);
@@ -185,22 +188,8 @@ void StreamPreviewWindow::onScreenCaptureErrorChanged()
 
 void StreamPreviewWindow::onStartStopButtonClicked()
 {
-  updateActive(sourceType, !isActive());
-}
-
-void StreamPreviewWindow::updateStartStopButtonText()
-{
-  switch (sourceType)
-  {
-  case SourceType::Window:
-    startStopButton->setText(isActive() ? tr("Stop window capture")
-                                        : tr("Start window capture"));
-    break;
-  case SourceType::Screen:
-    startStopButton->setText(isActive() ? tr("Stop screen capture")
-                                        : tr("Start screen capture"));
-    break;
-  }
+  VideoManager::instance().setMediaCaptureSession(*mediaCaptureSession);
+  close();
 }
 
 void StreamPreviewWindow::updateActive(SourceType sourceType, bool active)
@@ -209,8 +198,6 @@ void StreamPreviewWindow::updateActive(SourceType sourceType, bool active)
 
   screenCapture->setActive(active && sourceType == SourceType::Screen);
   windowCapture->setActive(active && sourceType == SourceType::Window);
-
-  updateStartStopButtonText();
 }
 
 bool StreamPreviewWindow::isActive() const

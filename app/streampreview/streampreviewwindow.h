@@ -52,7 +52,6 @@ private:
   };
 
   void updateActive(SourceType sourceType, bool active);
-  void updateStartStopButtonText();
   bool isActive() const;
 
 private:

@@ -1,6 +1,7 @@
 #include "mainwindow.hpp"
 #include "mnet.hpp"
 #include "../configControl/mconfig.hpp"
+#include "../streampreview/streampreviewwindow.h"
 
 #include <QApplication>
 #include <iostream>
@@ -15,6 +16,9 @@ int main(int argc, char **argv)
 
   MainWindow w;
   w.show();
+
+  StreamPreviewWindow spw;
+  spw.show();
 
   if (!(mercury::check_config_file_presence()))
   {

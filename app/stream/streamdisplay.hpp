@@ -1,8 +1,11 @@
 #pragma once
 
 #include <QAudioBuffer>
+#include <QAudioFormat>
 #include <QAudioOutput>
+#include <QAudioSink>
 #include <QBuffer>
+#include <QFile>
 #include <QMediaPlayer>
 #include <QPainter>
 #include <QTimer>
@@ -10,7 +13,10 @@
 #include <QVideoSink>
 #include <QVideoWidget>
 #include <QWidget>
+#include <QtMultimedia/qaudiooutput.h>
+#include <QtMultimedia/qmediaplayer.h>
 #include <functional>
+#include <logger.hpp>
 
 using namespace std;
 
@@ -24,7 +30,7 @@ class StreamDisplay : public QWidget
 
 public:
   StreamDisplay(QWidget *parent, function<bool(QImage &)> get_next_video_frame,
-                function<bool(QAudioBuffer &)> get_next_audio_frame);
+                function<bool(QBuffer &)> get_next_audio_frame);
 
   // Begins drawing and requesting frames
   void begin_playback();
@@ -40,16 +46,17 @@ private:
 
   // methods to ensure we know what to next display
   function<bool(QImage &)> get_next_video_frame;
-  function<bool(QAudioBuffer &)> get_next_audio_frame;
+  function<bool(QBuffer &)> get_next_audio_frame;
   QImage next_video_image;
-  QAudioBuffer next_audio_frame;
+  QBuffer next_audio_frame;
 
   // I think that audio will have to somehow be written to a QIODevice that a
   // QMediaPlayer reads from.
   // https://stackoverflow.com/questions/35365600/play-a-qaudiobuffer
   // https://stackoverflow.com/questions/4473608/how-to-play-sound-with-qt
-  QMediaPlayer *audio_player;
   QBuffer *audio_buffer;
+  QAudioSink *audio_sink;
+  QFile sourceFile;
 
   QMediaPlayer *video_player;
   QVideoWidget *video_widget;

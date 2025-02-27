@@ -43,15 +43,13 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   video_widget->setMinimumHeight(720);
 
   video_widget->show();
-
-  begin_playback();
 }
 
 void StreamDisplay::begin_playback()
 {
   video_player->play();
 
-  fps_timer->start(1000 / 30.0);
+  fps_timer->start(1000 / FPS);
 }
 
 void StreamDisplay::acquire_next_frame()
@@ -70,7 +68,7 @@ void StreamDisplay::acquire_next_frame()
     }
     else
     {
-      log("Invalid Frame", ll::ERROR);
+      log("Invalid VideoFrame received.", ll::ERROR);
     }
   }
 }

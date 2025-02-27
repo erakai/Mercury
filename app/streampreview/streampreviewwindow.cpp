@@ -36,6 +36,8 @@ StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
       videoWidgetLabel(new QLabel(tr("Capture output:"), this)),
       captureWindowAudioButton(new QCheckBox(this))
 {
+  setAttribute(Qt::WA_DeleteOnClose, false);
+
   // Get lists of screens and windows:
   screenListModel = new ScreenListModel(this);
   windowListModel = new WindowListModel(this);
@@ -105,12 +107,19 @@ StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
 
 StreamPreviewWindow::~StreamPreviewWindow() = default;
 
+void StreamPreviewWindow::closeEvent(QCloseEvent *event)
+{
+  emit closed();
+  QWidget::closeEvent(event);
+}
+
 void StreamPreviewWindow::onCurrentScreenSelectionChanged(
     QItemSelection selection)
 {
   if (auto indexes = selection.indexes(); !indexes.empty())
   {
     screenCapture->setScreen(screenListModel->screen(indexes.front()));
+    windowCapture->setWindow(QCapturableWindow());
     updateActive(SourceType::Screen, isActive());
 
     windowListView->clearSelection();
@@ -143,6 +152,7 @@ void StreamPreviewWindow::onCurrentWindowSelectionChanged(
     }
 
     windowCapture->setWindow(window);
+    screenCapture->setScreen(nullptr);
     updateActive(SourceType::Window, isActive());
 
     screenListView->clearSelection();

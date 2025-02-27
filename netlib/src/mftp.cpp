@@ -37,7 +37,7 @@ bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
   if (!video_image.save(&video_buffer, "JPG"))
   {
     log("Unable to serialize QImage.", ll::ERROR);
-    return -1;
+    return false;
   }
   video_buffer.close();
 
@@ -180,7 +180,7 @@ bool MFTPProcessor::process_datagram(QNetworkDatagram datagram)
       curr_frame.datagrams[header.fragment_num] = data;
       return true;
     }
-    else if (curr_frame.remaining_fragments == -1)
+    else if (curr_frame.remaining_fragments == -1 && first_free_frame == -1)
     {
       first_free_frame = i;
     }
@@ -195,14 +195,21 @@ bool MFTPProcessor::process_datagram(QNetworkDatagram datagram)
   if (first_free_frame == -1)
   {
     // Case: new frame and we don't have space
-    log("Dropping partial frame (had %d remaining fragments out of %d).",
-        partial_frames[0].remaining_fragments,
-        partial_frames[0].header.total_fragments, ll::WARNING);
+    log("Dropping partial frame %d (had %d remaining fragments out of %d) in "
+        "exchange for new frame %d.",
+        partial_frames[0].header.seq_num, partial_frames[0].remaining_fragments,
+        partial_frames[0].header.total_fragments, new_frame.header.seq_num,
+        ll::WARNING);
     first_free_frame = 0;
   }
 
   // Case: new frame and we have space
-  partial_frames[first_free_frame] = new_frame;
+  for (int i = first_free_frame; i < MAX_FRAMES_TO_REASSEMBLE - 1; i++)
+  {
+    partial_frames[i] = partial_frames[i + 1];
+  }
+  partial_frames[MAX_FRAMES_TO_REASSEMBLE - 1] = new_frame;
+
   return true;
 }
 
@@ -250,6 +257,22 @@ void MFTPProcessor::fix_partial_frame_array()
 
   for (int i = write_index; i < MAX_FRAMES_TO_REASSEMBLE; i++)
     partial_frames[i] = PartialFrame();
+}
+
+void MFTPProcessor::print_partial_frame_array()
+{
+  std::string to_log("Partial Frame Array: ");
+  for (int i = 0; i < MAX_FRAMES_TO_REASSEMBLE; i++)
+  {
+    PartialFrame f = partial_frames[i];
+    if (f.header.seq_num == 0)
+      to_log += ("0 ");
+    else
+      to_log += std::format("{}({}/{}) ", f.header.seq_num,
+                            f.header.total_fragments - f.remaining_fragments,
+                            f.header.total_fragments);
+  }
+  log(to_log.c_str(), ll::NOTE);
 }
 
 void print_header(MFTP_Header header)

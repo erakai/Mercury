@@ -69,10 +69,16 @@ void MercuryServer::close_server()
   }
 
   clients.clear();
-  mftp_sock->close();
-  close();
 
-  log("Server closed.", ll::NOTE);
+  if (isListening() || mftp_sock->isOpen())
+  {
+    mftp_sock->close();
+    close();
+
+    log("Gracefully shutting down...", ll::NOTE);
+    log("Server closed.", ll::NOTE);
+  }
+
   id_counter = 0;
 }
 
@@ -147,6 +153,7 @@ void MercuryServer::validate_client(int id, bool is_start, std::string alias,
   new_client.validated = true;
   new_client.mftp_port = mftp_port;
   strcpy(new_client.alias, alias.c_str());
+  log("Client \"%s\" has connected.", new_client.alias, ll::NOTE);
 
   // Connect relevant signals to slots
   connect(new_client.processor.get(), &HstpProcessor::received_chat, this,
@@ -184,7 +191,7 @@ void MercuryServer::disconnect_client(int id)
   if (client.validated)
   {
     emit client_disconnected(id, std::string(client.alias));
-    log("Client %s has disconnected.", client.alias, ll::NOTE);
+    log("Client \"%s\" has disconnected.", client.alias, ll::NOTE);
   }
 }
 

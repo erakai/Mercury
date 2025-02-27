@@ -30,5 +30,8 @@ public:
 
   void new_chat_message(ChatMessage msg);
 
+signals:
+  void send_chat_message(std::string message);
+
 private:
 };

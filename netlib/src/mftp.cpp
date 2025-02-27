@@ -5,17 +5,23 @@ std::shared_ptr<QUdpSocket> acquire_mftp_socket(int port)
 {
   std::shared_ptr<QUdpSocket> sock = std::make_shared<QUdpSocket>();
 
+  acquire_mftp_socket(sock, port);
+
+  return sock;
+}
+
+void acquire_mftp_socket(std::shared_ptr<QUdpSocket> sock, int port)
+{
   // Bind socket to target port on this machine
   if (!sock->bind(QHostAddress::Any, port))
   {
     log("Unable to bind MFTP socket.", ll::ERROR);
-    return nullptr;
   }
-
-  log("MFTP Socket created and bound on %s and port %d.",
-      sock->localAddress().toString().toStdString().c_str(), port, ll::NOTE);
-
-  return sock;
+  else
+  {
+    log("MFTP Socket created and bound on %s and port %d.",
+        sock->localAddress().toString().toStdString().c_str(), port, ll::NOTE);
+  }
 }
 
 bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
@@ -130,7 +136,7 @@ bool MFTPProcessor::process_datagram(QNetworkDatagram datagram)
   QByteArray data = datagram.data();
   MFTP_Header header = {0};
 
-  if (data.size() < sizeof(MFTP_Header))
+  if (data.size() < size_of_mftp_header())
   {
     log("Invalid datagram received - only %d bytes.", data.size(), ll::WARNING);
     return false;

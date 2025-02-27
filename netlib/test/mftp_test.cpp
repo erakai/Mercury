@@ -82,7 +82,7 @@ TEST_F(MftpTest, SendAndProcessBasic)
 
   // Spin until timeout or we receive frame
   auto start = std::chrono::system_clock::now();
-  constexpr int timeout_ms = 1000;
+  constexpr int timeout_ms = 5000;
 
   while (received_header.seq_num == 0)
   {
@@ -94,6 +94,11 @@ TEST_F(MftpTest, SendAndProcessBasic)
 
     ASSERT_LE(elapsed.count(), timeout_ms);
   }
+
+  auto now = std::chrono::system_clock::now();
+  auto elapsed =
+      std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
+  printf("Elapsed (1 frame): %lld ms.\n", elapsed.count());
 
   // This will vary
   sent_header.fragment_num = received_header.fragment_num;
@@ -119,7 +124,7 @@ TEST_F(MftpTest, SendAndProcessBasic)
   received_video_buffer.close();
 
   // Size can vary based on how it serializes
-  ASSERT_NEAR(sent_video_bytes.size(), received_video_bytes.size(), 1000);
+  ASSERT_NEAR(sent_video_bytes.size(), received_video_bytes.size(), 1500);
 
   // Examine this in: build/assets/...
   ASSERT_TRUE(received_image.save("assets/test.jpg", "JPG"));

@@ -33,7 +33,8 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
 
   m_hstp_sock->connectToHost(host, hstp_port);
 
-  m_mftp_sock = acquire_mftp_socket(mftp_port);
+  acquire_mftp_socket(m_mftp_sock, mftp_port);
+
   if (!m_mftp_sock || !m_mftp_sock->isValid())
   {
     log("Failed to acquire valid mftp socket", ll::ERROR);
@@ -103,8 +104,8 @@ void MercuryClient::connect_signals_and_slots()
   connect(m_hstp_sock.get(), &QTcpSocket::readyRead, this,
           &MercuryClient::process_received_hstp_messages);
 
-  connect(m_mftp_sock.get(), &QUdpSocket::readyRead, this, [=, this]()
-          { m_mftp_processor->process_ready_datagrams(m_mftp_sock); });
+  connect(m_mftp_sock.get(), &QUdpSocket::readyRead, this,
+          [&]() { m_mftp_processor->process_ready_datagrams(m_mftp_sock); });
 
   connect(m_mftp_processor.get(), &MFTPProcessor::frame_ready, this,
           &MercuryClient::insert_into_jitter_buffer);

@@ -65,6 +65,7 @@ void MercuryServer::close_server()
   {
     int id = it->first;
     force_disconnect_client(id);
+    it = clients.begin();
   }
 
   clients.clear();
@@ -139,7 +140,7 @@ void MercuryServer::add_new_client()
 void MercuryServer::validate_client(int id, bool is_start, std::string alias,
                                     int mftp_port)
 {
-  Client new_client = clients[id];
+  Client &new_client = clients[id];
 
   // TODO: VERIFY PASSWORD HERE (ADD EXTRA PARAMETER)
 
@@ -163,7 +164,7 @@ void MercuryServer::validate_client(int id, bool is_start, std::string alias,
 void MercuryServer::force_disconnect_client(int id)
 {
   // Inform the client that they have been disconnected
-  Client client = clients[id];
+  Client &client = clients[id];
   client.handler.init_msg(host_alias.c_str());
   client.handler.add_option_establishment(false, 0);
   client.hstp_sock->write(*(client.handler.output_msg()));

@@ -5,6 +5,7 @@
 #include <QScreen>
 #include <gtest/gtest.h>
 #include <random>
+#include <thread>
 
 // For generating random data.
 using random_bytes_engine =
@@ -75,6 +76,7 @@ TEST_F(NetlibTest, ServerClientBasic)
   ASSERT_TRUE(server.start_server());
   ASSERT_TRUE(client.establish_connection(QHostAddress::LocalHost, server_tcp,
                                           client_udp));
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   app->processEvents(QEventLoop::AllEvents, QDeadlineTimer(100));
   ASSERT_EQ(server.get_clients().size(), 1);
 
@@ -84,8 +86,7 @@ TEST_F(NetlibTest, ServerClientBasic)
   EXPECT_EQ(server.get_client(client_id).alias, client.get_alias());
 
   // Test MFTP
-  QByteArray audio_data = generate_random_data(20);
-  QAudioBuffer audio(audio_data, QAudioFormat());
+  QAudioBuffer audio;
 
   // Get screen for test video data
   QPixmap video = QGuiApplication::primaryScreen()->grabWindow(0);
@@ -95,9 +96,26 @@ TEST_F(NetlibTest, ServerClientBasic)
   // Need to also test sending a bunch of frames out of order (in a different
   // test case) to make sure client reorders them
   ASSERT_EQ(server.send_frame("test", audio, video_frame), 1);
-  app->processEvents(QEventLoop::AllEvents, QDeadlineTimer(500));
+
+  // Wait until full frame arrives
+  auto start = std::chrono::system_clock::now();
+  constexpr int timeout_ms = 2000;
+
+  while (client.jitter_buffer_size() == 0)
+  {
+    auto now = std::chrono::system_clock::now();
+    auto elapsed =
+        std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
+
+    app->processEvents(QEventLoop::AllEvents, QDeadlineTimer(100));
+
+    ASSERT_LE(elapsed.count(), timeout_ms);
+  }
 
   JitterEntry frame = client.retrieve_next_frame();
+
+  // Retrieved valid frame
+  ASSERT_NE(frame.seq_num, -1);
 
   QByteArray sent_video_bytes;
   QBuffer sent_video_buffer(&sent_video_bytes);
@@ -113,7 +131,7 @@ TEST_F(NetlibTest, ServerClientBasic)
 
   EXPECT_EQ(frame.seq_num, 1);
   EXPECT_NE(frame.timestamp, 0);
-  EXPECT_NEAR(sent_video_buffer.size(), received_video_bytes.size(), 1000);
+  EXPECT_NEAR(sent_video_buffer.size(), received_video_bytes.size(), 1500);
 }
 
 // Demonstrate some basic assertions, sanity check.

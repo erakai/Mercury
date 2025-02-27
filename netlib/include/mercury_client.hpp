@@ -50,6 +50,8 @@ public:
 
   std::string get_alias() { return m_alias; }
 
+  int jitter_buffer_size() { return m_jitter_buffer.size(); }
+
 public slots:
   /*
    * Connects to the given host address and port via both UDP/TCP. Slot allows

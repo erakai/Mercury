@@ -80,6 +80,7 @@ General usage.
 */
 
 std::shared_ptr<QUdpSocket> acquire_mftp_socket(int port);
+void acquire_mftp_socket(std::shared_ptr<QUdpSocket>, int port);
 void print_header(MFTP_Header header);
 int size_of_mftp_header();
 

@@ -32,7 +32,7 @@ struct Client
   std::shared_ptr<QTcpSocket> hstp_sock;
 
   // Keeps track of the sequence number of the protocol.
-  uint32_t frame_seq_num = 0;
+  uint32_t frame_seq_num = 1;
 };
 
 class MercuryServer : public QTcpServer

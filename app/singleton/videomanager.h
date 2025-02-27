@@ -59,7 +59,11 @@ private:
   }
 
   // Destructor (can be defaulted or customized)
-  ~VideoManager() = default;
+  ~VideoManager()
+  {
+    if (m_captureSession)
+      delete (m_captureSession);
+  }
 
   // Delete copy constructor and assignment operator to prevent copies.
   VideoManager(const VideoManager &) = delete;

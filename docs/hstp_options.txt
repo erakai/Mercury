@@ -49,3 +49,21 @@ Options
     - uint32_t len_of_message
     - char[len_of_message] message
 
+(ID: 3) Stream Title
+
+  Represents a message containing the (new) stream title.
+
+  Len: Variable
+  Data:
+    - char[len_of_message] title
+
+(ID: 4) Viewer Count
+
+  Represents a message containing the (updated) viewer count.
+
+  Len: sizeof(uint32_t) = 4
+  Data:
+    - uint32_t viewers
+
+
+

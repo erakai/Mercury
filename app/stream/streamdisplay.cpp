@@ -30,7 +30,7 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   audio_sink = new QAudioSink(format, this);
   sourceFile.setFileName("assets/fart.raw");
   sourceFile.open(QIODevice::ReadOnly);
-  // audio_sink->start(&sourceFile);
+  audio_sink->start(&sourceFile);
   // AUDIO TESTING END ====
 
   video_player = new QMediaPlayer(this);

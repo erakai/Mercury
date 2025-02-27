@@ -9,6 +9,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QMainWindow>
+#include <QtWidgets/qwidget.h>
 
 using namespace std;
 
@@ -34,6 +35,8 @@ public:
   bool provide_next_video_frame(QImage &next_video);
   bool provide_next_audio_frame(QBuffer &next_audio);
 
+  void closeEvent(QCloseEvent *event) override;
+
 public slots:
   // This should be connected to a signal from either MercuryClient (if this is
   // a client stream) that signals it has received enough information to fill
@@ -44,6 +47,9 @@ public slots:
 
   // Called to close the stream (if hosting) or leave (if client)
   void shut_down_window();
+
+  // Sends a chat message out
+  void send_chat_message(string message);
 
   // These are generic update slots that should be connected to a signal either
   // in the client or server
@@ -91,6 +97,6 @@ private:
   // Only one of these will not be null - check mode first
   // These contain all specific data to being a host/client (networking, viewer
   // count, stream name, etc)
-  const shared_ptr<HostService> host = nullptr;
-  const shared_ptr<ClientService> client = nullptr;
+  const shared_ptr<HostService> servh = nullptr;
+  const shared_ptr<ClientService> servc = nullptr;
 };

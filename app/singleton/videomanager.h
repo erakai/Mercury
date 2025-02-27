@@ -26,6 +26,7 @@ public:
 
   void setMediaCaptureSession(QMediaCaptureSession &session);
   VideoImageStatus GetVideoImage(QImage &image);
+  bool mediaCaptureIsSet() { return m_captureSession != nullptr; }
 
 private:
   QMediaCaptureSession *m_captureSession;

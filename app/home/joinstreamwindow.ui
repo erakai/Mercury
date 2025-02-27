@@ -94,7 +94,7 @@ QDialog#JoinStreamWindow {
          <item>
           <widget class="QLabel" name="ipAddressLabel">
            <property name="text">
-            <string>IP Address:</string>
+            <string>Host IP Address:</string>
            </property>
           </widget>
          </item>

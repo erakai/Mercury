@@ -16,21 +16,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
 void MainWindow::on_settingsButton_clicked()
 {
-  SettingsWindow settingsWindow(this);
-  settingsWindow.setModal(true);
-  settingsWindow.exec();
+  SettingsWindow *settingsWindow = new SettingsWindow(this);
+  settingsWindow->setModal(true);
+  settingsWindow->setAttribute(Qt::WA_DeleteOnClose);
+  settingsWindow->open();
 }
 
 void MainWindow::on_hostButton_clicked()
 {
-  HostStreamWindow hostStreamWindow(this);
-  hostStreamWindow.setModal(true);
-  hostStreamWindow.exec();
+  HostStreamWindow *hostStreamWindow = new HostStreamWindow(this);
+  hostStreamWindow->setModal(false);
+  hostStreamWindow->setAttribute(Qt::WA_DeleteOnClose);
+  hostStreamWindow->open();
 }
 
 void MainWindow::on_joinButton_clicked()
 {
-  JoinStreamWindow joinStreamWindow(this);
-  joinStreamWindow.setModal(true);
-  joinStreamWindow.exec();
+  JoinStreamWindow *joinStreamWindow = new JoinStreamWindow(this);
+  joinStreamWindow->setModal(true);
+  joinStreamWindow->setAttribute(Qt::WA_DeleteOnClose);
+  joinStreamWindow->open();
 }

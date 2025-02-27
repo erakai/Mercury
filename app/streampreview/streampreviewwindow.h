@@ -36,6 +36,9 @@ public:
   explicit StreamPreviewWindow(QWidget *parent = nullptr);
   ~StreamPreviewWindow() override;
 
+protected:
+  void closeEvent(QCloseEvent *event) override;
+
 private slots:
   void onCurrentScreenSelectionChanged(QItemSelection index);
   void onCurrentWindowSelectionChanged(QItemSelection index);
@@ -43,6 +46,9 @@ private slots:
   void onWindowCaptureErrorChanged();
   void onScreenCaptureErrorChanged();
   void onStartStopButtonClicked();
+
+signals:
+  void closed();
 
 private:
   enum class SourceType

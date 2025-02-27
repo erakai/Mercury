@@ -22,7 +22,7 @@ using namespace std;
 
 // TODO: This should instead be pulled from the settings somehow - Kris
 // responsibility
-constexpr int FPS = 30;
+constexpr int FPS = 5;
 
 class StreamDisplay : public QWidget
 {

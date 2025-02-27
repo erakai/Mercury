@@ -43,6 +43,11 @@ public:
   MercuryServer(std::string alias) : host_alias(alias) {}
   MercuryServer(std::string alias, int tcp_port, int udp_port)
       : host_alias(alias), tcp_port(tcp_port), udp_port(udp_port) {};
+  MercuryServer(MercuryServer &server)
+      : host_alias(server.host_alias), tcp_port(server.tcp_port),
+        udp_port(server.udp_port)
+  {
+  }
 
   /*
     Starts the server on the given port, meaning it will accept inbound

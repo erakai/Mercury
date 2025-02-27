@@ -13,9 +13,6 @@
 
 constexpr uint8_t MFTP_VERSION = 1;
 
-extern QByteArray original_array;
-extern QByteArray new_array;
-
 /*
 Packet formatting. Note modifying this header rquires updating the
 process_datagram implementation as well, or everything breaks.
@@ -73,6 +70,8 @@ private:
   bool process_datagram(QNetworkDatagram datagram);
   void release_complete_frame(int index);
   void fix_partial_frame_array();
+
+  void print_partial_frame_array();
 };
 
 /*

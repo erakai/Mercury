@@ -1,16 +1,17 @@
 #include "streamwindow.hpp"
 #include "hosttoolbar.hpp"
 #include "logger.hpp"
+#include "singleton/videomanager.h"
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
 #include <QtDebug>
-#include <QtMultimedia/qaudiosink.h>
+#include <QAudioSink>
 
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
                            QWidget *parent)
     : QMainWindow(parent), mode(MercuryMode::HOST), alias(alias),
-      host(host_data)
+      servh(host_data)
 {
   set_up();
 }
@@ -19,7 +20,7 @@ StreamWindow::StreamWindow(std::string alias,
                            shared_ptr<ClientService> client_data,
                            QWidget *parent)
     : QMainWindow(parent), mode(MercuryMode::CLIENT), alias(alias),
-      client(client_data)
+      servc(client_data)
 {
   set_up();
 }
@@ -31,7 +32,6 @@ void StreamWindow::set_up()
 
   initialize_primary_ui_widgets();
   configure_menu_and_tool_bar();
-  connect_signals_and_slots();
 
   display->setLayout(main_layout);
   setCentralWidget(display);
@@ -49,6 +49,8 @@ void StreamWindow::set_up()
   // Center this window
   move(QGuiApplication::screens().at(0)->geometry().center() -
        frameGeometry().center());
+
+  connect_signals_and_slots();
 }
 
 void StreamWindow::configure_menu_and_tool_bar()
@@ -66,6 +68,48 @@ void StreamWindow::connect_signals_and_slots()
 {
   connect(stop_or_leave_stream_action, &QAction::triggered, this,
           &StreamWindow::shut_down_window);
+
+  // connect socket disconnected to this window closing
+  if (is_client())
+    connect(servc->client.get(), &MercuryClient::client_disconnected, this,
+            &StreamWindow::shut_down_window);
+
+  // connect chat message received to chat
+  if (is_host())
+    connect(servh->server.get(), &MercuryServer::chat_message_received, this,
+            &StreamWindow::new_chat_message);
+  if (is_client())
+    connect(servc->client.get(), &MercuryClient::chat_message_received, this,
+            &StreamWindow::new_chat_message);
+
+  // connect chat message sent on side pane
+  connect(side_pane, &SidePane::send_chat_message, this,
+          &StreamWindow::send_chat_message);
+
+  // connect viewer count updated for host
+  if (is_host())
+  {
+    connect(servh->server.get(), &MercuryServer::client_connected, this,
+            [&]()
+            {
+              servh->viewer_count++;
+              viewer_count_updated(servh->viewer_count);
+            });
+    connect(servh->server.get(), &MercuryServer::client_disconnected, this,
+            [&]()
+            {
+              servh->viewer_count--;
+              viewer_count_updated(servh->viewer_count);
+            });
+  }
+
+  // connect stream fully initialized to client jitter buffer full signal
+  if (is_host())
+    stream_fully_initialized();
+  if (is_client())
+    connect(servc->client.get(),
+            &MercuryClient::jitter_buffer_sufficiently_full, this,
+            &StreamWindow::stream_fully_initialized);
 }
 
 void StreamWindow::initialize_primary_ui_widgets()
@@ -89,9 +133,13 @@ void StreamWindow::initialize_primary_ui_widgets()
   below_stream_layout->setRowMinimumHeight(0, 100);
 
   stream_title = new QLabel("Stream Title", this);
-  if (is_host() && host->stream_name.size() > 0)
-    stream_title->setText(host->stream_name.c_str());
-  viewer_count = new QLabel("Viewers: 1", this);
+  if (is_host() && servh->stream_name.size() > 0)
+    stream_title->setText(servh->stream_name.c_str());
+  if (is_host())
+    viewer_count = new QLabel(
+        std::format("Viewers: {}", servh->viewer_count).c_str(), this);
+  else
+    viewer_count = new QLabel("Viewers: 1", this);
 
   if (is_host())
     toolbar = new HostToolBar(this);
@@ -99,18 +147,27 @@ void StreamWindow::initialize_primary_ui_widgets()
 
 void StreamWindow::stream_fully_initialized()
 {
+  log("Beginning stream playback.", ll::NOTE);
   stream_display->begin_playback();
+}
+
+void StreamWindow::closeEvent(QCloseEvent *event)
+{
+  // Client already calls this from the disconnected signal on the socket
+  if (is_host())
+    shut_down_window();
+
+  QWidget::closeEvent(event);
 }
 
 void StreamWindow::shut_down_window()
 {
-  /*
   if (is_host())
-    // host->server->fully_disconnect_clients();
+    servh->server->close_server();
 
   if (is_client())
-    // client->client->disconnect();
-  */
+    servc->client->disconnect();
+
   close();
 }
 
@@ -119,19 +176,38 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
   if (is_host())
   {
     // acquire video frame from desktop
+    QImage img;
+    VideoManager::VideoImageStatus status =
+        VideoManager::instance().GetVideoImage(img);
+    if (status == VideoManager::VideoImageStatus::SUCCESS)
+    {
+      servh->server->send_frame("desktop", QAudioBuffer(), QVideoFrame(img));
+      next_video = img;
+      return true;
+    }
+    else
+    {
+      log("Unable to retrieve video image from manager (status: %d).", status,
+          ll::WARNING);
+      return false;
+    }
+
+    return true;
   }
   else
   {
     // acquire video frame from jitter buffer
-  }
+    JitterEntry jitter = servc->client->retrieve_next_frame();
 
-  // Testing
-  if (!next_video.load("assets/iamcomingtokillyou.jpg", "JPG"))
-  {
-    log("failed to load picture", ll::ERROR);
-    return false;
-  };
-  return true;
+    if (jitter.seq_num == -1)
+    {
+      log("Jitter buffer empty when frame desired.", ll::WARNING);
+      return false;
+    }
+
+    next_video = jitter.video;
+    return true;
+  }
 
   return false;
 }
@@ -148,6 +224,7 @@ bool StreamWindow::provide_next_audio_frame(QBuffer &next_audio)
   }
 
   // TESTING!:
+  /*
   QFile fart_file("assets/fart.mp3");
   if (!fart_file.open(QIODevice::ReadOnly))
   {
@@ -158,14 +235,21 @@ bool StreamWindow::provide_next_audio_frame(QBuffer &next_audio)
 
   QByteArray audio_byte_array = fart_file.readAll();
   fart_file.close();
-
   next_audio.open(QIODevice::WriteOnly);
   next_audio.write(audio_byte_array);
   next_audio.close();
-
   return true;
+  */
 
   return false;
+}
+
+void StreamWindow::send_chat_message(string message)
+{
+  if (is_host())
+    servh->server->forward_chat_message(-1, alias, message);
+  if (is_client())
+    servc->client->send_chat_message(message);
 }
 
 void StreamWindow::viewer_count_updated(int new_count)

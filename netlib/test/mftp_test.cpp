@@ -77,8 +77,17 @@ TEST_F(MftpTest, SendAndProcessBasic)
                    });
 
   // Send and receive
+  auto before_send = std::chrono::system_clock::now();
   ASSERT_TRUE(send_datagram(sock1, QHostAddress::LocalHost, sock2->localPort(),
                             sent_header, sent_image, sent_audio));
+  auto after_send = std::chrono::system_clock::now();
+  auto send_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+      after_send - before_send);
+  std::cout << "\u001b[32m[          ] \u001b[33m"
+            << std::format("Elapsed (Sending 1 frame): {} ms",
+                           send_time.count())
+            << "\u001b[0m\n"
+            << std::flush;
 
   // Spin until timeout or we receive frame
   auto start = std::chrono::system_clock::now();
@@ -98,7 +107,11 @@ TEST_F(MftpTest, SendAndProcessBasic)
   auto now = std::chrono::system_clock::now();
   auto elapsed =
       std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
-  printf("Elapsed (1 frame): %lld ms.\n", elapsed.count());
+  std::cout << "\u001b[32m[          ] \u001b[33m"
+            << std::format("Elapsed (Receiving 1 frame): {} ms",
+                           elapsed.count())
+            << "\u001b[0m\n"
+            << std::flush;
 
   // This will vary
   sent_header.fragment_num = received_header.fragment_num;

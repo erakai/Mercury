@@ -3,9 +3,6 @@
 #include "joinstreamwindow.h"
 #include "settingswindow.h"
 #include "utils.h"
-#include "../configControl/mconfig.hpp"
-
-#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -13,10 +10,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
   // that don't rely on ui files, open an example in Qt Creator (the screenshot
   // example is really good).
   ui.setupUi(this);
-  QSettings settings("../../config/MercuryClientSettings.ini",
-                     QSettings::IniFormat);
 
-  ui.settingsButton->setText(mercury::get_alias(settings));
+  ui.settingsButton->setText(Utils::instance().getDisplayName());
 }
 
 void MainWindow::on_settingsButton_clicked()

@@ -4,6 +4,14 @@
 
 JitterEntry MercuryClient::retrieve_next_frame()
 {
+  if (m_jitter_buffer.size() == 0)
+  {
+    JitterEntry entry;
+    entry.seq_num = -1;
+    entry.timestamp = -1;
+    return entry;
+  }
+
   JitterEntry first = m_jitter_buffer[0];
   m_jitter_buffer.pop_front();
   return first;
@@ -98,7 +106,7 @@ void MercuryClient::connect_signals_and_slots()
   connect(m_mftp_sock.get(), &QUdpSocket::readyRead, this, [=, this]()
           { m_mftp_processor->process_ready_datagrams(m_mftp_sock); });
 
-  connect(m_mftp_processor.get(), &MFTP_Processor::frame_ready, this,
+  connect(m_mftp_processor.get(), &MFTPProcessor::frame_ready, this,
           &MercuryClient::insert_into_jitter_buffer);
 }
 

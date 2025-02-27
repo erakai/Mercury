@@ -189,7 +189,7 @@ void MercuryServer::disconnect_client(int id)
 
 void MercuryServer::process_received_hstp_messages(int id)
 {
-  Client client = clients[id];
+  Client &client = clients[id];
 
   if (client.hstp_sock->state() == QAbstractSocket::ConnectedState)
   {
@@ -229,22 +229,6 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
 
   // Send to every client and increment their frame seq num
   MFTP_Header header;
-  AV_Frame payload;
-
-  // Serialize audio to payload
-  payload.audio.append(audio.constData<char>(), audio.byteCount());
-
-  // Serialize video to payload
-  QImage video_image = video.toImage();
-
-  QBuffer buffer(&payload.video);
-  buffer.open(QIODevice::WriteOnly);
-
-  if (!video_image.save(&buffer, "JPG"))
-  {
-    log("Unable to serialize QImage.", ll::ERROR);
-    return -1;
-  }
 
   // Set up header fields
   header.version = MFTP_VERSION;
@@ -256,8 +240,6 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
       std::chrono::duration_cast<std::chrono::milliseconds>(delta);
 
   header.timestamp = delta_ms_duration.count();
-  header.audio_len = payload.audio.size();
-  header.video_len = payload.video.size();
   strcpy(header.source_name, source);
 
   // Send data
@@ -272,7 +254,7 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
 
     client_sent_to_count++;
     send_datagram(mftp_sock, client.hstp_sock->peerAddress(), client.mftp_port,
-                  header, payload);
+                  header, video.toImage(), audio);
   }
 
   return client_sent_to_count;

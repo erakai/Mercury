@@ -30,7 +30,7 @@ public:
     m_hstp_sock = std::make_shared<QTcpSocket>();
     m_mftp_sock = std::make_shared<QUdpSocket>();
     m_hstp_processor_ptr = std::make_shared<HstpProcessor>();
-    m_mftp_processor = std::make_shared<MFTP_Processor>();
+    m_mftp_processor = std::make_shared<MFTPProcessor>();
     connect_signals_and_slots();
   };
 
@@ -102,5 +102,5 @@ private:
   HstpHandler m_hstp_handler;
   std::shared_ptr<HstpProcessor> m_hstp_processor_ptr;
 
-  std::shared_ptr<MFTP_Processor> m_mftp_processor;
+  std::shared_ptr<MFTPProcessor> m_mftp_processor;
 };

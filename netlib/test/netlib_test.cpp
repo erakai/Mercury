@@ -72,7 +72,6 @@ HSTP message
 */
 TEST_F(NetlibTest, ServerClientBasic)
 {
-  /*
   ASSERT_TRUE(server.start_server());
   ASSERT_TRUE(client.establish_connection(QHostAddress::LocalHost, server_tcp,
                                           client_udp));
@@ -90,23 +89,31 @@ TEST_F(NetlibTest, ServerClientBasic)
 
   // Get screen for test video data
   QPixmap video = QGuiApplication::primaryScreen()->grabWindow(0);
-  QByteArray video_data;
-  QBuffer buffer(&video_data);
-  buffer.open(QIODevice::WriteOnly);
-  ASSERT_TRUE(video.save(&buffer, "PNG", 0));
-  printf("Size of data: %lld\n", video_data.size());
+  QImage image = video.toImage();
+  QVideoFrame video_frame(image);
 
   // Need to also test sending a bunch of frames out of order (in a different
   // test case) to make sure client reorders them
-  ASSERT_EQ(server.send_frame("test", audio, video), 1);
-  app->processEvents(QEventLoop::AllEvents, QDeadlineTimer(100));
+  ASSERT_EQ(server.send_frame("test", audio, video_frame), 1);
+  app->processEvents(QEventLoop::AllEvents, QDeadlineTimer(500));
 
-  AV_Frame frame = client.retrieve_next_frame();
-  QByteArray received_audio = frame.audio;
-  QByteArray received_video = frame.video;
-  EXPECT_EQ(audio_data, received_audio);
-  EXPECT_EQ(video_data, received_video);
-  */
+  JitterEntry frame = client.retrieve_next_frame();
+
+  QByteArray sent_video_bytes;
+  QBuffer sent_video_buffer(&sent_video_bytes);
+  sent_video_buffer.open(QIODevice::WriteOnly);
+  image.save(&sent_video_buffer, "JPG");
+  sent_video_buffer.close();
+
+  QByteArray received_video_bytes;
+  QBuffer received_video_buffer(&received_video_bytes);
+  received_video_buffer.open(QIODevice::WriteOnly);
+  ASSERT_TRUE(frame.video.save(&received_video_buffer, "JPG"));
+  received_video_buffer.close();
+
+  EXPECT_EQ(frame.seq_num, 1);
+  EXPECT_NE(frame.timestamp, 0);
+  EXPECT_NEAR(sent_video_buffer.size(), received_video_bytes.size(), 1000);
 }
 
 // Demonstrate some basic assertions, sanity check.

@@ -16,6 +16,9 @@ public:
   explicit SettingsWindow(QWidget *parent = nullptr);
   ~SettingsWindow();
 
+signals:
+  void aliasChanged(const QString &alias);
+
 private slots:
   void on_closeButton_clicked();
 

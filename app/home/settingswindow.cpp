@@ -1,7 +1,7 @@
 #include "settingswindow.h"
 #include "toastnotification.h"
 #include "ui_settingswindow.h"
-#include "configcontrol/mconfig.hpp"
+#include "config/mconfig.hpp"
 
 #include <QDebug>
 #include <QSettings>
@@ -98,7 +98,7 @@ void SettingsWindow::set_up()
 
 void SettingsWindow::on_applyButton_clicked()
 {
-  QString displayName = ui->displayNameLineEdit->text();
+  QString alias = ui->displayNameLineEdit->text();
   bool darkMode = ui->darkModeCheckBox->isChecked();
   int clientStreamResOption =
       ui->clientStreamResolutionButtonGroup->checkedId();
@@ -106,12 +106,14 @@ void SettingsWindow::on_applyButton_clicked()
   int hostFramerateOption = ui->hostStreamFramerateButtonGroup->checkedId();
   int maxViewerCount = ui->maxViewerCountSpinBox->value();
 
-  mercury::save_all_settings(displayName, darkMode, clientStreamResOption,
+  emit aliasChanged(alias);
+
+  mercury::save_all_settings(alias, darkMode, clientStreamResOption,
                              hostStreamResOption, hostFramerateOption,
                              maxViewerCount);
 
-  qDebug() << displayName << darkMode << clientStreamResOption
-           << hostStreamResOption << hostFramerateOption << maxViewerCount;
+  qDebug() << alias << darkMode << clientStreamResOption << hostStreamResOption
+           << hostFramerateOption << maxViewerCount;
 
   ToastNotification::showToast(this, "All changes saved!");
 }

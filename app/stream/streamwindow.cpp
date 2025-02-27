@@ -1,5 +1,4 @@
 #include "streamwindow.hpp"
-#include "../home/mainwindow.hpp"
 #include "hosttoolbar.hpp"
 #include "logger.hpp"
 #include <QApplication>

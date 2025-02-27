@@ -7,9 +7,6 @@ JoinStreamWindow::JoinStreamWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::JoinStreamWindow)
 {
   ui->setupUi(this);
-
-  connect(ui->joinButton, &QPushButton::released, this,
-          &JoinStreamWindow::on_joinButton_clicked);
 }
 
 JoinStreamWindow::~JoinStreamWindow()

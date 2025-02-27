@@ -3,9 +3,11 @@
 #include "stream/streamwindow.hpp"
 #include "toastnotification.h"
 #include "ui_hoststreamwindow.h"
+#include "logger.hpp"
 #include "utils.h"
 
 #include <QClipboard>
+#include <QDesktopServices>
 #include <QHostAddress>
 #include <QLabel>
 #include <QNetworkInterface>
@@ -17,6 +19,8 @@ HostStreamWindow::HostStreamWindow(QWidget *parent)
   // Get the ip address here to display
 
   ui->setupUi(this);
+  connect(ui->tutorialButton, &QPushButton::clicked, this,
+          &HostStreamWindow::tutorial_button_press);
 
   QString ip = Utils::instance().getIpAddress();
   ui->ipAddressButton->setText(ip);
@@ -80,4 +84,13 @@ void HostStreamWindow::open_stream_window()
 
   parentWidget()->hide();
   this->close();
+}
+
+void HostStreamWindow::tutorial_button_press()
+{
+  if (!QDesktopServices::openUrl(QUrl(
+          "https://github.com/erakai/Mercury/blob/main/docs/ServerHosting.md")))
+  {
+    log("Unable to open tutorial URL.", ll::ERROR);
+  }
 }

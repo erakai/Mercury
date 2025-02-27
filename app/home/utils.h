@@ -4,6 +4,7 @@
 #include <QNetworkInterface>
 #include <QObject>
 #include <QString>
+#include <QSettings>
 
 class Utils : public QObject
 {
@@ -26,6 +27,7 @@ private:
   Utils &operator=(const Utils &) = delete;
 
   QString ipAddress;
+  QSettings settings;
 };
 
 #endif

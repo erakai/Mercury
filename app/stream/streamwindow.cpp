@@ -1,5 +1,6 @@
 #include "streamwindow.hpp"
 #include "hosttoolbar.hpp"
+#include "hstp.hpp"
 #include "logger.hpp"
 #include "singleton/videomanager.h"
 #include <QApplication>
@@ -79,21 +80,32 @@ void StreamWindow::connect_signals_and_slots()
     connect(servh->server.get(), &MercuryServer::chat_message_received, this,
             &StreamWindow::new_chat_message);
   if (is_client())
-    connect(servc->client.get(), &MercuryClient::chat_message_received, this,
-            &StreamWindow::new_chat_message);
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_chat, this,
+            [=, this](const char alias[ALIAS_SIZE],
+                      const char alias_of_chatter[ALIAS_SIZE],
+                      const std::string &chat)
+            { this->new_chat_message(std::string(alias_of_chatter), chat); });
 
   // connect chat message sent on side pane
   connect(side_pane, &SidePane::send_chat_message, this,
           &StreamWindow::send_chat_message);
 
-  // connect viewer count updated for host
+  // connect viewer count updated for host (todo move this into own functions)
   if (is_host())
   {
     connect(servh->server.get(), &MercuryServer::client_connected, this,
-            [&]()
+            [&](int id, std::string alias)
             {
               servh->viewer_count++;
               viewer_count_updated(servh->viewer_count);
+
+              Client &client = servh->server->get_client(id);
+              client.handler.init_msg(alias.c_str());
+              client.handler.add_option_stream_title(
+                  stream_title->text().toStdString().c_str());
+              client.handler.add_option_viewer_count(servh->viewer_count);
+              client.handler.output_msg_to_socket(client.hstp_sock);
             });
     connect(servh->server.get(), &MercuryServer::client_disconnected, this,
             [&]()
@@ -102,6 +114,20 @@ void StreamWindow::connect_signals_and_slots()
               viewer_count_updated(servh->viewer_count);
             });
   }
+
+  // connect viewer count updated for client
+  if (is_client())
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_viewer_count, this,
+            [=, this](const char alias[ALIAS_SIZE], uint32_t viewers)
+            { this->viewer_count_updated(viewers); });
+
+  // connect stream title for client
+  if (is_client())
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_stream_title, this,
+            [=, this](const char alias[ALIAS_SIZE], const char *stream_title)
+            { this->stream_name_changed(std::string(stream_title)); });
 
   // connect stream fully initialized to client jitter buffer full signal
   if (is_host())
@@ -255,11 +281,31 @@ void StreamWindow::send_chat_message(string message)
 void StreamWindow::viewer_count_updated(int new_count)
 {
   viewer_count->setText(("Viewers: " + std::to_string(new_count)).c_str());
+
+  // This slot is called whenever a viewer connects/disconnects for the host,
+  // who then must propagate it to the clients
+  if (is_host() && servh->viewer_count > 0)
+  {
+    HstpHandler temp_handler;
+    temp_handler.init_msg(alias.c_str());
+    temp_handler.add_option_viewer_count(new_count);
+    std::shared_ptr<QByteArray> bytes = temp_handler.output_msg();
+    servh->server->send_hstp_message_to_all_clients(*bytes);
+  }
 }
 
 void StreamWindow::stream_name_changed(string new_name)
 {
   stream_title->setText(new_name.c_str());
+
+  if (is_host() && servh->viewer_count > 0)
+  {
+    HstpHandler temp_handler;
+    temp_handler.init_msg(alias.c_str());
+    temp_handler.add_option_stream_title(new_name.c_str());
+    std::shared_ptr<QByteArray> bytes = temp_handler.output_msg();
+    servh->server->send_hstp_message_to_all_clients(*bytes);
+  }
 }
 
 void StreamWindow::new_chat_message(string alias, string msg)

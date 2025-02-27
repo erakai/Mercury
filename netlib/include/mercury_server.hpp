@@ -81,6 +81,11 @@ public:
   int get_udp_port() { return udp_port; }
   Client &get_client(int id) { return clients[id]; }
 
+  /*
+  Sends a message to every client.
+  */
+  void send_hstp_message_to_all_clients(QByteArray msg);
+
 public slots:
   /*
   This will be connected to the newConnection signal the QTcpServer emits. It

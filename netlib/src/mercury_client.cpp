@@ -117,12 +117,6 @@ void MercuryClient::connect_signals_and_slots()
 
   connect(m_mftp_processor.get(), &MFTPProcessor::frame_ready, this,
           &MercuryClient::insert_into_jitter_buffer);
-
-  connect(m_hstp_processor_ptr.get(), &HstpProcessor::received_chat, this,
-          [=, this](const char alias[ALIAS_SIZE],
-                    const char alias_of_chatter[ALIAS_SIZE],
-                    const std::string &chat)
-          { emit chat_message_received(std::string(alias_of_chatter), chat); });
 }
 
 void MercuryClient::insert_into_jitter_buffer(MFTP_Header header,

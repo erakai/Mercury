@@ -35,8 +35,23 @@ elseif (UNIX)
 endif()
 
 # Install qt
-find_package(Qt6 REQUIRED COMPONENTS Widgets Network Multimedia MultimediaWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Network Multimedia MultimediaWidgets Test)
 qt_standard_project_setup()
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+
+# GTest keeps throwing annoying deprecration warnings that don't apply to us
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
+
+# Install Google Test
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
 
 ###################################Add components
 
@@ -47,7 +62,6 @@ add_custom_target(assets
 
 # Create dependencies
 add_subdirectory(netlib)
-add_subdirectory(external)
 
 # Main app
 add_subdirectory(app)

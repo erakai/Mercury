@@ -1,0 +1,51 @@
+                             Mercury Options
+
+Overview
+
+HSTP must be designed to allow for modular information, as the control messages
+sent will expand in scope. To do this, we send over a preliminary header, which
+contains data universal in control messages. Appended to this header is a
+dynamic number of options. Each options is specified by a type, gives a length in bytes,
+and contains data specific to that option.
+
+Structure of the HSTP Header Packet:
+
+char[alias_size = 18]     alias           <--- Name of sender, if less than 18 octets must be filled with \0.
+uint_16                   options_length  <--- Length of all options in octets including headers.
+uint_8                    num_of_options  <--- # of options
+<--- Options --->
+
+
+Options
+
+(ID: 0) Echo
+
+  Debugging tool used to test functionality. Sender expects nothing,
+  receiver logs the message to the logger for debugging.
+  Debugging tool used to test functionality. Sender expects receiver
+  to send back what was sent.
+  Len: Variable
+  Data:
+    - char[len_of_message] message
+
+(ID: 1) Establishment
+
+  Represents if this is the first or last message with a client.
+
+  Len: 3
+  Data:
+    - uint8_t start_or_stop
+      - is 0 on start and 1 on stop
+    - uint16_t mftp_port
+      - only relevant on start, filled with 0s on stop
+
+(ID: 2) Chat
+
+  Represents a chat message being sent.
+
+  Len: Variable
+  Data:
+    - char[18] alias_of_chatter
+    - uint32_t len_of_message
+    - char[len_of_message] message
+

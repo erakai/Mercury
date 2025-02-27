@@ -1,6 +1,7 @@
 #include "streamwindow.hpp"
 #include "../home/mainwindow.hpp"
 #include "hosttoolbar.hpp"
+#include "logger.hpp"
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
@@ -78,7 +79,7 @@ void StreamWindow::initialize_primary_ui_widgets()
   display = new QWidget(this);
   side_pane = new SidePane(this);
 
-  std::function<bool(QPixmap &)> video_func = std::bind(
+  std::function<bool(QImage &)> video_func = std::bind(
       &StreamWindow::provide_next_video_frame, this, std::placeholders::_1);
   std::function<bool(QAudioBuffer &)> audio_func = std::bind(
       &StreamWindow::provide_next_audio_frame, this, std::placeholders::_1);
@@ -113,7 +114,7 @@ void StreamWindow::shut_down_window()
   close();
 }
 
-bool StreamWindow::provide_next_video_frame(QPixmap &next_video)
+bool StreamWindow::provide_next_video_frame(QImage &next_video)
 {
   if (is_host())
   {
@@ -123,6 +124,14 @@ bool StreamWindow::provide_next_video_frame(QPixmap &next_video)
   {
     // acquire video frame from jitter buffer
   }
+
+  // Testing
+  if (!next_video.load("assets/iamcomingtokillyou.jpg", "JPG"))
+  {
+    log("failed to load picture", ll::ERROR);
+    return false;
+  };
+  return true;
 
   return false;
 }

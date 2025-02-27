@@ -20,6 +20,7 @@ You can either build from the command line (an example path to pass into cmake c
 ```bash
 git clone https://github.com/erakai/Mercury
 git submodule update --init --recursive
+./format.sh
 mkdir build
 cd build
 cmake .. -DCMAKE_PREFIX_PATH=your qt installation

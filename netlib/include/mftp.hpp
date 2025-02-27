@@ -70,6 +70,8 @@ private:
   bool process_datagram(QNetworkDatagram datagram);
   void release_complete_frame(int index);
   void fix_partial_frame_array();
+
+  void print_partial_frame_array();
 };
 
 /*

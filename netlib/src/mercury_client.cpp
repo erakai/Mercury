@@ -131,16 +131,19 @@ void MercuryClient::insert_into_jitter_buffer(MFTP_Header header,
   new_entry.video = video;
   new_entry.audio = audio;
 
+  bool inserted = false;
   for (auto it = m_jitter_buffer.rbegin(); it != m_jitter_buffer.rend(); ++it)
   {
     if (it->seq_num < header.seq_num)
     {
       m_jitter_buffer.insert(it.base(), new_entry);
-      return;
+      inserted = true;
+      break;
     }
   }
 
-  m_jitter_buffer.push_front(new_entry);
+  if (!inserted)
+    m_jitter_buffer.push_front(new_entry);
 
   if (!begun_playback &&
       m_jitter_buffer.size() >= MINIMUM_FRAME_COUNT_FOR_PLAYBACK)

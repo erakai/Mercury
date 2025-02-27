@@ -9,6 +9,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QMainWindow>
+#include <QtWidgets/qwidget.h>
 
 using namespace std;
 
@@ -33,6 +34,8 @@ public:
 
   bool provide_next_video_frame(QImage &next_video);
   bool provide_next_audio_frame(QBuffer &next_audio);
+
+  void closeEvent(QCloseEvent *event) override;
 
 public slots:
   // This should be connected to a signal from either MercuryClient (if this is

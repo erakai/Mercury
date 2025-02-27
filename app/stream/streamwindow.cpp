@@ -146,8 +146,17 @@ void StreamWindow::stream_fully_initialized()
   stream_display->begin_playback();
 }
 
+void StreamWindow::closeEvent(QCloseEvent *event)
+{
+  // Client already calls this from the disconnected signal on the socket
+  if (is_host())
+    shut_down_window();
+}
+
 void StreamWindow::shut_down_window()
 {
+  log("Gracefully shutting down...", ll::NOTE);
+
   if (is_host())
     servh->server->close_server();
 
@@ -190,7 +199,7 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
 
     if (jitter.seq_num == -1)
     {
-      log("Invalid video frame returned.", ll::ERROR);
+      log("Jitter buffer empty when frame desired.", ll::WARNING);
       return false;
     }
 

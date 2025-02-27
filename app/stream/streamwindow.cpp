@@ -179,8 +179,9 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
   {
     // acquire video frame from desktop
     QImage img;
-    if (VideoManager::instance().GetVideoImage(img) ==
-        VideoManager::VideoImageStatus::SUCCESS)
+    VideoManager::VideoImageStatus status =
+        VideoManager::instance().GetVideoImage(img);
+    if (status == VideoManager::VideoImageStatus::SUCCESS)
     {
       servh->server->send_frame("desktop", QAudioBuffer(), QVideoFrame(img));
       next_video = img;
@@ -188,7 +189,8 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
     }
     else
     {
-      log("Unable to retrieve video image from manager.", ll::WARNING);
+      log("Unable to retrieve video image from manager (status: %d).", status,
+          ll::WARNING);
       return false;
     }
 

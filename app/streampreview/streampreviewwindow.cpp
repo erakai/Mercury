@@ -119,6 +119,7 @@ void StreamPreviewWindow::onCurrentScreenSelectionChanged(
   if (auto indexes = selection.indexes(); !indexes.empty())
   {
     screenCapture->setScreen(screenListModel->screen(indexes.front()));
+    windowCapture->setWindow(QCapturableWindow());
     updateActive(SourceType::Screen, isActive());
 
     windowListView->clearSelection();
@@ -151,6 +152,7 @@ void StreamPreviewWindow::onCurrentWindowSelectionChanged(
     }
 
     windowCapture->setWindow(window);
+    screenCapture->setScreen(nullptr);
     updateActive(SourceType::Window, isActive());
 
     screenListView->clearSelection();

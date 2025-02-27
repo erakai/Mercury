@@ -14,9 +14,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
   ui.settingsButton->setText(Utils::instance().getDisplayName());
 }
 
+void MainWindow::updateSettingsButton(const QString &alias)
+{
+  ui.settingsButton->setText(alias);
+}
+
 void MainWindow::on_settingsButton_clicked()
 {
   SettingsWindow *settingsWindow = new SettingsWindow(this);
+  connect(settingsWindow, &SettingsWindow::aliasChanged, this,
+          &MainWindow::updateSettingsButton);
   settingsWindow->setModal(true);
   settingsWindow->setAttribute(Qt::WA_DeleteOnClose);
   settingsWindow->open();

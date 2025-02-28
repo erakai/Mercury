@@ -59,14 +59,6 @@ void mercury::curl_default_config()
   curl_easy_cleanup(curl);
 }
 
-void mercury::change_host_settings()
-{
-
-  QSettings settings("../../config/MercuryClientSettings.ini",
-                     QSettings::IniFormat);
-  settings.setValue("HostSettings/StreamResolution", 1440);
-}
-
 bool mercury::get_dark_mode(QSettings &settings)
 {
 
@@ -103,10 +95,27 @@ int mercury::get_host_max_viewers(QSettings &settings)
   return settings.value("HostSettings/MaxViewers").toInt();
 }
 
+int mercury::get_defaultClientUdpPort(QSettings &settings)
+{
+  return settings.value("ClientSettings/DefaultClientUdpPort").toInt();
+}
+
+int mercury::get_defaultHostTcpPort(QSettings &settings)
+{
+  return settings.value("HostSettings/DefaultHostTcpPort").toInt();
+}
+
+int mercury::get_defaultHostUdpPort(QSettings &settings)
+{
+  return settings.value("HostSettings/DefaultHostUdpPort").toInt();
+}
+
 void mercury::save_all_settings(QString displayName, bool darkMode,
                                 int clientStreamResOption,
                                 int hostStreamResOption,
-                                int hostFramerateOption, int maxViewerCount)
+                                int hostFramerateOption, int maxViewerCount,
+                                int defaultClientUdpPort,
+                                int defaultHostTcpPort, int defaultHostUdpPort)
 {
   QSettings settings("../../config/MercuryClientSettings.ini",
                      QSettings::IniFormat);
@@ -114,7 +123,11 @@ void mercury::save_all_settings(QString displayName, bool darkMode,
   settings.setValue("GeneralSettings/Alias", displayName);
   settings.setValue("GeneralSettings/DarkMode", darkMode);
   settings.setValue("ClientSettings/StreamResolution", clientStreamResOption);
+  settings.setValue("ClientSettings/DefaultClientUdpPort",
+                    defaultClientUdpPort);
   settings.setValue("HostSettings/StreamResolution", hostStreamResOption);
   settings.setValue("HostSettings/FrameRate", hostFramerateOption);
   settings.setValue("HostSettings/MaxViewers", maxViewerCount);
+  settings.setValue("HostSettings/DefaultHostTcpPort", defaultHostTcpPort);
+  settings.setValue("HostSettings/DefaultHostUdpPort", defaultHostUdpPort);
 }

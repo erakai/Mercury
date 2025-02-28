@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>373</width>
-    <height>373</height>
+    <width>440</width>
+    <height>440</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -85,7 +85,7 @@ QDialog#JoinStreamWindow {
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="displayNameTextEdit"/>
+          <widget class="QLineEdit" name="displayNameLineEdit"/>
          </item>
         </layout>
        </item>
@@ -99,7 +99,7 @@ QDialog#JoinStreamWindow {
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="ipAddressTextEdit"/>
+          <widget class="QLineEdit" name="ipAddressLineEdit"/>
          </item>
         </layout>
        </item>

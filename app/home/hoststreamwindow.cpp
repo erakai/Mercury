@@ -26,8 +26,11 @@ HostStreamWindow::HostStreamWindow(QWidget *parent)
   ui->ipAddressButton->setText(ip);
 
   // Default ports (should be moved to settings)
-  ui->tcpPortLineEdit->setText("54332");
-  ui->udpPortLineEdit->setText("34332");
+  ui->displayNameLineEdit->setText(Utils::instance().getDisplayName());
+  ui->tcpPortLineEdit->setText(
+      QString::number(Utils::instance().getDefaultHostTcpPort()));
+  ui->udpPortLineEdit->setText(
+      QString::number(Utils::instance().getDefaultHostUdpPort()));
 
   ui->streamNameLineEdit->setFocus();
 }

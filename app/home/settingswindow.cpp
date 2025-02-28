@@ -2,6 +2,7 @@
 #include "toastnotification.h"
 #include "ui_settingswindow.h"
 #include "config/mconfig.hpp"
+#include "utils.h"
 
 #include <QDebug>
 #include <QSettings>
@@ -73,6 +74,9 @@ void SettingsWindow::set_up()
   ui->clientStreamResolutionButtonGroup->button(clientStreamResOption)
       ->setChecked(true);
 
+  ui->defaultClientUdpPortLineEdit->setText(
+      QString::number(mercury::get_defaultClientUdpPort(settings)));
+
   // HOST SETTINGS SETUP
 
   int hostStreamResOption = mercury::get_host_stream_res(settings);
@@ -94,6 +98,11 @@ void SettingsWindow::set_up()
       ->setChecked(true);
 
   ui->maxViewerCountSpinBox->setValue(mercury::get_host_max_viewers(settings));
+
+  ui->defaultHostUdpPortLineEdit->setText(
+      QString::number(mercury::get_defaultHostUdpPort(settings)));
+  ui->defaultHostTcpPortLineEdit->setText(
+      QString::number(mercury::get_defaultHostTcpPort(settings)));
 }
 
 void SettingsWindow::on_applyButton_clicked()
@@ -105,12 +114,25 @@ void SettingsWindow::on_applyButton_clicked()
   int hostStreamResOption = ui->hostStreamResolutionButtonGroup->checkedId();
   int hostFramerateOption = ui->hostStreamFramerateButtonGroup->checkedId();
   int maxViewerCount = ui->maxViewerCountSpinBox->value();
+  int defaultClientUdpPort = ui->defaultClientUdpPortLineEdit->text().toInt();
+  int defaultHostTcpPort = ui->defaultHostTcpPortLineEdit->text().toInt();
+  int defaultHostUdpPort = ui->defaultHostUdpPortLineEdit->text().toInt();
 
+  if (alias.length() > 15)
+  {
+    alias = Utils::instance().getDisplayName();
+    ToastNotification::showToast(this, "Invalid alias provided.", 3000,
+                                 WARNING);
+    return;
+  }
+
+  // notify other objects that the name should be updated
   emit aliasChanged(alias);
 
   mercury::save_all_settings(alias, darkMode, clientStreamResOption,
                              hostStreamResOption, hostFramerateOption,
-                             maxViewerCount);
+                             maxViewerCount, defaultClientUdpPort,
+                             defaultHostTcpPort, defaultHostUdpPort);
 
   qDebug() << alias << darkMode << clientStreamResOption << hostStreamResOption
            << hostFramerateOption << maxViewerCount;

@@ -10,15 +10,15 @@ int main(int argc, char **argv)
   QCoreApplication::setApplicationName("Mercury");
   QCoreApplication::setApplicationVersion("0.0.1");
 
-  MainWindow w;
-  w.show();
-
   if (!(mercury::check_config_file_presence()))
   {
 
     std::cout << "Config file not found!" << std::endl;
     mercury::curl_default_config();
   }
+
+  MainWindow w;
+  w.show();
 
   return a.exec();
 }

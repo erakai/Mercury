@@ -21,9 +21,9 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   format.setSampleFormat(QAudioFormat::Int16);
 
   audio_sink = new QAudioSink(format, this);
-  sourceFile.setFileName("assets/fart.raw");
-  sourceFile.open(QIODevice::ReadOnly);
-  audio_sink->start(&sourceFile);
+  //  sourceFile.setFileName("assets/fart.raw");
+  //  sourceFile.open(QIODevice::ReadOnly);
+  //  audio_sink->start(&sourceFile);
   // AUDIO TESTING END ====
 
   video_player = new QMediaPlayer(this);

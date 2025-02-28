@@ -14,7 +14,8 @@ JoinStreamWindow::JoinStreamWindow(QWidget *parent)
   ui->setupUi(this);
 
   // Default ports (should move this to settings)
-  ui->hostTcpPortLineEdit->setText("54332");
+  ui->hostTcpPortLineEdit->setText(
+      QString::number(Utils::instance().getDefaultHostTcpPort()));
   ui->clientUdpPortLineEdit->setText(
       QString::number(Utils::instance().getDefaultClientUdpPort()));
   ui->displayNameLineEdit->setText(Utils::instance().getDisplayName());

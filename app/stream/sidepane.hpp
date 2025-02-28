@@ -27,7 +27,8 @@ class SidePane : public QWidget
   Q_OBJECT;
 
 public:
-  SidePane(QWidget *parent = nullptr, const std::string &displayName = "User3279760");
+  SidePane(QWidget *parent = nullptr,
+           const std::string &displayName = "User3279760");
 
   void new_chat_message(ChatMessage msg);
 

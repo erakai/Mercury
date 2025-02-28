@@ -12,8 +12,8 @@ class HostService
 {
 public:
   HostService(std::string alias, int tcp_port, int udp_port,
-              std::string password)
-      : server(make_shared<MercuryServer>(alias, tcp_port, udp_port, password))
+              const QByteArray &pass)
+      : server(make_shared<MercuryServer>(alias, tcp_port, udp_port, pass))
   {
   }
 

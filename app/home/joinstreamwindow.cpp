@@ -7,6 +7,7 @@
 #include "utils.h"
 
 #include <QDebug>
+#include <QCryptographicHash>
 
 JoinStreamWindow::JoinStreamWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::JoinStreamWindow)
@@ -36,12 +37,17 @@ void JoinStreamWindow::on_joinButton_clicked()
   std::string alias = ui->displayNameLineEdit->text().toStdString();
   std::string server_address = ui->ipAddressLineEdit->text().toStdString();
   QHostAddress address(server_address.c_str());
+  std::string password = ui->passwordLineEdit->text().toStdString();
+
+  QByteArray hashedPassword = QCryptographicHash::hash(
+      QByteArray::fromStdString(password), QCryptographicHash::Sha256);
 
   quint16 hostTcpPort = ui->hostTcpPortLineEdit->text().toUShort();
   quint16 clientUdpPort = ui->clientUdpPortLineEdit->text().toUShort();
   std::shared_ptr<ClientService> serv = std::make_shared<ClientService>(alias);
 
-  if (!serv->client->establish_connection(address, hostTcpPort, clientUdpPort))
+  if (!serv->client->establish_connection(address, hostTcpPort, clientUdpPort,
+                                          hashedPassword))
   {
     ToastNotification::showToast(this, "No server could be found on that IP.",
                                  4000);

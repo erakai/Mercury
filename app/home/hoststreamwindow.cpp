@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QNetworkInterface>
 #include <QDebug>
+#include <QCryptographicHash>
 
 HostStreamWindow::HostStreamWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::HostStreamWindow)
@@ -78,8 +79,11 @@ void HostStreamWindow::open_stream_window()
   quint16 udpPort = ui->udpPortLineEdit->text().toUShort();
   std::string password = ui->passwordLineEdit->text().toStdString();
 
+  QByteArray hashedPassword = QCryptographicHash::hash(
+      QByteArray::fromStdString(password), QCryptographicHash::Sha256);
+
   std::shared_ptr<HostService> serv =
-      std::make_shared<HostService>(alias, tcpPort, udpPort, password);
+      std::make_shared<HostService>(alias, tcpPort, udpPort, hashedPassword);
   serv->stream_name = ui->streamNameLineEdit->text().toStdString();
   serv->server->start_server();
   // This sets itself to delete on close, so no memory leak (I think)

@@ -57,8 +57,7 @@ bool HstpHandler::add_option_establishment(bool is_start, uint16_t port,
     std::memcpy(&opt.data[4], password.constData(), 32);
   else
   {
-    char null_char = '\0';
-    std::memcpy(&opt.data[4], &null_char, 32);
+    std::memset(&opt.data[4], '\0', 32);
   }
 
   m_hdr->options.push_back(opt);

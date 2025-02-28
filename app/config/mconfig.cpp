@@ -10,7 +10,7 @@
 bool mercury::check_config_file_presence()
 {
 
-  const std::string &configFilePath = "../../config/MercuryClientSettings.ini";
+  const std::string &configFilePath = "config/MercuryClientSettings.ini";
   struct stat buffer;
   return (stat(configFilePath.c_str(), &buffer) == 0);
 }
@@ -29,7 +29,7 @@ void mercury::curl_default_config()
 
   const std::string url = "https://raw.githubusercontent.com/erakai/Mercury/"
                           "main/config/DefaultClientSettings.ini";
-  const std::string outputFilename = "../../config/MercuryClientSettings.ini";
+  const std::string outputFilename = "config/MercuryClientSettings.ini";
 
   CURL *curl = curl_easy_init();
   if (!curl)
@@ -117,8 +117,7 @@ void mercury::save_all_settings(QString displayName, bool darkMode,
                                 int defaultClientUdpPort,
                                 int defaultHostTcpPort, int defaultHostUdpPort)
 {
-  QSettings settings("../../config/MercuryClientSettings.ini",
-                     QSettings::IniFormat);
+  QSettings settings("config/MercuryClientSettings.ini", QSettings::IniFormat);
 
   settings.setValue("GeneralSettings/Alias", displayName);
   settings.setValue("GeneralSettings/DarkMode", darkMode);

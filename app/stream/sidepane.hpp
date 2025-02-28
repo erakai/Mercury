@@ -1,7 +1,14 @@
 #pragma once
 
+#include <QListWidget>
+#include <QListWidgetItem>
 #include <QPalette>
+#include <QVBoxLayout>
 #include <QWidget>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QSettings>
 
 struct ChatMessage
 {
@@ -20,18 +27,17 @@ class SidePane : public QWidget
   Q_OBJECT;
 
 public:
-  SidePane(QWidget *parent) : QWidget(parent)
-  {
-    QPalette pal = QPalette();
-    pal.setColor(QPalette::Window, Qt::red);
-    setAutoFillBackground(true);
-    setPalette(pal);
-  }
+  SidePane(QWidget *parent = nullptr, const std::string &displayName = "User3279760");
 
   void new_chat_message(ChatMessage msg);
+
+  void render_and_send_message(std::string msgContent);
 
 signals:
   void send_chat_message(std::string message);
 
 private:
+  QListWidget *chatBox;
+  QLineEdit *messageInput;
+  std::string displayName;
 };

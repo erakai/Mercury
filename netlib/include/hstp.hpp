@@ -4,7 +4,9 @@
 #include "mftp.hpp"
 #include <QHostAddress>
 #include <QTcpSocket>
+#include <QtCore/qhashfunctions.h>
 #include <QtCore/qobject.h>
+#include <QtCore/qstringview.h>
 #include <QtCore/qtmetamacros.h>
 #include <QtCore/qtypes.h>
 #include <QtNetwork/qtcpsocket.h>
@@ -36,7 +38,7 @@ They are inspired by DHCP options: https://www.ietf.org/rfc/rfc2132.txt.
 struct Option
 {
   uint8_t type;
-  uint8_t len; // length of data field in bytes (may be 0)
+  uint16_t len; // length of data field in bytes (may be 0)
   std::shared_ptr<char[]> data;
   bool operator==(const Option &other) const
   {
@@ -104,7 +106,8 @@ public:
   bool init_msg(const char sender_alias[ALIAS_SIZE]);
 
   bool add_option_echo(const char *msg);
-  bool add_option_establishment(bool is_start, uint16_t port);
+  bool add_option_establishment(bool is_start, uint16_t port,
+                                const QByteArray &password = nullptr);
   bool add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
                        const char *chat_msg);
   bool add_option_stream_title(const char *stream_title)
@@ -187,7 +190,8 @@ signals:
    * Emits during establishment of the client and server for basic syncing
    */
   void received_establishment(const char alias[ALIAS_SIZE], bool is_start,
-                              uint16_t mftp_port);
+                              uint16_t mftp_port,
+                              const QByteArray &password = nullptr);
   /*
    * Emtis when a chat option is used informing user of a new chat.
    */

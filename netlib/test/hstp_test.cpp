@@ -1,11 +1,14 @@
 #include <QtCore/qcontainerfwd.h>
+#include <QtCore/qcryptographichash.h>
 #include <QtCore/qstringview.h>
 #include <cstddef>
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <hstp.hpp>
 #include <memory>
+#include <ostream>
 #include <sys/types.h>
+#include <QCryptographicHash>
 
 class HstpHandlerTest : public testing::Test
 {
@@ -51,7 +54,7 @@ TEST_F(HstpHandlerTest, SerializeTest_Basic)
 
   EXPECT_EQ(byte_array_ptr->toHex(':').toStdString(),
             std::string("41:6c:65:78:00:00:00:00:00:00:00:00:00:00:00:00:00:"
-                        "00:08:00:01:00:06:68:65:6c:6c:6f:00"));
+                        "00:09:00:01:00:06:00:68:65:6c:6c:6f:00"));
 }
 
 TEST_F(HstpHandlerTest, SerializeTest_18CharAlias)
@@ -61,7 +64,7 @@ TEST_F(HstpHandlerTest, SerializeTest_18CharAlias)
   std::shared_ptr<HSTP_Header> header = std::make_shared<HSTP_Header>();
 
   strcpy(header->sender_alias, "AAAAAAAAAAAAAAAAAA");
-  echo_option.type = 0;
+  echo_option.type = 5;
   echo_option.len = 6;
   echo_option.data = std::shared_ptr<char[]>(new char[echo_option.len]);
   const char *hello = "hello";
@@ -74,7 +77,7 @@ TEST_F(HstpHandlerTest, SerializeTest_18CharAlias)
 
   EXPECT_STREQ(
       byte_array->toHex(':').toStdString().c_str(),
-      "41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:08:00:01:00:06:"
+      "41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:09:00:01:05:06:00:"
       "68:65:6c:6c:6f:00");
 }
 
@@ -139,7 +142,9 @@ TEST_F(HstpHandlerTest, HstpHandler_StreamTitle)
   handler.add_option_stream_title("Epic Stream!");
   std::shared_ptr<QByteArray> bytes = handler.output_msg();
 
-  const char *c = &bytes->constData()[ALIAS_SIZE + sizeof(uint32_t) + 1];
+  const char *c =
+      &bytes->constData()[ALIAS_SIZE + sizeof(uint16_t) + sizeof(uint8_t) +
+                          sizeof(uint8_t) + sizeof(uint16_t)];
 
   EXPECT_STREQ(c, "Epic Stream!");
 }
@@ -157,4 +162,19 @@ TEST_F(HstpHandlerTest, HstpHandler_ViewerCount)
   viewers = qFromBigEndian(viewers);
 
   EXPECT_EQ(viewers, 127);
+}
+
+TEST_F(HstpHandlerTest, HstpHandler_PasswordEstablish)
+{
+  QCryptographicHash hasher(QCryptographicHash::Sha256);
+  hasher.addData("Password");
+
+  HstpHandler handler;
+
+  handler.init_msg("Alex");
+  handler.add_option_establishment(false, 5, hasher.result());
+  std::shared_ptr<QByteArray> bytes = handler.output_msg();
+  std::shared_ptr<HSTP_Header> hdr = handler.bytes_to_msg(bytes);
+
+  EXPECT_EQ(QByteArray(&hdr->options[0].data.get()[4]), hasher.result());
 }

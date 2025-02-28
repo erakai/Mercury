@@ -1,6 +1,4 @@
 #include "mercury_client.hpp"
-#include "mftp.hpp"
-#include <memory>
 
 JitterEntry MercuryClient::retrieve_next_frame()
 {
@@ -18,7 +16,8 @@ JitterEntry MercuryClient::retrieve_next_frame()
 }
 
 bool MercuryClient::establish_connection(const QHostAddress &host,
-                                         quint16 hstp_port, quint16 mftp_port)
+                                         quint16 hstp_port, quint16 mftp_port,
+                                         const QByteArray &pass)
 {
   if (host.isNull())
   {
@@ -49,7 +48,7 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
 
     // send establishment message
     m_hstp_handler.init_msg(m_alias.c_str());
-    m_hstp_handler.add_option_establishment(true, mftp_port);
+    m_hstp_handler.add_option_establishment(true, mftp_port, pass);
     if (!m_hstp_handler.output_msg_to_socket(m_hstp_sock))
     {
       log("Failed to send establishment message to socket", ll::ERROR);

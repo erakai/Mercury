@@ -6,6 +6,8 @@
 #include <QNetworkInterface>
 #include <QTcpSocket>
 #include <Qbuffer>
+#include <QtCore/qdebug.h>
+#include <QtCore/qlogging.h>
 
 void MercuryServer::connect_signals_and_slots()
 {
@@ -132,23 +134,32 @@ void MercuryServer::add_new_client()
           [=, this]() { this->disconnect_client(new_client.id); });
 
   // Allow for validation if we receive an establishment message
-  connect(
-      new_client.processor.get(), &HstpProcessor::received_establishment, this,
-      [=, this](const char alias[ALIAS_SIZE], bool is_start, uint16_t mftp_port)
-      {
-        this->validate_client(new_client.id, is_start, std::string(alias),
-                              mftp_port);
-      });
+  connect(new_client.processor.get(), &HstpProcessor::received_establishment,
+          this,
+          [=, this](const char alias[ALIAS_SIZE], bool is_start,
+                    uint16_t mftp_port, const QByteArray &pass)
+          {
+            this->validate_client(new_client.id, is_start, std::string(alias),
+                                  mftp_port, pass);
+          });
 
   clients[new_client.id] = new_client;
 }
 
 void MercuryServer::validate_client(int id, bool is_start, std::string alias,
-                                    int mftp_port)
+                                    int mftp_port, const QByteArray &password)
 {
   Client &new_client = clients[id];
 
   // TODO: VERIFY PASSWORD HERE (ADD EXTRA PARAMETER)
+  if (!host_pass.isNull() && !host_pass.isEmpty())
+  {
+    if (host_pass != password)
+    {
+      force_disconnect_client(id);
+      return;
+    }
+  }
 
   new_client.validated = true;
   new_client.mftp_port = mftp_port;
@@ -175,13 +186,21 @@ void MercuryServer::force_disconnect_client(int id)
   Client &client = clients[id];
   client.handler.init_msg(host_alias.c_str());
   client.handler.add_option_establishment(false, 0);
-  client.hstp_sock->write(*(client.handler.output_msg()));
+  client.handler.output_msg_to_socket(client.hstp_sock);
 
   disconnect_client(id);
 }
 
 void MercuryServer::disconnect_client(int id)
 {
+  // TODO: Hi Kai, we added this cool if statement cause at
+  // force_disconnect_client() it sends an establishment message that will
+  // call this again even though force_disconnect_client() calls it.
+  // ask Alex if confused
+  if (clients.count(id) == 0)
+  {
+    return;
+  }
   Client client = clients[id];
 
   if (client.hstp_sock->state() == QAbstractSocket::ConnectedState)

@@ -163,6 +163,7 @@ void MercuryServer::validate_client(int id, bool is_start, std::string alias,
           {
             this->forward_chat_message(new_client.id,
                                        std::string(alias_of_chatter), chat);
+            emit chat_message_received(std::string(alias), chat);
           });
 
   emit client_connected(id, std::string(alias));
@@ -221,8 +222,6 @@ void MercuryServer::forward_chat_message(int sender_id, std::string alias,
       client.hstp_sock->write(*(client.handler.output_msg()));
     }
   }
-
-  emit chat_message_received(alias, message);
 }
 
 int MercuryServer::send_frame(const char *source, QAudioBuffer audio,

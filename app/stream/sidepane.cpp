@@ -25,7 +25,7 @@ SidePane::SidePane(QWidget *parent) : QWidget(parent)
 
   QHBoxLayout *inputLayout = new QHBoxLayout();
 
-  //QPushButton *sendButton = new QPushButton("Send", this);
+  // QPushButton *sendButton = new QPushButton("Send", this);
 
   messageInput = new QLineEdit(this);
   QPalette inputPalette = messageInput->palette();
@@ -34,19 +34,23 @@ SidePane::SidePane(QWidget *parent) : QWidget(parent)
   messageInput->setPalette(inputPalette);
 
   inputLayout->addWidget(messageInput);
-  //inputLayout->addWidget(sendButton);
+  // inputLayout->addWidget(sendButton);
 
   layout->addLayout(inputLayout);
   setLayout(layout);
 
-  connect(messageInput, &QLineEdit::returnPressed, this, [this]() {
-    render_and_send_message(messageInput->text().trimmed().toStdString());
-  });
+  connect(messageInput, &QLineEdit::returnPressed, this,
+          [this]()
+          {
+            render_and_send_message(
+                messageInput->text().trimmed().toStdString());
+          });
 }
 
 void SidePane::new_chat_message(ChatMessage msg)
 {
-  QString messageToRender = QString::fromStdString(msg.sender + ":\n" + msg.message + "\n");
+  QString messageToRender =
+      QString::fromStdString(msg.sender + ":\n" + msg.message + "\n");
   chatBox->addItem(new QListWidgetItem(messageToRender));
 }
 
@@ -58,4 +62,6 @@ void SidePane::render_and_send_message(std::string msgContent)
                      QSettings::IniFormat);
 
   new_chat_message({mercury::get_alias(settings).toStdString(), msgContent});
+
+  emit send_chat_message(msgContent);
 }

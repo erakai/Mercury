@@ -28,7 +28,7 @@ void mercury::curl_default_config()
 {
 
   const std::string url = "https://raw.githubusercontent.com/erakai/Mercury/"
-                          "main/config/MercuryClientSettings.ini";
+                          "main/config/DefaultClientSettings.ini";
   const std::string outputFilename = "../../config/MercuryClientSettings.ini";
 
   CURL *curl = curl_easy_init();

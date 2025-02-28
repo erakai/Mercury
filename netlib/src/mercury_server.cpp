@@ -6,6 +6,7 @@
 #include <QNetworkInterface>
 #include <QTcpSocket>
 #include <Qbuffer>
+#include <QtCore/qlogging.h>
 
 void MercuryServer::connect_signals_and_slots()
 {

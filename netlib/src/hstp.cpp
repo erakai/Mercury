@@ -389,7 +389,7 @@ void HstpProcessor::handle_establishment(const char alias[18],
   }
 
   // get password
-  QByteArray password = QByteArray::fromRawData(&opt.data[4], 256);
+  QByteArray password = QByteArray::fromRawData(&opt.data[4], 32);
   emit received_establishment(alias, is_start, mftp_port, password);
 }
 

@@ -75,8 +75,6 @@ TEST_F(HstpHandlerTest, SerializeTest_18CharAlias)
   std::shared_ptr<QByteArray> byte_array = std::make_shared<QByteArray>();
   byte_array = _serialize(header);
 
-  std::cout << byte_array->toHex(':').toStdString().c_str() << std::endl;
-
   EXPECT_STREQ(
       byte_array->toHex(':').toStdString().c_str(),
       "41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:41:09:00:01:05:06:00:"

@@ -1,5 +1,6 @@
 #include "hstp.hpp"
 #include <QtCore/qendian.h>
+#include <QtCore/qstringview.h>
 #include <cstdint>
 #include <cstring>
 #include <sys/_endian.h>
@@ -33,7 +34,8 @@ bool HstpHandler::add_option_echo(const char *msg)
   return true;
 }
 
-bool HstpHandler::add_option_establishment(bool is_start, uint16_t port)
+bool HstpHandler::add_option_establishment(bool is_start, uint16_t port,
+                                           const QByteArray &password)
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
@@ -43,11 +45,22 @@ bool HstpHandler::add_option_establishment(bool is_start, uint16_t port)
 
   Option opt;
   opt.type = 1;
-  opt.len = 3;
+  opt.len = 36;
   opt.data = std::shared_ptr<char[]>(new char[opt.len]);
   opt.data[0] = is_start ? 0 : 1;
   uint16_t network_port = qToBigEndian((uint16_t) port);
   std::memcpy(&opt.data[1], &network_port, sizeof(uint16_t));
+
+  bool has_password = !password.isNull() && password.size() == 32;
+  opt.data[3] = has_password ? 1 : 0;
+
+  if (has_password)
+    std::memcpy(&opt.data[4], password.constData(), 32);
+  else
+  {
+    char null_char = '\0';
+    std::memcpy(&opt.data[4], &null_char, 32);
+  }
 
   m_hdr->options.push_back(opt);
 
@@ -157,7 +170,7 @@ HstpHandler::_serialize(const std::shared_ptr<HSTP_Header> &hdr)
   for (const auto &opt : hdr->options)
   {
     size_opts +=
-        (2 + opt.len); // 1 bye for type, 1 byte for len, opt.len bytes for data
+        (3 + opt.len); // 1 bye for type, 2 byte for len, opt.len bytes for data
   }
   ds << qToBigEndian((uint16_t) size_opts);
 
@@ -169,7 +182,7 @@ HstpHandler::_serialize(const std::shared_ptr<HSTP_Header> &hdr)
   for (const auto &opt : hdr->options)
   {
     ds << opt.type;
-    ds << opt.len;
+    ds << qToBigEndian((uint16_t) opt.len);
     ds.writeRawData(opt.data.get(), opt.len);
   }
 
@@ -200,7 +213,10 @@ HstpHandler::_deserialize(const std::shared_ptr<QByteArray> &buff)
   {
     Option opt;
     ds >> opt.type;
-    ds >> opt.len;
+
+    uint16_t net_len;
+    ds >> net_len;
+    opt.len = qFromBigEndian(net_len);
     opt.data = std::shared_ptr<char[]>(new char[opt.len]);
     ds.readRawData(opt.data.get(), opt.len);
 
@@ -221,7 +237,7 @@ bool HstpHandler::add_option_generic_string(uint8_t type, const char *gen_str)
   std::string str(gen_str);
   if (str.size() > MAX_STRING_SIZE)
   {
-    str.substr(0, MAX_STRING_SIZE);
+    str = str.substr(0, MAX_STRING_SIZE);
   }
 
   Option opt;
@@ -350,7 +366,7 @@ void HstpProcessor::handle_echo(HANDLER_PARAMS)
 void HstpProcessor::handle_establishment(const char alias[18],
                                          const Option &opt)
 {
-  if (!opt.data || opt.len != 3)
+  if (!opt.data || opt.len != 36)
   {
     log("Something went wrong with handling an establishment option...",
         ll::ERROR);
@@ -364,7 +380,17 @@ void HstpProcessor::handle_establishment(const char alias[18],
   std::memcpy(&mftp_port, &opt.data[1], sizeof(uint16_t));
   mftp_port = qFromBigEndian((uint16_t) mftp_port);
 
-  emit received_establishment(alias, is_start, mftp_port);
+  bool has_password = static_cast<uint8_t>(opt.data[3]) == 1 ? true : false;
+
+  if (!has_password)
+  {
+    emit received_establishment(alias, is_start, mftp_port);
+    return;
+  }
+
+  // get password
+  QByteArray password = QByteArray::fromRawData(&opt.data[4], 256);
+  emit received_establishment(alias, is_start, mftp_port, password);
 }
 
 void HstpProcessor::handle_chat(HANDLER_PARAMS)

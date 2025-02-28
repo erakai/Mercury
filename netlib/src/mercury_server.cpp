@@ -132,23 +132,32 @@ void MercuryServer::add_new_client()
           [=, this]() { this->disconnect_client(new_client.id); });
 
   // Allow for validation if we receive an establishment message
-  connect(
-      new_client.processor.get(), &HstpProcessor::received_establishment, this,
-      [=, this](const char alias[ALIAS_SIZE], bool is_start, uint16_t mftp_port)
-      {
-        this->validate_client(new_client.id, is_start, std::string(alias),
-                              mftp_port);
-      });
+  connect(new_client.processor.get(), &HstpProcessor::received_establishment,
+          this,
+          [=, this](const char alias[ALIAS_SIZE], bool is_start,
+                    uint16_t mftp_port, const QByteArray &pass)
+          {
+            this->validate_client(new_client.id, is_start, std::string(alias),
+                                  mftp_port, pass);
+          });
 
   clients[new_client.id] = new_client;
 }
 
 void MercuryServer::validate_client(int id, bool is_start, std::string alias,
-                                    int mftp_port)
+                                    int mftp_port, const QByteArray &password)
 {
   Client &new_client = clients[id];
 
   // TODO: VERIFY PASSWORD HERE (ADD EXTRA PARAMETER)
+  if (!host_pass.isNull() && !host_pass.isEmpty())
+  {
+    if (host_pass != password)
+    {
+      force_disconnect_client(id);
+      return;
+    }
+  }
 
   new_client.validated = true;
   new_client.mftp_port = mftp_port;

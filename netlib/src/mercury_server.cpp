@@ -6,6 +6,7 @@
 #include <QNetworkInterface>
 #include <QTcpSocket>
 #include <Qbuffer>
+#include <QtCore/qdebug.h>
 #include <QtCore/qlogging.h>
 
 void MercuryServer::connect_signals_and_slots()
@@ -185,13 +186,21 @@ void MercuryServer::force_disconnect_client(int id)
   Client &client = clients[id];
   client.handler.init_msg(host_alias.c_str());
   client.handler.add_option_establishment(false, 0);
-  client.hstp_sock->write(*(client.handler.output_msg()));
+  client.handler.output_msg_to_socket(client.hstp_sock);
 
   disconnect_client(id);
 }
 
 void MercuryServer::disconnect_client(int id)
 {
+  // TODO: Hi Kai, we added this cool if statement cause at
+  // force_disconnect_client() it sends an establishment message that will
+  // call this again even though force_disconnect_client() calls it.
+  // ask Alex if confused
+  if (clients.count(id) == 0)
+  {
+    return;
+  }
   Client client = clients[id];
 
   if (client.hstp_sock->state() == QAbstractSocket::ConnectedState)

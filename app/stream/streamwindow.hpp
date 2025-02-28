@@ -9,6 +9,7 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QMainWindow>
+#include <QtWidgets/qlabel.h>
 #include <QtWidgets/qwidget.h>
 
 using namespace std;
@@ -54,7 +55,7 @@ public slots:
   // These are generic update slots that should be connected to a signal either
   // in the client or server
   void viewer_count_updated(int new_count);
-  void stream_name_changed(string new_name);
+  void stream_name_changed(string host_alias, string new_name);
   void new_chat_message(string alias, string msg);
   // void new_viewer_joined(Client client); // update participant_display_list
   // in side_pane
@@ -81,6 +82,7 @@ private:
   QGridLayout *below_stream_layout;
 
   QLabel *stream_title;
+  QLabel *host_name;
   QLabel *viewer_count;
 
   QMenu *stream_menu;

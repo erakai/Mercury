@@ -1,10 +1,16 @@
 #pragma once
 
+#include "../config/mconfig.hpp"
+
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QPalette>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QSettings>
 
 struct ChatMessage
 {
@@ -27,9 +33,12 @@ public:
 
   void new_chat_message(ChatMessage msg);
 
+  void render_and_send_message(std::string msgContent);
+
 signals:
   void send_chat_message(std::string message);
 
 private:
   QListWidget *chatBox;
+  QLineEdit *messageInput;
 };

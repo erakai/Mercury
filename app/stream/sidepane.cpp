@@ -1,5 +1,7 @@
 #include "sidepane.hpp"
 
+#include <iostream>
+
 SidePane::SidePane(QWidget *parent) : QWidget(parent)
 {
   QPalette pal = QPalette();
@@ -19,20 +21,41 @@ SidePane::SidePane(QWidget *parent) : QWidget(parent)
   chatBox->setFocusPolicy(Qt::NoFocus);
   chatBox->setEditTriggers(QAbstractItemView::NoEditTriggers);
   chatBox->setEnabled(false);
-
-  QString formattedMsg = QString::fromStdString("User 1:\nKai loves Alex\n");
-  chatBox->addItem(new QListWidgetItem(formattedMsg));
-  QString formattedMsg2 = QString::fromStdString("User 2:\nNo he doesn't\n");
-  chatBox->addItem(new QListWidgetItem(formattedMsg2));
-
   layout->addWidget(chatBox);
+
+  QHBoxLayout *inputLayout = new QHBoxLayout();
+
+  //QPushButton *sendButton = new QPushButton("Send", this);
+
+  messageInput = new QLineEdit(this);
+  QPalette inputPalette = messageInput->palette();
+  inputPalette.setColor(QPalette::Base, Qt::white);
+  inputPalette.setColor(QPalette::Text, Qt::black);
+  messageInput->setPalette(inputPalette);
+
+  inputLayout->addWidget(messageInput);
+  //inputLayout->addWidget(sendButton);
+
+  layout->addLayout(inputLayout);
   setLayout(layout);
+
+  connect(messageInput, &QLineEdit::returnPressed, this, [this]() {
+    render_and_send_message(messageInput->text().trimmed().toStdString());
+  });
 }
 
 void SidePane::new_chat_message(ChatMessage msg)
 {
-  // idk display it
-  //TODO: render on front end
-  //msg.sender = username
-  //msg.message = message content
+  QString messageToRender = QString::fromStdString(msg.sender + ":\n" + msg.message + "\n");
+  chatBox->addItem(new QListWidgetItem(messageToRender));
+}
+
+void SidePane::render_and_send_message(std::string msgContent)
+{
+  messageInput->clear();
+
+  QSettings settings("../../config/MercuryClientSettings.ini",
+                     QSettings::IniFormat);
+
+  new_chat_message({mercury::get_alias(settings).toStdString(), msgContent});
 }

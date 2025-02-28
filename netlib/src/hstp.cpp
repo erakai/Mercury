@@ -2,7 +2,6 @@
 #include <QtCore/qendian.h>
 #include <cstdint>
 #include <cstring>
-#include <sys/_endian.h>
 
 bool HstpHandler::init_msg(const char sender_alias[18])
 {
@@ -221,7 +220,7 @@ bool HstpHandler::add_option_generic_string(uint8_t type, const char *gen_str)
   std::string str(gen_str);
   if (str.size() > MAX_STRING_SIZE)
   {
-    str.substr(0, MAX_STRING_SIZE);
+    str = str.substr(0, MAX_STRING_SIZE);
   }
 
   Option opt;
@@ -265,7 +264,7 @@ void HstpProcessor::process(const QByteArray &chunk)
   }
 
   m_hstp_buffer.append(chunk);
-  while (m_hstp_buffer.size() >= HSTP_HEADER_SIZE)
+  while ((long long unsigned int) m_hstp_buffer.size() >= HSTP_HEADER_SIZE)
   {
     // get size of options
     quint16 opt_size =
@@ -273,7 +272,8 @@ void HstpProcessor::process(const QByteArray &chunk)
         static_cast<uchar>(m_hstp_buffer[ALIAS_SIZE - 1 + 2]);
     opt_size = qFromBigEndian((uint16_t) opt_size);
 
-    if (m_hstp_buffer.size() >= HSTP_HEADER_SIZE + opt_size)
+    if ((long long unsigned int) m_hstp_buffer.size() >=
+        HSTP_HEADER_SIZE + opt_size)
     {
       qint16 bytes_processed = process_single_hstp_message(opt_size);
       m_hstp_buffer.remove(0, bytes_processed);
@@ -316,7 +316,8 @@ qint16 HstpProcessor::process_single_hstp_message(qint16 opt_size)
 {
   std::shared_ptr<QByteArray> buff = std::make_shared<QByteArray>();
 
-  if (m_hstp_buffer.size() >= HSTP_HEADER_SIZE + opt_size)
+  if ((long long unsigned int) m_hstp_buffer.size() >=
+      HSTP_HEADER_SIZE + opt_size)
   {
     buff->append(m_hstp_buffer.mid(0, HSTP_HEADER_SIZE + opt_size));
   }

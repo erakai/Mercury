@@ -11,7 +11,6 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
-#include <sys/_endian.h>
 #include <vector>
 #include <QtEndian>
 

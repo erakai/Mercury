@@ -6,6 +6,8 @@
 
 #include <QDebug>
 #include <QSettings>
+#include <QStringList>
+#include <QRandomGenerator>
 
 SettingsWindow::SettingsWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::SettingsWindow)
@@ -123,6 +125,24 @@ void SettingsWindow::on_applyButton_clicked()
     ToastNotification::showToast(this, "Invalid alias provided.", 3000,
                                  WARNING);
     return;
+  }
+  else if (alias.length() == 0)
+  {
+    // Small pool of adjectives and nouns
+    QStringList adjectives = {"Swift",  "Brave", "Clever", "Mighty",
+                              "Silent", "Loyal", "Fierce", "Witty"};
+    QStringList nouns = {"Falcon", "Tiger", "Wolf",   "Panther",
+                         "Eagle",  "Shark", "Dragon", "Phoenix"};
+
+    // Select random adjective and noun
+    QString randomAdjective =
+        adjectives.at(QRandomGenerator::global()->bounded(adjectives.size()));
+    QString randomNoun =
+        nouns.at(QRandomGenerator::global()->bounded(nouns.size()));
+
+    // Combine and ensure it's under 15 characters
+    alias = randomAdjective + randomNoun;
+    ui->displayNameLineEdit->setText(alias);
   }
 
   // notify other objects that the name should be updated

@@ -56,6 +56,10 @@ void SidePane::new_chat_message(ChatMessage msg)
 
 void SidePane::render_and_send_message(std::string msgContent)
 {
+  if (msgContent.length() == 0) {
+    return;
+  }
+
   messageInput->clear();
 
   QSettings settings("../../config/MercuryClientSettings.ini",

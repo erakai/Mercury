@@ -2,7 +2,7 @@
 #include "config/mconfig.hpp"
 
 Utils::Utils()
-    : settings("../../config/MercuryClientSettings.ini", QSettings::IniFormat)
+    : settings("config/MercuryClientSettings.ini", QSettings::IniFormat)
 {
   foreach (const QHostAddress &address, QNetworkInterface::allAddresses())
   {

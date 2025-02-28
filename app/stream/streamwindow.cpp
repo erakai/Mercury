@@ -42,6 +42,7 @@ void StreamWindow::set_up()
   main_layout->addLayout(below_stream_layout, 1, 0, 1, 2);
 
   below_stream_layout->addWidget(stream_title, 0, 0);
+  below_stream_layout->addWidget(host_name, 1, 0);
   below_stream_layout->addWidget(viewer_count, 0, 2);
 
   if (is_host())
@@ -95,7 +96,7 @@ void StreamWindow::connect_signals_and_slots()
   if (is_host())
   {
     connect(servh->server.get(), &MercuryServer::client_connected, this,
-            [&](int id, std::string alias)
+            [&](int id, std::string _alias)
             {
               servh->viewer_count++;
               viewer_count_updated(servh->viewer_count);
@@ -127,7 +128,10 @@ void StreamWindow::connect_signals_and_slots()
     connect(servc->client->hstp_processor().get(),
             &HstpProcessor::received_stream_title, this,
             [=, this](const char alias[ALIAS_SIZE], const char *stream_title)
-            { this->stream_name_changed(std::string(stream_title)); });
+            {
+              this->stream_name_changed(std::string(alias),
+                                        std::string(stream_title));
+            });
 
   // connect stream fully initialized to client jitter buffer full signal
   if (is_host())
@@ -169,6 +173,11 @@ void StreamWindow::initialize_primary_ui_widgets()
 
   if (is_host())
     toolbar = new HostToolBar(this);
+
+  if (is_host())
+    host_name = new QLabel(std::format("Host: {}", alias).c_str(), this);
+  if (is_client())
+    host_name = new QLabel(std::format("Host: {}", "Host").c_str(), this);
 }
 
 void StreamWindow::stream_fully_initialized()
@@ -294,7 +303,7 @@ void StreamWindow::viewer_count_updated(int new_count)
   }
 }
 
-void StreamWindow::stream_name_changed(string new_name)
+void StreamWindow::stream_name_changed(string host_alias, string new_name)
 {
   stream_title->setText(new_name.c_str());
 
@@ -306,6 +315,9 @@ void StreamWindow::stream_name_changed(string new_name)
     std::shared_ptr<QByteArray> bytes = temp_handler.output_msg();
     servh->server->send_hstp_message_to_all_clients(*bytes);
   }
+
+  if (is_client())
+    host_name->setText(std::format("Host: {}", host_alias).c_str());
 }
 
 void StreamWindow::new_chat_message(string alias, string msg)

@@ -77,10 +77,19 @@ void HostStreamWindow::open_stream_window()
   std::string alias = ui->displayNameLineEdit->text().toStdString();
   quint16 tcpPort = ui->tcpPortLineEdit->text().toUShort();
   quint16 udpPort = ui->udpPortLineEdit->text().toUShort();
+
+  QByteArray hashedPassword = nullptr;
   std::string password = ui->passwordLineEdit->text().toStdString();
 
-  QByteArray hashedPassword = QCryptographicHash::hash(
-      QByteArray::fromStdString(password), QCryptographicHash::Sha256);
+  qDebug() << password;
+  if (!password.empty())
+  {
+    QCryptographicHash hasher(QCryptographicHash::Sha256);
+    hasher.addData(password);
+
+    hashedPassword = hasher.result();
+    qDebug() << hashedPassword.toStdString();
+  }
 
   std::shared_ptr<HostService> serv =
       std::make_shared<HostService>(alias, tcpPort, udpPort, hashedPassword);

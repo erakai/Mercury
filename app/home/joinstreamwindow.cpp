@@ -37,10 +37,20 @@ void JoinStreamWindow::on_joinButton_clicked()
   std::string alias = ui->displayNameLineEdit->text().toStdString();
   std::string server_address = ui->ipAddressLineEdit->text().toStdString();
   QHostAddress address(server_address.c_str());
+
+  QByteArray hashedPassword = nullptr;
+
   std::string password = ui->passwordLineEdit->text().toStdString();
 
-  QByteArray hashedPassword = QCryptographicHash::hash(
-      QByteArray::fromStdString(password), QCryptographicHash::Sha256);
+  qDebug() << password;
+  if (!password.empty())
+  {
+    QCryptographicHash hasher(QCryptographicHash::Sha256);
+    hasher.addData(password);
+
+    hashedPassword = hasher.result();
+    qDebug() << hashedPassword.toStdString();
+  }
 
   quint16 hostTcpPort = ui->hostTcpPortLineEdit->text().toUShort();
   quint16 clientUdpPort = ui->clientUdpPortLineEdit->text().toUShort();

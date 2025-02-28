@@ -1,6 +1,7 @@
 #include "sidepane.hpp"
 
-SidePane::SidePane(QWidget *parent, const std::string &displayName) : QWidget(parent), displayName(displayName)
+SidePane::SidePane(QWidget *parent, const std::string &displayName)
+    : QWidget(parent), displayName(displayName)
 {
   QPalette pal = QPalette();
   pal.setColor(QPalette::Window, Qt::gray);
@@ -54,7 +55,8 @@ void SidePane::new_chat_message(ChatMessage msg)
 
 void SidePane::render_and_send_message(std::string msgContent)
 {
-  if (msgContent.length() == 0) {
+  if (msgContent.length() == 0)
+  {
     return;
   }
 

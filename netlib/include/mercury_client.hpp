@@ -63,7 +63,8 @@ public slots:
    * the port the client is on (for udp).
    */
   bool establish_connection(const QHostAddress &host, quint16 hstp_port,
-                            quint16 mftp_port);
+                            quint16 mftp_port,
+                            const QByteArray &pass = nullptr);
 
   /*
    * Disconnects the TCP/UDP sockets. Slot allows UI to disconnect on signal.

@@ -6,6 +6,7 @@
 #include <QUdpSocket>
 #include <QVideoFrame>
 
+#include <QtCore/qstringview.h>
 #include <chrono>
 #include <memory>
 
@@ -40,12 +41,17 @@ class MercuryServer : public QTcpServer
   Q_OBJECT;
 
 public:
-  MercuryServer(std::string alias) : host_alias(alias) {}
-  MercuryServer(std::string alias, int tcp_port, int udp_port)
-      : host_alias(alias), tcp_port(tcp_port), udp_port(udp_port) {};
+  MercuryServer(std::string alias, const QByteArray &pass = nullptr)
+      : host_alias(alias), host_pass(pass)
+  {
+  }
+  MercuryServer(std::string alias, int tcp_port, int udp_port,
+                const QByteArray &pass = nullptr)
+      : host_alias(alias), host_pass(pass), tcp_port(tcp_port),
+        udp_port(udp_port) {};
   MercuryServer(MercuryServer &server)
-      : host_alias(server.host_alias), tcp_port(server.tcp_port),
-        udp_port(server.udp_port)
+      : host_alias(server.host_alias), host_pass(server.host_pass),
+        tcp_port(server.tcp_port), udp_port(server.udp_port)
   {
   }
 
@@ -123,7 +129,8 @@ public slots:
   Handles a client's initial establishment message and validates the client,
   enabling it to receive MFTP data.
   */
-  void validate_client(int id, bool is_start, std::string alias, int mftp_port);
+  void validate_client(int id, bool is_start, std::string alias, int mftp_port,
+                       const QByteArray &password = nullptr);
 
   /*
   This slot will be connected to every client's processor and go off whenever a
@@ -161,6 +168,9 @@ private:
 
   // The host's alias
   std::string host_alias;
+
+  // The host's hashed password
+  QByteArray host_pass;
 
   // Global UDP socket that all clients will be contacted with
   std::shared_ptr<QUdpSocket> mftp_sock = nullptr;

@@ -121,7 +121,7 @@ void StreamWindow::initialize_primary_ui_widgets()
   main_layout->setRowMinimumHeight(1, 75);
 
   display = new QWidget(this);
-  side_pane = new SidePane(this);
+  side_pane = new SidePane(this, alias);
 
   std::function<bool(QImage &)> video_func = std::bind(
       &StreamWindow::provide_next_video_frame, this, std::placeholders::_1);

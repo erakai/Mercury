@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../config/mconfig.hpp"
-
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QPalette>
@@ -29,7 +27,7 @@ class SidePane : public QWidget
   Q_OBJECT;
 
 public:
-  SidePane(QWidget *parent = nullptr);
+  SidePane(QWidget *parent = nullptr, const std::string &displayName = "User3279760");
 
   void new_chat_message(ChatMessage msg);
 
@@ -41,4 +39,5 @@ signals:
 private:
   QListWidget *chatBox;
   QLineEdit *messageInput;
+  std::string displayName;
 };

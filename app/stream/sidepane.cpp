@@ -1,8 +1,6 @@
 #include "sidepane.hpp"
 
-#include <iostream>
-
-SidePane::SidePane(QWidget *parent) : QWidget(parent)
+SidePane::SidePane(QWidget *parent, const std::string &displayName) : QWidget(parent), displayName(displayName)
 {
   QPalette pal = QPalette();
   pal.setColor(QPalette::Window, Qt::gray);
@@ -62,10 +60,7 @@ void SidePane::render_and_send_message(std::string msgContent)
 
   messageInput->clear();
 
-  QSettings settings("../../config/MercuryClientSettings.ini",
-                     QSettings::IniFormat);
-
-  new_chat_message({mercury::get_alias(settings).toStdString(), msgContent});
+  new_chat_message({displayName, msgContent});
 
   emit send_chat_message(msgContent);
 }

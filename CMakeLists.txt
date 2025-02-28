@@ -60,6 +60,10 @@ add_custom_target(assets
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
 )
 
+add_custom_target(config
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/config ${CMAKE_CURRENT_BINARY_DIR}/config
+)
+
 # Create dependencies
 add_subdirectory(netlib)
 

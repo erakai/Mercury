@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>440</width>
-    <height>440</height>
+    <height>467</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -165,6 +165,20 @@ QDialog#HostStreamWindow {
          </item>
          <item>
           <widget class="QLineEdit" name="displayNameLineEdit"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="passwordLabel">
+           <property name="text">
+            <string>Password:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="passwordLineEdit"/>
          </item>
         </layout>
        </item>

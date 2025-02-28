@@ -76,9 +76,10 @@ void HostStreamWindow::open_stream_window()
   std::string alias = ui->displayNameLineEdit->text().toStdString();
   quint16 tcpPort = ui->tcpPortLineEdit->text().toUShort();
   quint16 udpPort = ui->udpPortLineEdit->text().toUShort();
+  std::string password = ui->passwordLineEdit->text().toStdString();
 
   std::shared_ptr<HostService> serv =
-      std::make_shared<HostService>(alias, tcpPort, udpPort);
+      std::make_shared<HostService>(alias, tcpPort, udpPort, password);
   serv->stream_name = ui->streamNameLineEdit->text().toStdString();
   serv->server->start_server();
   // This sets itself to delete on close, so no memory leak (I think)

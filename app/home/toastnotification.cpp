@@ -6,9 +6,21 @@
 #include <QTimer>
 
 void ToastNotification::showToast(QWidget *parent, const QString &text,
-                                  int duration)
+                                  int duration, ToastType toastType)
 {
   ToastNotification *toast = new ToastNotification(parent);
+  switch (toastType)
+  {
+  case WARNING:
+    toast->setStyleSheet(
+        toast->styleSheet().append("color: rgb(227, 208, 113);"));
+    break;
+  case ERROR:
+    toast->setStyleSheet(toast->styleSheet().append("color: red;"));
+    break;
+  default:
+    toast->setStyleSheet(toast->styleSheet().append("color: white;"));
+  }
   toast->setText(text);
   toast->raise();
   toast->show();
@@ -26,7 +38,6 @@ ToastNotification::ToastNotification(QWidget *parent) : QLabel(parent)
 {
   setAlignment(Qt::AlignCenter);
   setStyleSheet("background-color: rgba(192, 192, 192, 255);"
-                "color: white;"
                 "font-weight: bold;"
                 "padding: 10px;"
                 "border-radius: 10px;");

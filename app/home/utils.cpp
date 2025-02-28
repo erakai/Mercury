@@ -19,3 +19,18 @@ QString Utils::getDisplayName()
 {
   return mercury::get_alias(settings);
 }
+
+int Utils::getDefaultClientUdpPort()
+{
+  return mercury::get_defaultClientUdpPort(settings);
+}
+
+int Utils::getDefaultHostUdpPort()
+{
+  return mercury::get_defaultHostUdpPort(settings);
+}
+
+int Utils::getDefaultHostTcpPort()
+{
+  return mercury::get_defaultHostTcpPort(settings);
+}

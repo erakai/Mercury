@@ -15,7 +15,9 @@ JoinStreamWindow::JoinStreamWindow(QWidget *parent)
 
   // Default ports (should move this to settings)
   ui->hostTcpPortLineEdit->setText("54332");
-  ui->clientUdpPortLineEdit->setText("34342");
+  ui->clientUdpPortLineEdit->setText(
+      QString::number(Utils::instance().getDefaultClientUdpPort()));
+  ui->displayNameLineEdit->setText(Utils::instance().getDisplayName());
 }
 
 JoinStreamWindow::~JoinStreamWindow()
@@ -30,8 +32,8 @@ void JoinStreamWindow::on_cancelButton_clicked()
 
 void JoinStreamWindow::on_joinButton_clicked()
 {
-  std::string alias = ui->displayNameTextEdit->text().toStdString();
-  std::string server_address = ui->ipAddressTextEdit->text().toStdString();
+  std::string alias = ui->displayNameLineEdit->text().toStdString();
+  std::string server_address = ui->ipAddressLineEdit->text().toStdString();
   QHostAddress address(server_address.c_str());
 
   quint16 hostTcpPort = ui->hostTcpPortLineEdit->text().toUShort();

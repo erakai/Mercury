@@ -10,7 +10,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
   // that don't rely on ui files, open an example in Qt Creator (the screenshot
   // example is really good).
   ui.setupUi(this);
-
   ui.settingsButton->setText(Utils::instance().getDisplayName());
 }
 

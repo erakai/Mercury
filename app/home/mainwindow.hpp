@@ -5,6 +5,7 @@
 #include "ui_mainwindow.h"
 
 #include <QMainWindow>
+#include <QLabel>
 
 class MainWindow : public QMainWindow
 {

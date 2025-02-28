@@ -20,7 +20,5 @@ int main(int argc, char **argv)
     mercury::curl_default_config();
   }
 
-  mercury::change_host_settings();
-
   return a.exec();
 }

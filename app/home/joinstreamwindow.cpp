@@ -49,7 +49,6 @@ void JoinStreamWindow::on_joinButton_clicked()
     hasher.addData(password);
 
     hashedPassword = hasher.result();
-    qDebug() << hashedPassword.toStdString();
   }
 
   quint16 hostTcpPort = ui->hostTcpPortLineEdit->text().toUShort();

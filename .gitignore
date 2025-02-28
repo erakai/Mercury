@@ -14,3 +14,5 @@ Makefile
 CMakeLists.txt.user
 
 a.out
+
+config/MercuryClientSettings.ini

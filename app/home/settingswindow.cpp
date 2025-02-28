@@ -153,8 +153,5 @@ void SettingsWindow::on_applyButton_clicked()
                              maxViewerCount, defaultClientUdpPort,
                              defaultHostTcpPort, defaultHostUdpPort);
 
-  qDebug() << alias << darkMode << clientStreamResOption << hostStreamResOption
-           << hostFramerateOption << maxViewerCount;
-
   ToastNotification::showToast(this, "All changes saved!");
 }

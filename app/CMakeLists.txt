@@ -55,6 +55,7 @@ target_link_libraries(mercury PRIVATE netlib)
 
 # Add dependency on assets in case we want any
 add_dependencies(mercury assets)
+add_dependencies(mercury config)
 
 # Install to destination
 include(GNUInstallDirs)

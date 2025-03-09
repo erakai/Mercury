@@ -1,6 +1,5 @@
 #include "mconfig.hpp"
 
-#include <curl/curl.h>
 #include <fstream>
 #include <iostream>
 #include <QSettings>
@@ -31,32 +30,32 @@ void mercury::curl_default_config()
                           "main/config/DefaultClientSettings.ini";
   const std::string outputFilename = "config/MercuryClientSettings.ini";
 
-  CURL *curl = curl_easy_init();
-  if (!curl)
-  {
-    std::cerr << "Error: curl_easy_init() failed\n";
-  }
+  // CURL *curl = curl_easy_init();
+  // if (!curl)
+  // {
+  //   std::cerr << "Error: curl_easy_init() failed\n";
+  // }
 
-  std::ofstream outFile(outputFilename, std::ios::binary);
-  if (!outFile)
-  {
-    std::cerr << "Error: Could not open file for writing\n";
-    curl_easy_cleanup(curl);
-  }
+  // std::ofstream outFile(outputFilename, std::ios::binary);
+  // if (!outFile)
+  // {
+  //   std::cerr << "Error: Could not open file for writing\n";
+  //   curl_easy_cleanup(curl);
+  // }
 
-  curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &outFile);
+  // curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+  // curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+  // curl_easy_setopt(curl, CURLOPT_WRITEDATA, &outFile);
 
-  CURLcode res = curl_easy_perform(curl);
-  if (res != CURLE_OK)
-  {
-    std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res)
-              << '\n';
-  }
+  // CURLcode res = curl_easy_perform(curl);
+  // if (res != CURLE_OK)
+  // {
+  //   std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res)
+  //             << '\n';
+  // }
 
-  outFile.close();
-  curl_easy_cleanup(curl);
+  // outFile.close();
+  // curl_easy_cleanup(curl);
 }
 
 bool mercury::get_dark_mode(QSettings &settings)

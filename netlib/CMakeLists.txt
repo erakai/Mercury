@@ -19,9 +19,13 @@ set(NETLIB_TEST_SOURCES
   test/client_test.cpp
 )
 
+set(CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE PRE_TEST)
+
 # The library
 qt_add_library(netlib ${NETLIB_SOURCES}
-    include/hstp.hpp include/logger.hpp include/mercury_client.hpp include/mercury_server.hpp include/mftp.hpp)
+    include/hstp.hpp include/logger.hpp include/mercury_client.hpp include/mercury_server.hpp include/mftp.hpp
+    include/netlib_global.h)
+target_compile_definitions(netlib PRIVATE NETLIB_LIBRARY)
 
 # Set include dir and qt
 target_include_directories(netlib

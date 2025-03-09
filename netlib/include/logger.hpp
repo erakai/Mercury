@@ -1,5 +1,6 @@
 #pragma once
 
+#include "netlib_global.h"
 #include <chrono>
 #include <filesystem>
 #include <source_location>
@@ -15,11 +16,11 @@ The last argument must be a log level. Example call:
 =========================================================================
 */
 
-extern std::chrono::time_point<std::chrono::system_clock> boot_time;
-std::string get_time_since_boot();
+extern NETLIB_EXPORT std::chrono::time_point<std::chrono::system_clock> boot_time;
+NETLIB_EXPORT std::string get_time_since_boot();
 
 // Log levels
-extern int MINIMUM_LOG_LEVEL; // increase this to filter what is printed
+extern NETLIB_EXPORT int MINIMUM_LOG_LEVEL; // increase this to filter what is printed
 enum class ll
 {
   NOTE = 0,
@@ -27,11 +28,11 @@ enum class ll
   ERROR = 2,
   CRITICAL = 3,
 };
-std::string get_log_level_string(ll lev);
+NETLIB_EXPORT std::string get_log_level_string(ll lev);
 
 // This struct is necessary to have a function accept variable arg count,
 // while also providing the source information of the caller.
-struct FormatWithLocation
+struct NETLIB_EXPORT FormatWithLocation
 {
   const char *value;
   std::source_location loc;
@@ -43,7 +44,7 @@ struct FormatWithLocation
   }
 };
 
-template <typename... Args> void log(FormatWithLocation fmt, Args &&...args)
+ template <typename... Args> void log(FormatWithLocation fmt, Args &&...args)
 {
   // Retrieve last argument and check if it is a log level.
   // This will fail on compile if not properly provided by user.

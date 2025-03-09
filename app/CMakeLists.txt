@@ -29,21 +29,7 @@ qt_add_executable(mercury
 )
 
 # Qt set up
-target_link_libraries(mercury PRIVATE Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets)
-# Curl set up
-
-# so leo can build this shit for now
-if(WIN32)
-set(CURL_ROOT "C:/Program Files/curl")
-endif()
-
-find_package(CURL REQUIRED)
-target_link_libraries(mercury PRIVATE CURL::libcurl)
-
-# # Set include dir
-# target_include_directories(mercury
-#   PUBLIC ${PROJECT_SOURCE_DIR}/app/stream
-# )
+target_link_libraries(mercury PRIVATE Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets)
 
 # Prevents console window on windows (Qt stuff)
 set_target_properties(mercury PROPERTIES
@@ -61,7 +47,6 @@ add_dependencies(mercury config)
 include(GNUInstallDirs)
 install(TARGETS mercury
     BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 

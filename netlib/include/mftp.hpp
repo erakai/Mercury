@@ -1,5 +1,6 @@
 #pragma once
 
+#include "netlib_global.h"
 #include <QAudioBuffer>
 #include <QBuffer>
 #include <QByteArray>
@@ -19,7 +20,7 @@ process_datagram implementation as well, or everything breaks.
 */
 
 // Also update size_of_mftp_header
-struct MFTP_Header
+struct NETLIB_EXPORT MFTP_Header
 {
   uint8_t version;                         // 1 byte
   uint16_t payload_type;                   // 2 bytes
@@ -46,14 +47,14 @@ struct MFTP_Header
 Processor class that re-assembles the fragmented datagrams into one big one.
 */
 
-struct PartialFrame
+struct NETLIB_EXPORT PartialFrame
 {
   int remaining_fragments = -1;
   MFTP_Header header;
   std::vector<QByteArray> datagrams;
 };
 
-class MFTPProcessor : public QObject
+class NETLIB_EXPORT MFTPProcessor : public QObject
 {
   Q_OBJECT;
 
@@ -78,15 +79,16 @@ private:
 General usage.
 */
 
-std::shared_ptr<QUdpSocket> acquire_mftp_socket(int port);
-void acquire_mftp_socket(std::shared_ptr<QUdpSocket>, int port);
-void print_header(MFTP_Header header);
-int size_of_mftp_header();
+NETLIB_EXPORT std::shared_ptr<QUdpSocket> acquire_mftp_socket(int port);
+NETLIB_EXPORT void acquire_mftp_socket(std::shared_ptr<QUdpSocket>, int port);
+NETLIB_EXPORT void print_header(MFTP_Header header);
+NETLIB_EXPORT int size_of_mftp_header();
 
 /*
 Host-side functionality.
 */
 
-bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
-                   int dest_port, MFTP_Header &header, QImage video_image,
-                   QAudioBuffer audio);
+NETLIB_EXPORT bool send_datagram(std::shared_ptr<QUdpSocket> sock,
+                                 QHostAddress dest_ip, int dest_port,
+                                 MFTP_Header &header, QImage video_image,
+                                 QAudioBuffer audio);

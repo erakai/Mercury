@@ -1,7 +1,6 @@
 #pragma once
 
-#include "logger.hpp"
-#include "mftp.hpp"
+#include "netlib_global.h"
 #include <QHostAddress>
 #include <QTcpSocket>
 #include <QtCore/qhashfunctions.h>
@@ -11,6 +10,7 @@
 #include <QtCore/qtypes.h>
 #include <QtNetwork/qtcpsocket.h>
 #include <cstdint>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -35,7 +35,7 @@ They are inspired by DHCP options: https://www.ietf.org/rfc/rfc2132.txt.
 #define HSTP_HEADER_SIZE                                                       \
   ALIAS_SIZE * sizeof(char) + sizeof(uint16_t) + sizeof(uint8_t)
 
-struct Option
+struct NETLIB_EXPORT Option
 {
   uint8_t type;
   uint16_t len; // length of data field in bytes (may be 0)
@@ -65,7 +65,7 @@ struct Option
   }
 };
 
-struct HSTP_Header
+struct NETLIB_EXPORT HSTP_Header
 {
   char sender_alias[ALIAS_SIZE] = {0};
   std::vector<Option> options;
@@ -95,7 +95,7 @@ enum class MSG_STATUS
  * state of Handler for the next message.
  */
 
-class HstpHandler
+class NETLIB_EXPORT HstpHandler
 {
   friend class HstpHandlerTest;
 
@@ -153,7 +153,7 @@ private:
  * protocol.
  */
 
-class HstpProcessor : public QObject
+class NETLIB_EXPORT HstpProcessor : public QObject
 {
   Q_OBJECT;
 

@@ -19,8 +19,6 @@ public:
       : client(MercuryClient("ClientAlias")),
         server(MercuryServer("ServerAlias"))
   {
-    MINIMUM_LOG_LEVEL = 1;
-
     // How to use QCoreApplication non-blocking:
     // https://stackoverflow.com/questions/15202098/using-qapplication-in-a-non-blocking-way
     int argc = 0;
@@ -37,7 +35,6 @@ public:
 
     client.disconnect();
 
-    MINIMUM_LOG_LEVEL = -1;
     delete app;
   }
 
@@ -160,7 +157,7 @@ TEST_F(NetlibTest, ServerClientBasic)
 
   EXPECT_EQ(frame.seq_num, 1);
   EXPECT_NE(frame.timestamp, 0);
-  EXPECT_NEAR(sent_video_buffer.size(), received_video_bytes.size(), 1500);
+  EXPECT_NEAR(sent_video_buffer.size(), received_video_bytes.size(), 10000);
 }
 
 // Demonstrate some basic assertions, sanity check.

@@ -61,7 +61,7 @@ void StreamDisplay::acquire_next_frame()
     }
     else
     {
-      log("Invalid VideoFrame received.", ll::ERROR);
+      qCritical("Invalid VideoFrame received.");
     }
   }
 }

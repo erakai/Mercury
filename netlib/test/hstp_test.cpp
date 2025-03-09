@@ -176,5 +176,5 @@ TEST_F(HstpHandlerTest, HstpHandler_PasswordEstablish)
   std::shared_ptr<QByteArray> bytes = handler.output_msg();
   std::shared_ptr<HSTP_Header> hdr = handler.bytes_to_msg(bytes);
 
-  EXPECT_EQ(QByteArray(&hdr->options[0].data.get()[4]), hasher.result());
+  EXPECT_EQ(QByteArray(&hdr->options[0].data.get()[4], 32), hasher.result());
 }

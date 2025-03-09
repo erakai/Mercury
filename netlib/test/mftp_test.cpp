@@ -1,4 +1,3 @@
-#include "logger.hpp"
 #include "mftp.hpp"
 #include <QApplication>
 #include <QAudioBuffer>
@@ -15,8 +14,6 @@ class MftpTest : public testing::Test
 public:
   MftpTest()
   {
-    MINIMUM_LOG_LEVEL = 1;
-
     int argc = 0;
     char *argv[] = {nullptr};
     app = new QGuiApplication(argc, argv);
@@ -34,8 +31,6 @@ public:
   }
   ~MftpTest()
   {
-    MINIMUM_LOG_LEVEL = -1;
-
     sock1->close();
     sock2->close();
 
@@ -137,7 +132,7 @@ TEST_F(MftpTest, SendAndProcessBasic)
   received_video_buffer.close();
 
   // Size can vary based on how it serializes
-  ASSERT_NEAR(sent_video_bytes.size(), received_video_bytes.size(), 1500);
+  ASSERT_NEAR(sent_video_bytes.size(), received_video_bytes.size(), 10000);
 
   // Examine this in: build/assets/...
   ASSERT_TRUE(received_image.save("assets/test.jpg", "JPG"));

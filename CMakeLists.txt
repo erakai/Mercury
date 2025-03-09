@@ -19,6 +19,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "-Wall -Werror")
 
+# For windows
+set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+
 # Project definition
 project(mercury)
 
@@ -35,7 +39,7 @@ elseif (UNIX)
 endif()
 
 # Install qt
-find_package(Qt6 REQUIRED COMPONENTS Widgets Network Multimedia MultimediaWidgets Test)
+find_package(Qt6 REQUIRED COMPONENTS Gui Widgets Network Multimedia MultimediaWidgets Test)
 qt_standard_project_setup()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)

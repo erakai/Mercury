@@ -1,7 +1,6 @@
 #include "streamwindow.hpp"
 #include "hosttoolbar.hpp"
 #include "hstp.hpp"
-#include "logger.hpp"
 #include "singleton/videomanager.h"
 #include <QApplication>
 #include <QMenuBar>
@@ -182,7 +181,7 @@ void StreamWindow::initialize_primary_ui_widgets()
 
 void StreamWindow::stream_fully_initialized()
 {
-  log("Beginning stream playback.", ll::NOTE);
+  qInfo("Beginning stream playback.");
   stream_display->begin_playback();
 }
 
@@ -222,8 +221,8 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
     }
     else
     {
-      log("Unable to retrieve video image from manager (status: %d).", status,
-          ll::WARNING);
+      qWarning("Unable to retrieve video image from manager (status: %d).",
+               status);
       return false;
     }
 
@@ -236,7 +235,7 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
 
     if (jitter.seq_num == -1)
     {
-      log("Jitter buffer empty when frame desired.", ll::WARNING);
+      qInfo("Jitter buffer empty when frame desired.");
       return false;
     }
 
@@ -264,7 +263,7 @@ bool StreamWindow::provide_next_audio_frame(QBuffer &next_audio)
   if (!fart_file.open(QIODevice::ReadOnly))
   {
     // Handle error opening file
-    log("failed to load audio file", ll::ERROR);
+    qInfo("failed to load audio file");
     return false;
   }
 

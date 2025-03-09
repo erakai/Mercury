@@ -1,5 +1,6 @@
 #pragma once
 
+#include "netlib_global.h"
 #include "hstp.hpp"
 #include "mftp.hpp"
 #include <QImage>
@@ -13,7 +14,7 @@
 
 #define MINIMUM_FRAME_COUNT_FOR_PLAYBACK 1
 
-struct JitterEntry
+struct NETLIB_EXPORT JitterEntry
 {
   int16_t seq_num;
   int32_t timestamp;
@@ -21,7 +22,7 @@ struct JitterEntry
   QAudioBuffer audio;
 };
 
-class MercuryClient : public QObject
+class NETLIB_EXPORT MercuryClient : public QObject
 {
   friend class MercuryClientTest;
   Q_OBJECT;

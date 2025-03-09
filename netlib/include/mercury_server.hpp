@@ -1,5 +1,6 @@
 #pragma once
 
+#include "netlib_global.h"
 #include "hstp.hpp"
 #include <QAudioBuffer>
 #include <QTcpServer>
@@ -14,7 +15,7 @@
 This struct helps us keep track of our client list. It is low level and not
 meant to be exposed to the actual application.
 */
-struct Client
+struct NETLIB_EXPORT Client
 {
   // Validated - has sent server port, alias, and password, etc
   bool validated = false;
@@ -36,7 +37,7 @@ struct Client
   uint32_t frame_seq_num = 1;
 };
 
-class MercuryServer : public QTcpServer
+class NETLIB_EXPORT MercuryServer : public QTcpServer
 {
   Q_OBJECT;
 

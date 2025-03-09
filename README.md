@@ -16,7 +16,7 @@ Prerequisites:
 * Open-Source GPL Licensed Qt 6.8 Developer Tools (from [here](https://www.qt.io/download-qt-installer-oss))
 * C++, CMake, Git
 
-You can either build from the command line (an example path to pass into cmake could be: `cmake .. -DCMAKE_PREFIX_PATH=~/Qt/6.8.1/macos`):
+You can either build from the command line on a Unix system (an example path to pass into cmake could be: `cmake .. -DCMAKE_PREFIX_PATH=~/Qt/6.8.1/macos`):
 ```bash
 git clone https://github.com/erakai/Mercury
 git submodule update --init --recursive

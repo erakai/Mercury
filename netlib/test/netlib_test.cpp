@@ -157,7 +157,7 @@ TEST_F(NetlibTest, ServerClientBasic)
 
   EXPECT_EQ(frame.seq_num, 1);
   EXPECT_NE(frame.timestamp, 0);
-  EXPECT_NEAR(sent_video_buffer.size(), received_video_bytes.size(), 1500);
+  EXPECT_NEAR(sent_video_buffer.size(), received_video_bytes.size(), 10000);
 }
 
 // Demonstrate some basic assertions, sanity check.

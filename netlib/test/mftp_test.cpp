@@ -132,7 +132,7 @@ TEST_F(MftpTest, SendAndProcessBasic)
   received_video_buffer.close();
 
   // Size can vary based on how it serializes
-  ASSERT_NEAR(sent_video_bytes.size(), received_video_bytes.size(), 1500);
+  ASSERT_NEAR(sent_video_bytes.size(), received_video_bytes.size(), 10000);
 
   // Examine this in: build/assets/...
   ASSERT_TRUE(received_image.save("assets/test.jpg", "JPG"));

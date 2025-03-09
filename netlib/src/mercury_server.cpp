@@ -249,7 +249,7 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
   {
     qCritical("Source passed to send_frame too long - should be <= 12, instead "
               "is %ld",
-              strlen(source));
+              static_cast<long>(strlen(source)));
     return -1;
   }
 

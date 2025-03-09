@@ -16,7 +16,7 @@
 #include <QtMultimedia/qaudiooutput.h>
 #include <QtMultimedia/qmediaplayer.h>
 #include <functional>
-#include <logger.hpp>
+#include <QtLogging>
 
 using namespace std;
 

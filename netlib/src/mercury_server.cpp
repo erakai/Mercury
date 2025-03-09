@@ -1,6 +1,5 @@
 #include "mercury_server.hpp"
 #include "hstp.hpp"
-#include "logger.hpp"
 #include "mftp.hpp"
 
 #include <QNetworkInterface>
@@ -19,13 +18,13 @@ bool MercuryServer::start_server()
 {
   if (udp_port == -1 || tcp_port == -1)
   {
-    log("Server ports are not set, cannot start.", ll::CRITICAL);
+    qFatal("Server ports are not set, cannot start.");
     return false;
   }
 
   if (!listen(QHostAddress::Any, tcp_port))
   {
-    log("Error: Unable to start server.", ll::CRITICAL);
+    qFatal("Error: Unable to start server.");
     close();
     return false;
   }
@@ -33,7 +32,7 @@ bool MercuryServer::start_server()
   mftp_sock = acquire_mftp_socket(udp_port);
   if (mftp_sock == nullptr)
   {
-    log("Unable to construct MFTP socket.", ll::ERROR);
+    qFatal("Unable to construct MFTP socket.");
     return false;
   }
 
@@ -52,8 +51,8 @@ bool MercuryServer::start_server()
   if (address.isEmpty())
     address = QHostAddress(QHostAddress::LocalHost).toString();
 
-  log("Started server at %s with HSTP port %d.", address.toStdString().c_str(),
-      tcp_port, ll::NOTE);
+  qInfo("Started server at %s with HSTP port %d.",
+        address.toStdString().c_str(), tcp_port);
   server_start = std::chrono::system_clock::now();
   id_counter = 0;
 
@@ -77,8 +76,8 @@ void MercuryServer::close_server()
     mftp_sock->close();
     close();
 
-    log("Gracefully shutting down...", ll::NOTE);
-    log("Server closed.", ll::NOTE);
+    qInfo("Gracefully shutting down...");
+    qInfo("Server closed.");
   }
 
   id_counter = 0;
@@ -164,7 +163,7 @@ void MercuryServer::validate_client(int id, bool is_start, std::string alias,
   new_client.validated = true;
   new_client.mftp_port = mftp_port;
   strcpy(new_client.alias, alias.c_str());
-  log("Client \"%s\" has connected.", new_client.alias, ll::NOTE);
+  qInfo("Client \"%s\" has connected.", new_client.alias);
 
   // Connect relevant signals to slots
   connect(new_client.processor.get(), &HstpProcessor::received_chat, this,
@@ -211,7 +210,7 @@ void MercuryServer::disconnect_client(int id)
   if (client.validated)
   {
     emit client_disconnected(id, std::string(client.alias));
-    log("Client \"%s\" has disconnected.", client.alias, ll::NOTE);
+    qInfo("Client \"%s\" has disconnected.", client.alias);
   }
 }
 
@@ -226,7 +225,7 @@ void MercuryServer::process_received_hstp_messages(int id)
     return;
   }
 
-  log("Issue processing received hstp message.", ll::ERROR);
+  qCritical("Issue processing received hstp message.");
 }
 
 void MercuryServer::forward_chat_message(int sender_id, std::string alias,
@@ -248,8 +247,9 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
 {
   if (strlen(source) > 12)
   {
-    log("Source passed to send_frame too long - should be <= 12, instead is %d",
-        strlen(source), ll::ERROR);
+    qCritical("Source passed to send_frame too long - should be <= 12, instead "
+              "is %ld",
+              strlen(source));
     return -1;
   }
 

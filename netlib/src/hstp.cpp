@@ -17,7 +17,7 @@ bool HstpHandler::add_option_echo(const char *msg)
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
-    log("Unable to add option, uninitalized message.", ll::ERROR);
+    qCritical("Unable to add option, uninitalized message.");
     return false;
   }
 
@@ -38,7 +38,7 @@ bool HstpHandler::add_option_establishment(bool is_start, uint16_t port,
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
-    log("Unable to add option, uninitalized message.", ll::ERROR);
+    qCritical("Unable to add option, uninitalized message.");
     return false;
   }
 
@@ -69,7 +69,7 @@ bool HstpHandler::add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
-    log("Unable to add option, uninitalized message.", ll::ERROR);
+    qCritical("Unable to add option, uninitalized message.");
     return false;
   }
 
@@ -102,7 +102,7 @@ std::shared_ptr<QByteArray> HstpHandler::output_msg()
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
-    log("Unable to emit message, uninitalized message.", ll::ERROR);
+    qCritical("Unable to emit message, uninitalized message.");
     clear_msg();
     return nullptr;
   }
@@ -124,14 +124,14 @@ bool HstpHandler::output_msg_to_socket(const std::shared_ptr<QTcpSocket> &sock)
     }
     else
     {
-      log("Failed to write all HSTP message bytes", ll::ERROR);
+      qCritical("Failed to write all HSTP message bytes");
       return false;
     }
   }
   else
   {
-    log("Failed to output HSTP message to socket, issue with message or socket",
-        ll::ERROR);
+    qCritical("Failed to output HSTP message to socket, issue with message or "
+              "socket");
     return false;
   }
 }
@@ -228,7 +228,7 @@ bool HstpHandler::add_option_generic_string(uint8_t type, const char *gen_str)
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
-    log("Unable to add option, uninitalized message.", ll::ERROR);
+    qCritical("Unable to add option, uninitalized message.");
     return false;
   }
 
@@ -254,7 +254,7 @@ bool HstpHandler::add_option_generic_uint32(uint8_t type, uint32_t uint32)
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
   {
-    log("Unable to add option, uninitalized message.", ll::ERROR);
+    qCritical("Unable to add option, uninitalized message.");
     return false;
   }
 
@@ -338,7 +338,7 @@ qint16 HstpProcessor::process_single_hstp_message(qint16 opt_size)
   }
   else
   {
-    log("Issue reading HSTP single packet", ll::ERROR);
+    qWarning("Issue reading HSTP single packet");
     return -1;
   }
 
@@ -358,8 +358,7 @@ void HstpProcessor::handle_default(HANDLER_PARAMS)
 void HstpProcessor::handle_echo(HANDLER_PARAMS)
 {
   std::string msg(opt.data.get());
-  log(msg.c_str(), ll::NOTE);
-
+  qInfo("%s", msg.c_str());
   emit received_echo(alias, msg);
 }
 
@@ -368,8 +367,7 @@ void HstpProcessor::handle_establishment(const char alias[18],
 {
   if (!opt.data || opt.len != 36)
   {
-    log("Something went wrong with handling an establishment option...",
-        ll::ERROR);
+    qCritical("Something went wrong with handling an establishment option...");
     handle_default(alias, opt);
     return;
   }
@@ -397,7 +395,7 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
 {
   if (!opt.data || opt.len == 0)
   {
-    log("Something went wrong with handling a chat option...", ll::ERROR);
+    qCritical("Something went wrong with handling a chat option...");
     handle_default(alias, opt);
     return;
   }
@@ -412,7 +410,7 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
   if (len_of_message == 0)
   {
     std::cout << opt << std::endl;
-    log("Something went wrong with handling chat message", ll::ERROR);
+    qCritical("Something went wrong with handling chat message");
     return;
   }
 
@@ -420,7 +418,7 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
 
   if (chat_msg.empty() || std::strlen(alias_of_chatter) == 0)
   {
-    log("Something went wrong with handling chat message", ll::ERROR);
+    qCritical("Something went wrong with handling chat message");
     return;
   }
 
@@ -433,7 +431,7 @@ void HstpProcessor::handle_string(
 {
   if (!opt.data || opt.len == 0)
   {
-    log("Something went wrong with handling a string option...", ll::ERROR);
+    qCritical("Something went wrong with handling a string option...");
     handle_default(alias, opt);
     return;
   }
@@ -448,7 +446,7 @@ void HstpProcessor::handle_uint32(
 {
   if (!opt.data || opt.len == 0)
   {
-    log("Something went wrong with handling a uint32 option...", ll::ERROR);
+    qCritical("Something went wrong with handling a uint32 option...");
     handle_default(alias, opt);
     return;
   }

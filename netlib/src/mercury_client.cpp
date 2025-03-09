@@ -21,13 +21,13 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
 {
   if (host.isNull())
   {
-    log("Invalid QHostAddress", ll::ERROR);
+    qFatal("Invalid QHostAddress");
     return false;
   }
 
   if (hstp_port == 0 || mftp_port == 0)
   {
-    log("Invalid ports", ll::ERROR);
+    qFatal("Invalid ports");
   }
 
   m_hstp_sock->connectToHost(host, hstp_port);
@@ -36,22 +36,22 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
 
   if (!m_mftp_sock || !m_mftp_sock->isValid())
   {
-    log("Failed to acquire valid mftp socket", ll::ERROR);
+    qCritical("Failed to acquire valid mftp socket");
     return false;
   }
 
   if (m_hstp_sock->waitForConnected(2000))
   {
     std::string address = host.toString().toStdString();
-    log("Connected to client at %s with HSTP: %d, MFTP: %d", address.c_str(),
-        hstp_port, mftp_port, ll::NOTE);
+    qInfo("Connected to client at %s with HSTP: %d, MFTP: %d", address.c_str(),
+          hstp_port, mftp_port);
 
     // send establishment message
     m_hstp_handler.init_msg(m_alias.c_str());
     m_hstp_handler.add_option_establishment(true, mftp_port, pass);
     if (!m_hstp_handler.output_msg_to_socket(m_hstp_sock))
     {
-      log("Failed to send establishment message to socket", ll::ERROR);
+      qCritical("Failed to send establishment message to socket");
       return false;
     }
 
@@ -59,8 +59,7 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
   }
   else
   {
-    log("Failed connection for HSTP/TCP or MFTP/UDP after 2000 msec.",
-        ll::ERROR);
+    qCritical("Failed connection for HSTP/TCP or MFTP/UDP after 2000 msec.");
     return false;
   }
 }
@@ -71,7 +70,7 @@ bool MercuryClient::disconnect()
     m_mftp_sock->close();
   if (m_hstp_sock->isOpen())
   {
-    log("Gracefully shutting down...", ll::NOTE);
+    qInfo("Gracefully shutting down...");
     m_hstp_sock->close();
   }
   return true;
@@ -83,7 +82,7 @@ bool MercuryClient::send_chat_message(const std::string &chat_msg)
   m_hstp_handler.add_option_chat(m_alias.c_str(), chat_msg.c_str());
   if (!m_hstp_handler.output_msg_to_socket(m_hstp_sock))
   {
-    log("Failed to send chat message to socket", ll::ERROR);
+    qCritical("Failed to send chat message to socket");
     return false;
   }
 
@@ -99,7 +98,7 @@ void MercuryClient::process_received_hstp_messages()
   }
   else
   {
-    log("Issue processing received hstp message", ll::ERROR);
+    qCritical("Issue processing received hstp message");
   }
 }
 

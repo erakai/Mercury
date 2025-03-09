@@ -1,4 +1,3 @@
-#include "logger.hpp"
 #include "mftp.hpp"
 #include <QApplication>
 #include <QAudioBuffer>
@@ -15,8 +14,6 @@ class MftpTest : public testing::Test
 public:
   MftpTest()
   {
-    MINIMUM_LOG_LEVEL = 1;
-
     int argc = 0;
     char *argv[] = {nullptr};
     app = new QGuiApplication(argc, argv);
@@ -34,8 +31,6 @@ public:
   }
   ~MftpTest()
   {
-    MINIMUM_LOG_LEVEL = -1;
-
     sock1->close();
     sock2->close();
 

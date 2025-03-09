@@ -1,4 +1,3 @@
-#include "logger.hpp"
 #include <mftp.hpp>
 
 std::shared_ptr<QUdpSocket> acquire_mftp_socket(int port)
@@ -15,12 +14,12 @@ void acquire_mftp_socket(std::shared_ptr<QUdpSocket> sock, int port)
   // Bind socket to target port on this machine
   if (!sock->bind(QHostAddress::Any, port))
   {
-    log("Unable to bind MFTP socket.", ll::ERROR);
+    qCritical("Unable to bind MFTP socket.");
   }
   else
   {
-    log("MFTP Socket created and bound on %s and port %d.",
-        sock->localAddress().toString().toStdString().c_str(), port, ll::NOTE);
+    qInfo("MFTP Socket created and bound on %s and port %d.",
+          sock->localAddress().toString().toStdString().c_str(), port);
   }
 }
 
@@ -36,7 +35,7 @@ bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
   video_buffer.open(QIODevice::WriteOnly);
   if (!video_image.save(&video_buffer, "JPG"))
   {
-    log("Unable to serialize QImage.", ll::ERROR);
+    qCritical("Unable to serialize QImage.");
     return false;
   }
   video_buffer.close();
@@ -93,8 +92,8 @@ bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
     // Send
     if (sock->writeDatagram(dg) < 0)
     {
-      log("Datagram failed to send due to size (%d bytes).", data.size(),
-          ll::CRITICAL);
+      qCritical("Datagram failed to send due to size (%lld bytes).",
+                data.size());
       return false;
     }
   }
@@ -138,7 +137,7 @@ bool MFTPProcessor::process_datagram(QNetworkDatagram datagram)
 
   if (data.size() < size_of_mftp_header())
   {
-    log("Invalid datagram received - only %d bytes.", data.size(), ll::WARNING);
+    qWarning("Invalid datagram received - only %lld bytes.", data.size());
     return false;
   }
 
@@ -173,7 +172,7 @@ bool MFTPProcessor::process_datagram(QNetworkDatagram datagram)
 
       if (curr_frame.remaining_fragments < 0)
       {
-        log("Received too many datagrams for a frame somehow.", ll::ERROR);
+        qCritical("Received too many datagrams for a frame somehow.");
         return false;
       }
 
@@ -195,11 +194,11 @@ bool MFTPProcessor::process_datagram(QNetworkDatagram datagram)
   if (first_free_frame == -1)
   {
     // Case: new frame and we don't have space
-    log("Dropping partial frame %d (had %d remaining fragments out of %d) in "
-        "exchange for new frame %d.",
-        partial_frames[0].header.seq_num, partial_frames[0].remaining_fragments,
-        partial_frames[0].header.total_fragments, new_frame.header.seq_num,
-        ll::WARNING);
+    qInfo("Dropping partial frame %d (had %d remaining fragments out of %d) in "
+          "exchange for new frame %d.",
+          partial_frames[0].header.seq_num,
+          partial_frames[0].remaining_fragments,
+          partial_frames[0].header.total_fragments, new_frame.header.seq_num);
     first_free_frame = 0;
   }
 
@@ -233,7 +232,7 @@ void MFTPProcessor::release_complete_frame(int index)
 
   if (video.isNull())
   {
-    log("Received corrupted data - unable to load image frame.", ll::WARNING);
+    qWarning("Received corrupted data - unable to load image frame.");
     return;
   }
 
@@ -272,16 +271,16 @@ void MFTPProcessor::print_partial_frame_array()
                             f.header.total_fragments - f.remaining_fragments,
                             f.header.total_fragments);
   }
-  log(to_log.c_str(), ll::NOTE);
+  qInfo("%s", to_log.c_str());
 }
 
 void print_header(MFTP_Header header)
 {
-  log("Datagram: Ver %d Type %d Seq #%d Total Frags %d Frag #%d Timestamp %ld "
-      "Audio Len %d Video Len %d Source % s",
-      header.version, header.payload_type, header.seq_num,
-      header.total_fragments, header.fragment_num, header.timestamp,
-      header.audio_len, header.video_len, header.source_name, ll::WARNING);
+  qInfo("Datagram: Ver %d Type %d Seq #%d Total Frags %d Frag #%d Timestamp %d "
+        "Audio Len %d Video Len %d Source %s",
+        header.version, header.payload_type, header.seq_num,
+        header.total_fragments, header.fragment_num, header.timestamp,
+        header.audio_len, header.video_len, header.source_name);
 }
 
 int size_of_mftp_header()

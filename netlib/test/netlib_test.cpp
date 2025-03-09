@@ -19,8 +19,6 @@ public:
       : client(MercuryClient("ClientAlias")),
         server(MercuryServer("ServerAlias"))
   {
-    MINIMUM_LOG_LEVEL = 1;
-
     // How to use QCoreApplication non-blocking:
     // https://stackoverflow.com/questions/15202098/using-qapplication-in-a-non-blocking-way
     int argc = 0;
@@ -37,7 +35,6 @@ public:
 
     client.disconnect();
 
-    MINIMUM_LOG_LEVEL = -1;
     delete app;
   }
 

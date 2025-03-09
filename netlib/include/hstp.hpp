@@ -1,8 +1,6 @@
 #pragma once
 
 #include "netlib_global.h"
-#include "logger.hpp"
-#include "mftp.hpp"
 #include <QHostAddress>
 #include <QTcpSocket>
 #include <QtCore/qhashfunctions.h>
@@ -12,6 +10,7 @@
 #include <QtCore/qtypes.h>
 #include <QtNetwork/qtcpsocket.h>
 #include <cstdint>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <vector>

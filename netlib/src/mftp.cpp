@@ -1,5 +1,6 @@
 #include <mftp.hpp>
 
+#include <QVariant>
 std::shared_ptr<QUdpSocket> acquire_mftp_socket(int port)
 {
   std::shared_ptr<QUdpSocket> sock = std::make_shared<QUdpSocket>();
@@ -21,6 +22,8 @@ void acquire_mftp_socket(std::shared_ptr<QUdpSocket> sock, int port)
     qInfo("MFTP Socket created and bound on %s and port %d.",
           sock->localAddress().toString().toStdString().c_str(), port);
   }
+
+  sock->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, 800000);
 }
 
 bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,

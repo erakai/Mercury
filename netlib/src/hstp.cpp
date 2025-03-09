@@ -414,7 +414,8 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
     return;
   }
 
-  std::string chat_msg(opt.data.get() + ALIAS_SIZE + sizeof(uint32_t), len_of_message);
+  std::string chat_msg(opt.data.get() + ALIAS_SIZE + sizeof(uint32_t),
+                       len_of_message);
 
   if (chat_msg.empty() || std::strlen(alias_of_chatter) == 0)
   {

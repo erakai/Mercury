@@ -88,6 +88,7 @@ NETLIB_EXPORT int size_of_mftp_header();
 Host-side functionality.
 */
 
-NETLIB_EXPORT bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
-                   int dest_port, MFTP_Header &header, QImage video_image,
-                   QAudioBuffer audio);
+NETLIB_EXPORT bool send_datagram(std::shared_ptr<QUdpSocket> sock,
+                                 QHostAddress dest_ip, int dest_port,
+                                 MFTP_Header &header, QImage video_image,
+                                 QAudioBuffer audio);

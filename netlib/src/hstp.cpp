@@ -98,6 +98,24 @@ bool HstpHandler::add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
   return true;
 }
 
+bool HstpHandler::add_option_annotation(const HSTP_Annotation &annotation)
+{
+  if (get_status() != MSG_STATUS::IN_PROGRESS)
+  {
+    qCritical("Unable to add option, uninitalized message.");
+    return false;
+  }
+
+  Option opt;
+  opt.type = 5; // im using 5 for now
+  opt.len = 8;
+  opt.data = annotation.serialize();
+
+  m_hdr->options.push_back(opt);
+
+  return true;
+}
+
 std::shared_ptr<QByteArray> HstpHandler::output_msg()
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)

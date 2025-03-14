@@ -84,6 +84,52 @@ enum class MSG_STATUS
   IN_PROGRESS,
 };
 
+struct NETLIB_EXPORT HSTP_Annotation
+{
+  u_int16_t x_position;
+  u_int16_t y_position;
+  u_int8_t red;
+  u_int8_t green;
+  u_int8_t blue;
+  bool erase;
+
+  // Serializes the current annotation to a shared_ptr<char[]>
+  std::shared_ptr<char[]> serialize() const {
+    // Total size: 2 (x) + 2 (y) + 1 (red) + 1 (green) + 1 (blue) + 1 (erase) = 8 bytes
+    const size_t dataSize = 8;
+    std::shared_ptr<char[]> buffer(new char[dataSize], std::default_delete<char[]>());
+
+    // Pointer to the current write location in the buffer
+    char* ptr = buffer.get();
+
+    // Copy x_position (2 bytes)
+    std::memcpy(ptr, &x_position, sizeof(x_position));
+    ptr += sizeof(x_position);
+
+    // Copy y_position (2 bytes)
+    std::memcpy(ptr, &y_position, sizeof(y_position));
+    ptr += sizeof(y_position);
+
+    // Copy red (1 byte)
+    std::memcpy(ptr, &red, sizeof(red));
+    ptr += sizeof(red);
+
+    // Copy green (1 byte)
+    std::memcpy(ptr, &green, sizeof(green));
+    ptr += sizeof(green);
+
+    // Copy blue (1 byte)
+    std::memcpy(ptr, &blue, sizeof(blue));
+    ptr += sizeof(blue);
+
+    // Copy erase flag (serialize as 1 byte)
+    uint8_t erase_byte = erase ? 1 : 0;
+    std::memcpy(ptr, &erase_byte, sizeof(erase_byte));
+
+    return buffer;
+  }
+};
+
 /*
  * HstpHandler offers the user an object to build out a HSTP message
  * through a series of function calls to ensure safety and proper use.
@@ -110,6 +156,7 @@ public:
                                 const QByteArray &password = nullptr);
   bool add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
                        const char *chat_msg);
+  bool add_option_annotation(const HSTP_Annotation &annotation);
   bool add_option_stream_title(const char *stream_title)
   {
     return add_option_generic_string(3, stream_title);

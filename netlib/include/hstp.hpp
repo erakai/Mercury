@@ -94,13 +94,16 @@ struct NETLIB_EXPORT HSTP_Annotation
   bool erase;
 
   // Serializes the current annotation to a shared_ptr<char[]>
-  std::shared_ptr<char[]> serialize() const {
-    // Total size: 2 (x) + 2 (y) + 1 (red) + 1 (green) + 1 (blue) + 1 (erase) = 8 bytes
+  std::shared_ptr<char[]> serialize() const
+  {
+    // Total size: 2 (x) + 2 (y) + 1 (red) + 1 (green) + 1 (blue) + 1 (erase) =
+    // 8 bytes
     const size_t dataSize = 8;
-    std::shared_ptr<char[]> buffer(new char[dataSize], std::default_delete<char[]>());
+    std::shared_ptr<char[]> buffer(new char[dataSize],
+                                   std::default_delete<char[]>());
 
     // Pointer to the current write location in the buffer
-    char* ptr = buffer.get();
+    char *ptr = buffer.get();
 
     // Copy x_position (2 bytes)
     std::memcpy(ptr, &x_position, sizeof(x_position));

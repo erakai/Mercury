@@ -6,6 +6,7 @@ Makefile
 .cache/
 .cache/**/*
 .cache/*
+.idea/
 
 .DS_Store
 **/*/.DS_STORE

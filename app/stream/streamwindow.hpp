@@ -60,7 +60,14 @@ public slots:
   // void new_viewer_joined(Client client); // update participant_display_list
   // in side_pane
 
+  void onStreamDisplayMousePressed(QMouseEvent *event);
+  void onStreamDisplayMouseMoved(QMouseEvent *event);
+  void onStreamDisplayMouseReleased(QMouseEvent *event);
+
 signals:
+
+protected:
+  bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
   /*

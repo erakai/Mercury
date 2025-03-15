@@ -6,6 +6,7 @@
 #include <QMenuBar>
 #include <QScreen>
 #include <QtDebug>
+#include <QMouseEvent>
 #include <QAudioSink>
 
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
@@ -157,6 +158,8 @@ void StreamWindow::initialize_primary_ui_widgets()
   std::function<bool(QBuffer &)> audio_func = std::bind(
       &StreamWindow::provide_next_audio_frame, this, std::placeholders::_1);
   stream_display = new StreamDisplay(this, video_func, audio_func);
+
+  stream_display->installEventFilter(this);
 
   below_stream_layout = new QGridLayout();
   below_stream_layout->setRowMinimumHeight(0, 100);
@@ -322,4 +325,51 @@ void StreamWindow::stream_name_changed(string host_alias, string new_name)
 void StreamWindow::new_chat_message(string alias, string msg)
 {
   side_pane->new_chat_message({alias, msg});
+}
+
+bool StreamWindow::eventFilter(QObject *watched, QEvent *event)
+{
+  if (watched == stream_display)
+  {
+    if (event->type() == QEvent::MouseButtonPress)
+    {
+      QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+      onStreamDisplayMousePressed(mouseEvent);
+      return true;
+    }
+    else if (event->type() == QEvent::MouseMove)
+    {
+      QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+      onStreamDisplayMouseMoved(mouseEvent);
+      return true;
+    }
+    else if (event->type() == QEvent::MouseButtonRelease)
+    {
+      QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+      onStreamDisplayMouseReleased(mouseEvent);
+      return true;
+    }
+  }
+  return QMainWindow::eventFilter(watched, event);
+}
+
+void StreamWindow::onStreamDisplayMousePressed(QMouseEvent *event)
+{
+  QPoint pos = event->pos();
+  qDebug() << "Mouse Pressed on streamDisplay at: (" << pos.x() << ", "
+           << pos.y() << ")";
+}
+
+void StreamWindow::onStreamDisplayMouseMoved(QMouseEvent *event)
+{
+  QPoint pos = event->pos();
+  qDebug() << "Mouse Moved on streamDisplay at: (" << pos.x() << ", " << pos.y()
+           << ")";
+}
+
+void StreamWindow::onStreamDisplayMouseReleased(QMouseEvent *event)
+{
+  QPoint pos = event->pos();
+  qDebug() << "Mouse Released on streamDisplay at: (" << pos.x() << ", "
+           << pos.y() << ")";
 }

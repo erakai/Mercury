@@ -93,39 +93,59 @@ struct NETLIB_EXPORT HSTP_Annotation
   u_int8_t blue;
   bool erase;
 
+  // Default constructor
+  HSTP_Annotation() = default;
+
+  // Constructor that deserializes from a shared_ptr<char[]>
+  HSTP_Annotation(const std::shared_ptr<char[]> &buffer)
+  {
+    // Pointer to the beginning of the buffer
+    const char *ptr = buffer.get();
+
+    std::memcpy(&x_position, ptr, sizeof(x_position));
+    ptr += sizeof(x_position);
+
+    std::memcpy(&y_position, ptr, sizeof(y_position));
+    ptr += sizeof(y_position);
+
+    std::memcpy(&red, ptr, sizeof(red));
+    ptr += sizeof(red);
+
+    std::memcpy(&green, ptr, sizeof(green));
+    ptr += sizeof(green);
+
+    std::memcpy(&blue, ptr, sizeof(blue));
+    ptr += sizeof(blue);
+
+    uint8_t erase_byte;
+    std::memcpy(&erase_byte, ptr, sizeof(erase_byte));
+    erase = (erase_byte != 0);
+  }
+
   // Serializes the current annotation to a shared_ptr<char[]>
   std::shared_ptr<char[]> serialize() const
   {
-    // Total size: 2 (x) + 2 (y) + 1 (red) + 1 (green) + 1 (blue) + 1 (erase) =
-    // 8 bytes
     const size_t dataSize = 8;
     std::shared_ptr<char[]> buffer(new char[dataSize],
                                    std::default_delete<char[]>());
 
-    // Pointer to the current write location in the buffer
     char *ptr = buffer.get();
 
-    // Copy x_position (2 bytes)
     std::memcpy(ptr, &x_position, sizeof(x_position));
     ptr += sizeof(x_position);
 
-    // Copy y_position (2 bytes)
     std::memcpy(ptr, &y_position, sizeof(y_position));
     ptr += sizeof(y_position);
 
-    // Copy red (1 byte)
     std::memcpy(ptr, &red, sizeof(red));
     ptr += sizeof(red);
 
-    // Copy green (1 byte)
     std::memcpy(ptr, &green, sizeof(green));
     ptr += sizeof(green);
 
-    // Copy blue (1 byte)
     std::memcpy(ptr, &blue, sizeof(blue));
     ptr += sizeof(blue);
 
-    // Copy erase flag (serialize as 1 byte)
     uint8_t erase_byte = erase ? 1 : 0;
     std::memcpy(ptr, &erase_byte, sizeof(erase_byte));
 
@@ -243,11 +263,17 @@ signals:
                               uint16_t mftp_port,
                               const QByteArray &password = nullptr);
   /*
-   * Emtis when a chat option is used informing user of a new chat.
+   * Emits when a chat option is used informing user of a new chat.
    */
   void received_chat(const char alias[ALIAS_SIZE],
                      const char alias_of_chatter[ALIAS_SIZE],
                      const std::string &chat);
+
+  /*
+   * Emits when an annotation pixel is received
+   */
+  void received_annotation(const char alias[ALIAS_SIZE],
+                           const HSTP_Annotation &annotation);
 
   /*
    * Emits when a (new) stream title is used.
@@ -294,4 +320,6 @@ private:
   {
     handle_uint32(alias, opt, &HstpProcessor::received_viewer_count);
   }
+
+  void handle_annotation(HANDLER_PARAMS); // 5
 };

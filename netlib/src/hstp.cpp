@@ -444,6 +444,20 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
   emit received_chat(alias, alias_of_chatter, chat_msg);
 }
 
+void HstpProcessor::handle_annotation(HANDLER_PARAMS)
+{
+  if (!opt.data || opt.len == 0)
+  {
+    qCritical("Something went wrong with handling a chat option...");
+    handle_default(alias, opt);
+    return;
+  }
+
+  HSTP_Annotation annotation(opt.data);
+
+  emit received_annotation(alias, annotation);
+}
+
 void HstpProcessor::handle_string(
     HANDLER_PARAMS, void (HstpProcessor::*signal)(const char alias[ALIAS_SIZE],
                                                   const char *str))

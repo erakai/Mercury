@@ -1,5 +1,7 @@
 #pragma once
 
+#include "home/mainwindow.hpp"
+
 #include <QAudioBuffer>
 #include <QAudioFormat>
 #include <QAudioOutput>
@@ -12,6 +14,9 @@
 #include <QVideoFrame>
 #include <QVideoSink>
 #include <QVideoWidget>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsVideoItem>
 #include <QWidget>
 #include <QtMultimedia/qaudiooutput.h>
 #include <QtMultimedia/qmediaplayer.h>
@@ -61,4 +66,8 @@ private:
   QMediaPlayer *video_player;
   QVideoWidget *video_widget;
   QVideoSink *video_sink;
+
+  QGraphicsView *graphics_view;
+  QGraphicsScene *graphics_scene;
+  QGraphicsVideoItem *video_item;
 };

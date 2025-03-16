@@ -1,5 +1,6 @@
 #pragma once
 
+#include "annotationdisplay.hpp"
 #include "hosttoolbar.hpp"
 #include "sidepane.hpp"
 #include "streamdisplay.hpp"
@@ -60,9 +61,9 @@ public slots:
   // void new_viewer_joined(Client client); // update participant_display_list
   // in side_pane
 
-  void onStreamDisplayMousePressed(QMouseEvent *event);
-  void onStreamDisplayMouseMoved(QMouseEvent *event);
-  void onStreamDisplayMouseReleased(QMouseEvent *event);
+  void onAnnotationDisplayMousePressed(QMouseEvent *event);
+  void onAnnotationDisplayMouseMoved(QMouseEvent *event);
+  void onAnnotationDisplayMouseReleased(QMouseEvent *event);
 
 signals:
 
@@ -86,6 +87,7 @@ private:
   QGridLayout *main_layout;
   SidePane *side_pane;
   StreamDisplay *stream_display;
+  AnnotationDisplay *annotation_display;
   QGridLayout *below_stream_layout;
 
   QLabel *stream_title;

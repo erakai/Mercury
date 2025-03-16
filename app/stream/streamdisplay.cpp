@@ -26,16 +26,30 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   //  audio_sink->start(&sourceFile);
   // AUDIO TESTING END ====
 
+  // Set up the media player.
   video_player = new QMediaPlayer(this);
 
-  video_widget = new QVideoWidget(this);
-  video_sink = video_widget->videoSink();
-  video_player->setVideoOutput(video_sink);
+  // Instead of a QVideoWidget, create a QGraphicsView and scene.
+  graphics_view = new QGraphicsView(this);
+  graphics_scene = new QGraphicsScene(this);
+  graphics_view->setScene(graphics_scene);
 
-  video_widget->setMinimumWidth(1280); // TODO: No idea if this right
-  video_widget->setMinimumHeight(720);
+  // Create the QGraphicsVideoItem and add it to the scene.
+  video_item = new QGraphicsVideoItem();
+  graphics_scene->addItem(video_item);
 
-  video_widget->show();
+  // Retrieve the video sink from the video item.
+  video_sink = video_item->videoSink();
+
+  // Set the media player's video output to the video item.
+  video_player->setVideoOutput(video_item);
+
+  // Set the minimum size as before.
+  graphics_view->setMinimumWidth(1280);
+  graphics_view->setMinimumHeight(720);
+
+  // Show the graphics view.
+  graphics_view->show();
 }
 
 void StreamDisplay::begin_playback()

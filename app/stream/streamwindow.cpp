@@ -1,4 +1,6 @@
 #include "streamwindow.hpp"
+
+#include "annotationdisplay.hpp"
 #include "hosttoolbar.hpp"
 #include "hstp.hpp"
 #include "singleton/videomanager.h"
@@ -37,7 +39,18 @@ void StreamWindow::set_up()
   display->setLayout(main_layout);
   setCentralWidget(display);
 
-  main_layout->addWidget(stream_display, 0, 0);
+  // Create a container widget to stack the stream display and the annotation
+  // display.
+  QWidget *videoAnnotationContainer = new QWidget(this);
+  QGridLayout *containerLayout = new QGridLayout(videoAnnotationContainer);
+  containerLayout->setContentsMargins(0, 0, 0, 0);
+  containerLayout->setSpacing(0);
+  // Add both widgets in the same cell.
+  containerLayout->addWidget(stream_display, 0, 0);
+  containerLayout->addWidget(annotation_display, 0, 0);
+  annotation_display->raise();
+
+  main_layout->addWidget(videoAnnotationContainer, 0, 0);
   main_layout->addWidget(side_pane, 0, 1, 2, 1);
   main_layout->addLayout(below_stream_layout, 1, 0, 1, 2);
 
@@ -159,7 +172,8 @@ void StreamWindow::initialize_primary_ui_widgets()
       &StreamWindow::provide_next_audio_frame, this, std::placeholders::_1);
   stream_display = new StreamDisplay(this, video_func, audio_func);
 
-  stream_display->installEventFilter(this);
+  annotation_display = new AnnotationDisplay(this);
+  annotation_display->installEventFilter(this);
 
   below_stream_layout = new QGridLayout();
   below_stream_layout->setRowMinimumHeight(0, 100);
@@ -329,47 +343,50 @@ void StreamWindow::new_chat_message(string alias, string msg)
 
 bool StreamWindow::eventFilter(QObject *watched, QEvent *event)
 {
-  if (watched == stream_display)
+  if (watched == annotation_display)
   {
     if (event->type() == QEvent::MouseButtonPress)
     {
       QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-      onStreamDisplayMousePressed(mouseEvent);
+      onAnnotationDisplayMousePressed(mouseEvent);
       return true;
     }
     else if (event->type() == QEvent::MouseMove)
     {
       QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-      onStreamDisplayMouseMoved(mouseEvent);
+      onAnnotationDisplayMouseMoved(mouseEvent);
       return true;
     }
     else if (event->type() == QEvent::MouseButtonRelease)
     {
       QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-      onStreamDisplayMouseReleased(mouseEvent);
+      onAnnotationDisplayMouseReleased(mouseEvent);
       return true;
     }
   }
   return QMainWindow::eventFilter(watched, event);
 }
 
-void StreamWindow::onStreamDisplayMousePressed(QMouseEvent *event)
+void StreamWindow::onAnnotationDisplayMousePressed(QMouseEvent *event)
 {
   QPoint pos = event->pos();
-  qDebug() << "Mouse Pressed on streamDisplay at: (" << pos.x() << ", "
+  qDebug() << "Mouse Pressed on annotationDisplay at: (" << pos.x() << ", "
            << pos.y() << ")";
+  // Optionally clear previous annotations:
+  annotation_display->points.clear();
+  annotation_display->points.push_back(pos);
 }
 
-void StreamWindow::onStreamDisplayMouseMoved(QMouseEvent *event)
+void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
 {
-  QPoint pos = event->pos();
-  qDebug() << "Mouse Moved on streamDisplay at: (" << pos.x() << ", " << pos.y()
-           << ")";
+  annotation_display->points.push_back(event->pos());
 }
 
-void StreamWindow::onStreamDisplayMouseReleased(QMouseEvent *event)
+void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
 {
   QPoint pos = event->pos();
-  qDebug() << "Mouse Released on streamDisplay at: (" << pos.x() << ", "
+  qDebug() << "Mouse Released on annotationDisplay at: (" << pos.x() << ", "
            << pos.y() << ")";
+  annotation_display->points.push_back(pos);
+  annotation_display->update();
 }

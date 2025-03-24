@@ -8,6 +8,16 @@
 #include <QtDebug>
 #include <QAudioSink>
 
+/* TODO: ( FOR KAI )
+    Add new tab to the chat bar so that we can have a metrics window
+    Make both server and client record jitter/latency/loss/etc
+    Make client send server metric data every like 5 seconds or something
+    Make new tab (if you're hosting) display your metric data and your client's
+    Add transparent label with LIVE/NOT LIVE etc to top right of streamdisplay
+    Add transparent label with UNSTABLE if metrics are "bad"
+    Add delay logic to MercuryServer (only place it should live)
+*/
+
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
                            QWidget *parent)
     : QMainWindow(parent), mode(MercuryMode::HOST), alias(alias),

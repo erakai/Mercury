@@ -34,6 +34,9 @@ HostStreamWindow::HostStreamWindow(QWidget *parent)
       QString::number(Utils::instance().getDefaultHostUdpPort()));
 
   ui->streamNameLineEdit->setFocus();
+
+  // To make it look like password
+  ui->passwordLineEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
 }
 
 HostStreamWindow::~HostStreamWindow()

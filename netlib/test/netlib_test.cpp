@@ -83,7 +83,7 @@ TEST_F(NetlibTest, ServerClientBasic)
 
     app->processEvents(QEventLoop::AllEvents, QDeadlineTimer(100));
 
-    ASSERT_LE(elapsed.count(), 1000);
+    ASSERT_LE(elapsed.count(), 3000);
   }
   ASSERT_EQ(server.get_clients().size(), 1);
 

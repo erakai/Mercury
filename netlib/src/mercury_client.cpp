@@ -1,4 +1,5 @@
 #include "mercury_client.hpp"
+#include <QtCore/qlogging.h>
 
 JitterEntry MercuryClient::retrieve_next_frame()
 {
@@ -21,13 +22,13 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
 {
   if (host.isNull())
   {
-    qFatal("Invalid QHostAddress");
+    qCritical("Invalid QHostAddress");
     return false;
   }
 
   if (hstp_port == 0 || mftp_port == 0)
   {
-    qFatal("Invalid ports");
+    qCritical("Invalid ports");
   }
 
   m_hstp_sock->connectToHost(host, hstp_port);
@@ -55,7 +56,14 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
       return false;
     }
 
-    return true;
+    if (m_hstp_sock->waitForDisconnected(1000))
+    {
+      qCritical(
+          "Client disconnected by host, likely due to incorrect password.");
+      return false;
+    }
+
+    return (m_hstp_sock->state() == QAbstractSocket::ConnectedState);
   }
   else
   {

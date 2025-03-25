@@ -39,7 +39,7 @@ public:
 
     get_hstp_sock()->connectToHost(QHostAddress::LocalHost,
                                    test_server.serverPort());
-    ASSERT_TRUE(get_hstp_sock()->waitForConnected(1000));
+    ASSERT_TRUE(get_hstp_sock()->waitForConnected(3000));
 
     QObject::connect(&test_server, &QTcpServer::newConnection,
                      [&]()

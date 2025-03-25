@@ -84,7 +84,6 @@ void HostStreamWindow::open_stream_window()
   QByteArray hashedPassword = nullptr;
   std::string password = ui->passwordLineEdit->text().toStdString();
 
-  qDebug() << password;
   if (!password.empty())
   {
     QCryptographicHash hasher(QCryptographicHash::Sha256);

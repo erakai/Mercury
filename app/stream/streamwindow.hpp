@@ -52,15 +52,17 @@ public slots:
   // Sends a chat message out
   void send_chat_message(string message);
 
-  // These are generic update slots that should be connected to a signal either
-  // in the client or server
+  // The rest are generic update slots that should be connected to a signal
+  // either in the client or server
+
   void viewer_count_updated(int new_count);
   void stream_name_changed(string host_alias, string new_name);
   void new_chat_message(string alias, string msg);
-  // void new_viewer_joined(Client client); // update participant_display_list
-  // in side_pane
 
-signals:
+  // These next two are host-only
+  void viewer_disconnected(int id, std::string alias);
+  // This is called after a client is validated
+  void viewer_connected(int id, std::string _alias);
 
 private:
   /*

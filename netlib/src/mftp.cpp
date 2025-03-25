@@ -19,8 +19,7 @@ void acquire_mftp_socket(std::shared_ptr<QUdpSocket> sock, int port)
   }
   else
   {
-    qInfo("MFTP Socket created and bound on %s and port %d.",
-          sock->localAddress().toString().toStdString().c_str(), port);
+    qInfo("MFTP Socket created and bound on port %d.", port);
   }
 
   sock->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, 800000);

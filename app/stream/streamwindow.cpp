@@ -8,16 +8,6 @@
 #include <QtDebug>
 #include <QAudioSink>
 
-/* TODO: ( FOR KAI )
-    Add new tab to the chat bar so that we can have a metrics window
-    Make both server and client record jitter/latency/loss/etc
-    Make client send server metric data every like 5 seconds or something
-    Make new tab (if you're hosting) display your metric data and your client's
-    Add transparent label with LIVE/NOT LIVE etc to top right of streamdisplay
-    Add transparent label with UNSTABLE if metrics are "bad"
-    Add delay logic to MercuryServer (only place it should live)
-*/
-
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
                            QWidget *parent)
     : QMainWindow(parent), mode(MercuryMode::HOST), alias(alias),
@@ -98,31 +88,16 @@ void StreamWindow::connect_signals_and_slots()
             { this->new_chat_message(std::string(alias_of_chatter), chat); });
 
   // connect chat message sent on side pane
-  connect(side_pane, &SidePane::send_chat_message, this,
+  connect(side_pane->get_chat_tab(), &ChatTab::send_chat_message, this,
           &StreamWindow::send_chat_message);
 
-  // connect viewer count updated for host (todo move this into own functions)
+  // connect viewer count updated for host
   if (is_host())
   {
     connect(servh->server.get(), &MercuryServer::client_connected, this,
-            [&](int id, std::string _alias)
-            {
-              servh->viewer_count++;
-              viewer_count_updated(servh->viewer_count);
-
-              Client &client = servh->server->get_client(id);
-              client.handler.init_msg(alias.c_str());
-              client.handler.add_option_stream_title(
-                  stream_title->text().toStdString().c_str());
-              client.handler.add_option_viewer_count(servh->viewer_count);
-              client.handler.output_msg_to_socket(client.hstp_sock);
-            });
+            &StreamWindow::viewer_connected);
     connect(servh->server.get(), &MercuryServer::client_disconnected, this,
-            [&]()
-            {
-              servh->viewer_count--;
-              viewer_count_updated(servh->viewer_count);
-            });
+            &StreamWindow::viewer_disconnected);
   }
 
   // connect viewer count updated for client
@@ -160,7 +135,12 @@ void StreamWindow::initialize_primary_ui_widgets()
   main_layout->setRowMinimumHeight(1, 75);
 
   display = new QWidget(this);
-  side_pane = new SidePane(this, alias);
+
+  side_pane = new SidePane(this);
+  side_pane->initialize_chat_tab(alias);
+
+  if (is_host())
+    side_pane->initialize_viewer_list_tab(alias);
 
   std::function<bool(QImage &)> video_func = std::bind(
       &StreamWindow::provide_next_video_frame, this, std::placeholders::_1);
@@ -326,10 +306,35 @@ void StreamWindow::stream_name_changed(string host_alias, string new_name)
   }
 
   if (is_client())
+  {
     host_name->setText(std::format("Host: {}", host_alias).c_str());
+  }
 }
 
 void StreamWindow::new_chat_message(string alias, string msg)
 {
-  side_pane->new_chat_message({alias, msg});
+  side_pane->get_chat_tab()->new_chat_message({alias, msg});
+}
+
+void StreamWindow::viewer_connected(int id, std::string _alias)
+{
+  servh->viewer_count++;
+  viewer_count_updated(servh->viewer_count);
+
+  side_pane->get_viewer_list_tab()->viewer_joined(_alias);
+
+  Client &client = servh->server->get_client(id);
+  client.handler.init_msg(alias.c_str());
+  client.handler.add_option_stream_title(
+      stream_title->text().toStdString().c_str());
+  client.handler.add_option_viewer_count(servh->viewer_count);
+  client.handler.output_msg_to_socket(client.hstp_sock);
+}
+
+void StreamWindow::viewer_disconnected(int id, std::string _alias)
+{
+  servh->viewer_count--;
+  viewer_count_updated(servh->viewer_count);
+
+  side_pane->get_viewer_list_tab()->viewer_left(_alias);
 }

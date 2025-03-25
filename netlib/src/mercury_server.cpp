@@ -18,13 +18,13 @@ bool MercuryServer::start_server()
 {
   if (udp_port == -1 || tcp_port == -1)
   {
-    qFatal("Server ports are not set, cannot start.");
+    qCritical("Server ports are not set, cannot start.");
     return false;
   }
 
   if (!listen(QHostAddress::Any, tcp_port))
   {
-    qFatal("Error: Unable to start server.");
+    qCritical("Error: Unable to start server.");
     close();
     return false;
   }
@@ -32,7 +32,7 @@ bool MercuryServer::start_server()
   mftp_sock = acquire_mftp_socket(udp_port);
   if (mftp_sock == nullptr)
   {
-    qFatal("Unable to construct MFTP socket.");
+    qCritical("Unable to construct MFTP socket.");
     return false;
   }
 

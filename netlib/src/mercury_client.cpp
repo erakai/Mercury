@@ -22,13 +22,13 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
 {
   if (host.isNull())
   {
-    qFatal("Invalid QHostAddress");
+    qCritical("Invalid QHostAddress");
     return false;
   }
 
   if (hstp_port == 0 || mftp_port == 0)
   {
-    qFatal("Invalid ports");
+    qCritical("Invalid ports");
   }
 
   m_hstp_sock->connectToHost(host, hstp_port);

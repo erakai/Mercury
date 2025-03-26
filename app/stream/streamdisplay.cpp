@@ -21,21 +21,26 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   format.setSampleFormat(QAudioFormat::Int16);
 
   audio_sink = new QAudioSink(format, this);
-  //  sourceFile.setFileName("assets/fart.raw");
-  //  sourceFile.open(QIODevice::ReadOnly);
-  //  audio_sink->start(&sourceFile);
+  sourceFile.setFileName("assets/fart.raw");
+  sourceFile.open(QIODevice::ReadOnly);
+  audio_sink->start(&sourceFile);
   // AUDIO TESTING END ====
 
   video_player = new QMediaPlayer(this);
 
   video_widget = new QVideoWidget(this);
   video_sink = video_widget->videoSink();
+
+  video_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   video_player->setVideoOutput(video_sink);
 
-  video_widget->setMinimumWidth(1280); // TODO: No idea if this right
-  video_widget->setMinimumHeight(720);
-
   video_widget->show();
+}
+
+void StreamDisplay::resizeEvent(QResizeEvent *event)
+{
+  QWidget::resizeEvent(event);
+  video_widget->setGeometry(0, 0, width(), height()); // Force full expansion
 }
 
 void StreamDisplay::begin_playback()

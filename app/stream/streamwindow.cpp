@@ -30,6 +30,8 @@ void StreamWindow::set_up()
   setWindowTitle("Mercury");
   setAttribute(Qt::WA_DeleteOnClose);
 
+  this->showMaximized(); // Sets Window size to max
+
   initialize_primary_ui_widgets();
   configure_menu_and_tool_bar();
 
@@ -38,11 +40,30 @@ void StreamWindow::set_up()
 
   main_layout->addWidget(stream_display, 0, 0);
   main_layout->addWidget(side_pane, 0, 1, 2, 1);
-  main_layout->addLayout(below_stream_layout, 1, 0, 1, 2);
+  main_layout->addLayout(below_stream_layout, 1, 0);
 
   below_stream_layout->addWidget(stream_title, 0, 0);
   below_stream_layout->addWidget(host_name, 1, 0);
   below_stream_layout->addWidget(viewer_count, 0, 2);
+
+  /*
+  |---------------------------|-------------|
+  |75% - Stream Window Across | 25% - Chat  |
+  |                           |             |
+  |                           |             |
+  |                           |             |
+  |                           |             |
+  |-80% display---------------|             |
+  |                           |             |
+  |                           |             |
+  |-20% info------------------|-------------|
+  */
+
+  main_layout->setRowStretch(0, 80);
+  main_layout->setRowStretch(1, 20);
+
+  main_layout->setColumnStretch(0, 75);
+  main_layout->setColumnStretch(1, 25);
 
   if (is_host())
     addToolBar(toolbar);
@@ -129,14 +150,11 @@ void StreamWindow::connect_signals_and_slots()
 void StreamWindow::initialize_primary_ui_widgets()
 {
   main_layout = new QGridLayout();
-  main_layout->setColumnMinimumWidth(0, 1280);
-  main_layout->setColumnMinimumWidth(1, 400);
-  main_layout->setRowMinimumHeight(0, 720);
-  main_layout->setRowMinimumHeight(1, 75);
 
   display = new QWidget(this);
 
   side_pane = new SidePane(this);
+  side_pane->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   side_pane->initialize_chat_tab(alias);
 
   if (is_host())
@@ -147,9 +165,9 @@ void StreamWindow::initialize_primary_ui_widgets()
   std::function<bool(QBuffer &)> audio_func = std::bind(
       &StreamWindow::provide_next_audio_frame, this, std::placeholders::_1);
   stream_display = new StreamDisplay(this, video_func, audio_func);
+  stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   below_stream_layout = new QGridLayout();
-  below_stream_layout->setRowMinimumHeight(0, 100);
 
   stream_title = new QLabel("Stream Title", this);
   if (is_host() && servh->stream_name.size() > 0)

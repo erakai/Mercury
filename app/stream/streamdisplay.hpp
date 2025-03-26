@@ -35,6 +35,9 @@ public:
   // Begins drawing and requesting frames
   void begin_playback();
 
+protected:
+  void resizeEvent(QResizeEvent *event) override;
+
 public slots:
   // Called FPS times a second
   void acquire_next_frame();

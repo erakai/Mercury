@@ -369,24 +369,15 @@ bool StreamWindow::eventFilter(QObject *watched, QEvent *event)
 
 void StreamWindow::onAnnotationDisplayMousePressed(QMouseEvent *event)
 {
-  QPoint pos = event->pos();
-  qDebug() << "Mouse Pressed on annotationDisplay at: (" << pos.x() << ", "
-           << pos.y() << ")";
-  // Optionally clear previous annotations:
-  annotation_display->points.clear();
-  annotation_display->points.push_back(pos);
+  old_point = event->pos();
 }
 
 void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
 {
-  annotation_display->points.push_back(event->pos());
+  annotation_display->addLine(old_point, event->pos());
+  old_point = event->pos();
 }
 
 void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
 {
-  QPoint pos = event->pos();
-  qDebug() << "Mouse Released on annotationDisplay at: (" << pos.x() << ", "
-           << pos.y() << ")";
-  annotation_display->points.push_back(pos);
-  annotation_display->update();
 }

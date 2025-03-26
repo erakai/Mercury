@@ -1,42 +1,26 @@
 #pragma once
 
 #include <QWidget>
-#include <QPainter>
-#include <QPen>
-#include <vector>
+#include <QPixmap>
+#include <QColor>
 #include <QPoint>
 
 class AnnotationDisplay : public QWidget
 {
   Q_OBJECT
 public:
-  explicit AnnotationDisplay(QWidget *parent = nullptr) : QWidget(parent)
-  {
-    // Make sure the background is transparent.
-    setAttribute(Qt::WA_TranslucentBackground);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  }
+  explicit AnnotationDisplay(QWidget *parent = nullptr);
 
-  // Container to store annotation points.
-  std::vector<QPoint> points;
+  // Add a line persistently from start to end with the specified color and
+  // thickness.
+  void addLine(const QPoint &start, const QPoint &end, QColor color = Qt::red,
+               int thickness = 2);
 
 protected:
-  void paintEvent(QPaintEvent *event) override
-  {
-    qDebug() << "paintEvent" << width() << " " << height();
-    // QWidget::paintEvent(event);
-    QPainter painter(this);
-    QPen pen(Qt::red);
-    pen.setWidth(2);
-    painter.setPen(pen);
+  void paintEvent(QPaintEvent *event) override;
+  void resizeEvent(QResizeEvent *event) override;
 
-    if (points.size() > 1)
-    {
-      for (size_t i = 1; i < points.size(); ++i)
-      {
-        qDebug() << "points[" << i << "]";
-        painter.drawLine(points[i - 1], points[i]);
-      }
-    }
-  }
+private:
+  // Off-screen pixmap that holds all drawn annotations.
+  QPixmap m_pixmap;
 };

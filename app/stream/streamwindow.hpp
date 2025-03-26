@@ -110,4 +110,6 @@ private:
   // count, stream name, etc)
   const shared_ptr<HostService> servh = nullptr;
   const shared_ptr<ClientService> servc = nullptr;
+
+  QPoint old_point;
 };

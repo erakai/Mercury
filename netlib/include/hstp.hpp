@@ -84,13 +84,22 @@ enum class MSG_STATUS
   IN_PROGRESS,
 };
 
+// Helper structure for a 2D point
+struct AnnotationPoint
+{
+  uint16_t x;
+  uint16_t y;
+};
+
 struct NETLIB_EXPORT HSTP_Annotation
 {
-  u_int16_t x_position;
-  u_int16_t y_position;
-  u_int8_t red;
-  u_int8_t green;
-  u_int8_t blue;
+  // A vector of points
+  std::vector<AnnotationPoint> points;
+  // RGB color values
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+  // Erase flag
   bool erase;
 
   // Default constructor
@@ -99,15 +108,24 @@ struct NETLIB_EXPORT HSTP_Annotation
   // Constructor that deserializes from a shared_ptr<char[]>
   HSTP_Annotation(const std::shared_ptr<char[]> &buffer)
   {
-    // Pointer to the beginning of the buffer
     const char *ptr = buffer.get();
 
-    std::memcpy(&x_position, ptr, sizeof(x_position));
-    ptr += sizeof(x_position);
+    // First, deserialize the number of points
+    uint16_t num_points;
+    std::memcpy(&num_points, ptr, sizeof(num_points));
+    ptr += sizeof(num_points);
 
-    std::memcpy(&y_position, ptr, sizeof(y_position));
-    ptr += sizeof(y_position);
+    // Resize the vector and deserialize each point
+    points.resize(num_points);
+    for (size_t i = 0; i < num_points; ++i)
+    {
+      std::memcpy(&points[i].x, ptr, sizeof(points[i].x));
+      ptr += sizeof(points[i].x);
+      std::memcpy(&points[i].y, ptr, sizeof(points[i].y));
+      ptr += sizeof(points[i].y);
+    }
 
+    // Deserialize the RGB values
     std::memcpy(&red, ptr, sizeof(red));
     ptr += sizeof(red);
 
@@ -117,6 +135,7 @@ struct NETLIB_EXPORT HSTP_Annotation
     std::memcpy(&blue, ptr, sizeof(blue));
     ptr += sizeof(blue);
 
+    // Deserialize the erase flag (stored as a single byte)
     uint8_t erase_byte;
     std::memcpy(&erase_byte, ptr, sizeof(erase_byte));
     erase = (erase_byte != 0);
@@ -125,18 +144,34 @@ struct NETLIB_EXPORT HSTP_Annotation
   // Serializes the current annotation to a shared_ptr<char[]>
   std::shared_ptr<char[]> serialize() const
   {
-    const size_t dataSize = 8;
+    // Calculate total size:
+    // - 2 bytes for the number of points
+    // - 4 bytes per point (2 bytes for x and 2 for y)
+    // - 3 bytes for RGB
+    // - 1 byte for the erase flag
+    size_t dataSize = sizeof(uint16_t) +
+                      points.size() * (sizeof(uint16_t) * 2) + sizeof(red) +
+                      sizeof(green) + sizeof(blue) + sizeof(uint8_t);
+
     std::shared_ptr<char[]> buffer(new char[dataSize],
                                    std::default_delete<char[]>());
-
     char *ptr = buffer.get();
 
-    std::memcpy(ptr, &x_position, sizeof(x_position));
-    ptr += sizeof(x_position);
+    // Serialize the number of points
+    uint16_t num_points = points.size();
+    std::memcpy(ptr, &num_points, sizeof(num_points));
+    ptr += sizeof(num_points);
 
-    std::memcpy(ptr, &y_position, sizeof(y_position));
-    ptr += sizeof(y_position);
+    // Serialize each point
+    for (const auto &pt : points)
+    {
+      std::memcpy(ptr, &pt.x, sizeof(pt.x));
+      ptr += sizeof(pt.x);
+      std::memcpy(ptr, &pt.y, sizeof(pt.y));
+      ptr += sizeof(pt.y);
+    }
 
+    // Serialize the RGB values
     std::memcpy(ptr, &red, sizeof(red));
     ptr += sizeof(red);
 
@@ -146,6 +181,7 @@ struct NETLIB_EXPORT HSTP_Annotation
     std::memcpy(ptr, &blue, sizeof(blue));
     ptr += sizeof(blue);
 
+    // Serialize the erase flag as a byte
     uint8_t erase_byte = erase ? 1 : 0;
     std::memcpy(ptr, &erase_byte, sizeof(erase_byte));
 

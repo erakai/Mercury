@@ -112,4 +112,5 @@ private:
   const shared_ptr<ClientService> servc = nullptr;
 
   QPoint old_point;
+  std::vector<QPoint> points;
 };

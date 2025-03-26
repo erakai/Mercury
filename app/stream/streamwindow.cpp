@@ -369,15 +369,23 @@ bool StreamWindow::eventFilter(QObject *watched, QEvent *event)
 
 void StreamWindow::onAnnotationDisplayMousePressed(QMouseEvent *event)
 {
-  old_point = event->pos();
+  QPoint pos = event->pos();
+  old_point = pos;
+  points.push_back(pos);
 }
 
 void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
 {
-  annotation_display->addLine(old_point, event->pos());
-  old_point = event->pos();
+  QPoint pos = event->pos();
+  annotation_display->addLine(old_point, pos);
+  old_point = pos;
+  points.push_back(pos);
 }
 
 void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
 {
+  for (QPoint &point : points)
+  {
+    cout << point.x() << ", " << point.y() << endl;
+  }
 }

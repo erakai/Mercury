@@ -17,6 +17,20 @@ void SidePane::initialize_viewer_list_tab(const string &display_name)
   addTab(viewer_list, "Viewer List");
 }
 
+void SidePane::initialize_server_performance_tab(
+    shared_ptr<MercuryServer> server)
+{
+  server_performance = new ServerPerformanceTab(server);
+  addTab(server_performance, "Performance");
+}
+
+void SidePane::initialize_client_performance_tab(
+    shared_ptr<MercuryClient> client)
+{
+  client_performance = new ClientPerformanceTab(client);
+  addTab(client_performance, "Performance");
+}
+
 ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
     : QWidget(parent), displayName(displayName)
 {

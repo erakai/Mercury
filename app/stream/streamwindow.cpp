@@ -1,5 +1,4 @@
 #include "streamwindow.hpp"
-#include "hosttoolbar.hpp"
 #include "hstp.hpp"
 #include "singleton/videomanager.h"
 #include <QApplication>
@@ -64,9 +63,6 @@ void StreamWindow::set_up()
 
   main_layout->setColumnStretch(0, 75);
   main_layout->setColumnStretch(1, 25);
-
-  if (is_host())
-    addToolBar(toolbar);
 
   // Center this window
   move(QGuiApplication::screens().at(0)->geometry().center() -
@@ -158,7 +154,13 @@ void StreamWindow::initialize_primary_ui_widgets()
   side_pane->initialize_chat_tab(alias);
 
   if (is_host())
+  {
     side_pane->initialize_viewer_list_tab(alias);
+    side_pane->initialize_server_performance_tab(servh->server);
+  }
+
+  if (is_client())
+    side_pane->initialize_client_performance_tab(servc->client);
 
   std::function<bool(QImage &)> video_func = std::bind(
       &StreamWindow::provide_next_video_frame, this, std::placeholders::_1);
@@ -177,9 +179,6 @@ void StreamWindow::initialize_primary_ui_widgets()
         std::format("Viewers: {}", servh->viewer_count).c_str(), this);
   else
     viewer_count = new QLabel("Viewers: 1", this);
-
-  if (is_host())
-    toolbar = new HostToolBar(this);
 
   if (is_host())
     host_name = new QLabel(std::format("Host: {}", alias).c_str(), this);

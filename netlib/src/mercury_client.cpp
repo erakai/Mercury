@@ -44,7 +44,7 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
   if (m_hstp_sock->waitForConnected(2000))
   {
     std::string address = host.toString().toStdString();
-    qInfo("Connected to client at %s with HSTP: %d, MFTP: %d", address.c_str(),
+    qInfo("Connected as client on %s with HSTP: %d, MFTP: %d", address.c_str(),
           hstp_port, mftp_port);
 
     // send establishment message

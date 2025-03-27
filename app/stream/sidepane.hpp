@@ -13,6 +13,8 @@
 #include <QTabWidget>
 #include <QtCore/qtmetamacros.h>
 
+#include "performancetab.hpp"
+
 using namespace std;
 
 struct ChatMessage
@@ -63,21 +65,27 @@ class SidePane : public QTabWidget
 public:
   SidePane(QWidget *parent = nullptr);
 
-  ~SidePane()
-  {
-    if (chat_tab)
-      delete chat_tab;
-    if (viewer_list)
-      delete viewer_list;
-  }
-
   void initialize_chat_tab(const string &display_name);
   ChatTab *get_chat_tab() { return chat_tab; }
 
   void initialize_viewer_list_tab(const string &display_name);
   ViewerListTab *get_viewer_list_tab() { return viewer_list; }
 
+  void initialize_server_performance_tab(shared_ptr<MercuryServer> server);
+  ServerPerformanceTab *get_server_performance_tab()
+  {
+    return server_performance;
+  }
+
+  void initialize_client_performance_tab(shared_ptr<MercuryClient> client);
+  ClientPerformanceTab *get_client_performance_tab()
+  {
+    return client_performance;
+  }
+
 private:
   ChatTab *chat_tab;
   ViewerListTab *viewer_list;
+  ServerPerformanceTab *server_performance;
+  ClientPerformanceTab *client_performance;
 };

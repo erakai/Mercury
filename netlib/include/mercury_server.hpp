@@ -141,6 +141,8 @@ public slots:
   void forward_chat_message(int sender_id, std::string alias,
                             std::string message);
 
+  void forward_annotations(int sender_id, HSTP_Annotation annotation);
+
 signals:
   /*
   This is emitted whenever a QTcpSocket emits stateChanged (connect signal to
@@ -160,6 +162,12 @@ signals:
   client.
   */
   void chat_message_received(std::string alias, std::string message);
+
+  /*
+  This signal will be emitted anytime an annotation is received, from any
+  client.
+   */
+  void annotation_received(std::string alias, HSTP_Annotation annotation);
 
 private:
   /*

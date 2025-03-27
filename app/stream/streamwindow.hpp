@@ -5,6 +5,7 @@
 #include "sidepane.hpp"
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
+#include "hstp.hpp"
 #include <QAudioBuffer>
 #include <QFile>
 #include <QGridLayout>
@@ -53,6 +54,9 @@ public slots:
   // Sends a chat message out
   void send_chat_message(string message);
 
+  // Sends an annotation out
+  void send_annotation(HSTP_Annotation annotation);
+
   // These are generic update slots that should be connected to a signal either
   // in the client or server
   void viewer_count_updated(int new_count);
@@ -60,6 +64,7 @@ public slots:
   void new_chat_message(string alias, string msg);
   // void new_viewer_joined(Client client); // update participant_display_list
   // in side_pane
+  void new_annotation(string alias, HSTP_Annotation annotation);
 
   void onAnnotationDisplayMousePressed(QMouseEvent *event);
   void onAnnotationDisplayMouseMoved(QMouseEvent *event);

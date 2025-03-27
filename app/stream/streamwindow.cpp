@@ -93,6 +93,17 @@ void StreamWindow::connect_signals_and_slots()
   if (is_host())
     connect(servh->server.get(), &MercuryServer::chat_message_received, this,
             &StreamWindow::new_chat_message);
+
+  // connect annotation received to annotation display
+  if (is_host())
+    connect(servh->server.get(), &MercuryServer::annotation_received, this,
+            &StreamWindow::new_annotation);
+
+  if (is_client())
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_annotation, this,
+            &StreamWindow::new_annotation);
+
   if (is_client())
     connect(servc->client->hstp_processor().get(),
             &HstpProcessor::received_chat, this,
@@ -303,6 +314,14 @@ void StreamWindow::send_chat_message(string message)
     servc->client->send_chat_message(message);
 }
 
+void StreamWindow::send_annotation(HSTP_Annotation annotation)
+{
+  if (is_host())
+    servh->server->forward_annotations(-1, annotation);
+  if (is_client())
+    servc->client->send_annotations(annotation);
+}
+
 void StreamWindow::viewer_count_updated(int new_count)
 {
   viewer_count->setText(("Viewers: " + std::to_string(new_count)).c_str());
@@ -339,6 +358,30 @@ void StreamWindow::stream_name_changed(string host_alias, string new_name)
 void StreamWindow::new_chat_message(string alias, string msg)
 {
   side_pane->new_chat_message({alias, msg});
+}
+
+void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
+{
+  if (annotation.points.size() < 1)
+    return;
+  else if (annotation.points.size() == 1)
+  {
+    QPoint p(annotation.points[0].x, annotation.points[0].y);
+    annotation_display->addLine(
+        p, p, QColor(annotation.red, annotation.green, annotation.blue),
+        annotation.thickness);
+  }
+  else
+  {
+    for (int i = 1; i < annotation.points.size(); i++)
+    {
+      QPoint q(annotation.points[i].x, annotation.points[i].y);
+      QPoint p(annotation.points[i - 1].x, annotation.points[i - 1].y);
+      annotation_display->addLine(
+          p, q, QColor(annotation.red, annotation.green, annotation.blue),
+          annotation.thickness);
+    }
+  }
 }
 
 bool StreamWindow::eventFilter(QObject *watched, QEvent *event)
@@ -384,8 +427,6 @@ void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
 
 void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
 {
-  for (QPoint &point : points)
-  {
-    cout << point.x() << ", " << point.y() << endl;
-  }
+  send_annotation(HSTP_Annotation(points, 255, 0, 0, 2));
+  points.clear();
 }

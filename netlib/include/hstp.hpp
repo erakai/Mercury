@@ -9,6 +9,7 @@
 #include <QtCore/qtmetamacros.h>
 #include <QtCore/qtypes.h>
 #include <QtNetwork/qtcpsocket.h>
+#include <QPoint>
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
@@ -99,11 +100,24 @@ struct NETLIB_EXPORT HSTP_Annotation
   uint8_t red;
   uint8_t green;
   uint8_t blue;
-  // Erase flag
-  bool erase;
+  // Thickness instead of the erase flag
+  uint8_t thickness;
 
   // Default constructor
   HSTP_Annotation() = default;
+
+  HSTP_Annotation(const std::vector<QPoint> &v, uint8_t r, uint8_t g, uint8_t b,
+                  uint8_t thick)
+      : red(r), green(g), blue(b), thickness(thick)
+  {
+    points.reserve(v.size());
+    for (const auto &qp : v)
+    {
+      // Convert QPoint to Point (casting to uint16_t)
+      points.push_back(
+          {static_cast<uint16_t>(qp.x()), static_cast<uint16_t>(qp.y())});
+    }
+  }
 
   // Constructor that deserializes from a shared_ptr<char[]>
   HSTP_Annotation(const std::shared_ptr<char[]> &buffer)
@@ -135,10 +149,8 @@ struct NETLIB_EXPORT HSTP_Annotation
     std::memcpy(&blue, ptr, sizeof(blue));
     ptr += sizeof(blue);
 
-    // Deserialize the erase flag (stored as a single byte)
-    uint8_t erase_byte;
-    std::memcpy(&erase_byte, ptr, sizeof(erase_byte));
-    erase = (erase_byte != 0);
+    // Deserialize the thickness (stored as a single byte)
+    std::memcpy(&thickness, ptr, sizeof(thickness));
   }
 
   // Serializes the current annotation to a shared_ptr<char[]>
@@ -148,10 +160,10 @@ struct NETLIB_EXPORT HSTP_Annotation
     // - 2 bytes for the number of points
     // - 4 bytes per point (2 bytes for x and 2 for y)
     // - 3 bytes for RGB
-    // - 1 byte for the erase flag
+    // - 1 byte for thickness
     size_t dataSize = sizeof(uint16_t) +
                       points.size() * (sizeof(uint16_t) * 2) + sizeof(red) +
-                      sizeof(green) + sizeof(blue) + sizeof(uint8_t);
+                      sizeof(green) + sizeof(blue) + sizeof(thickness);
 
     std::shared_ptr<char[]> buffer(new char[dataSize],
                                    std::default_delete<char[]>());
@@ -181,9 +193,8 @@ struct NETLIB_EXPORT HSTP_Annotation
     std::memcpy(ptr, &blue, sizeof(blue));
     ptr += sizeof(blue);
 
-    // Serialize the erase flag as a byte
-    uint8_t erase_byte = erase ? 1 : 0;
-    std::memcpy(ptr, &erase_byte, sizeof(erase_byte));
+    // Serialize the thickness as a byte
+    std::memcpy(ptr, &thickness, sizeof(thickness));
 
     return buffer;
   }

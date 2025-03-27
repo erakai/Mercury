@@ -78,6 +78,12 @@ public slots:
   bool send_chat_message(const std::string &chat_msg);
 
   /*
+   * Informs the server that the client is sending out a vector of points for
+   * annotations.
+   */
+  bool send_annotations(const HSTP_Annotation &annotation);
+
+  /*
    * Connected to the readyRead signal of QTcpSocket. Will process the given
    * HSTP message and emit signals based on that.
    */

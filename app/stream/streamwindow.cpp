@@ -317,9 +317,16 @@ void StreamWindow::send_chat_message(string message)
 void StreamWindow::send_annotation(HSTP_Annotation annotation)
 {
   if (is_host())
+  {
+    qDebug() << "Sending annotation as host";
     servh->server->forward_annotations(-1, annotation);
+  }
+
   if (is_client())
+  {
+    qDebug() << "Sending annotation as client";
     servc->client->send_annotations(annotation);
+  }
 }
 
 void StreamWindow::viewer_count_updated(int new_count)

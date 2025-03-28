@@ -108,7 +108,10 @@ bool HstpHandler::add_option_annotation(const HSTP_Annotation &annotation)
 
   Option opt;
   opt.type = 5; // im using 5 for now
-  opt.len = 8;
+  opt.len = sizeof(uint16_t) +
+            annotation.points.size() * (sizeof(uint16_t) * 2) +
+            sizeof(annotation.red) + sizeof(annotation.green) +
+            sizeof(annotation.blue) + sizeof(annotation.thickness);
   opt.data = annotation.serialize();
 
   m_hdr->options.push_back(opt);
@@ -339,6 +342,9 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
     case 4: // viewer count
       handle_viewer_count(hdr_ptr->sender_alias, opt);
       break;
+    case 5: // annotation
+      handle_annotation((hdr_ptr->sender_alias), opt);
+      break;
     default:
       handle_default(hdr_ptr->sender_alias, opt);
     }
@@ -446,9 +452,11 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
 
 void HstpProcessor::handle_annotation(HANDLER_PARAMS)
 {
+  qDebug() << "HstpProcessor handling annotations";
+
   if (!opt.data || opt.len == 0)
   {
-    qCritical("Something went wrong with handling a chat option...");
+    qCritical("Something went wrong with handling an annotation option...");
     handle_default(alias, opt);
     return;
   }

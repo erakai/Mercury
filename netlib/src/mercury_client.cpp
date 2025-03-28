@@ -119,7 +119,11 @@ void MercuryClient::connect_signals_and_slots()
           &MercuryClient::client_disconnected);
 
   connect(m_mftp_sock.get(), &QUdpSocket::readyRead, this,
-          [&]() { m_mftp_processor->process_ready_datagrams(m_mftp_sock); });
+          [&]()
+          {
+            metrics().register_data_received(m_mftp_sock->bytesAvailable());
+            m_mftp_processor->process_ready_datagrams(m_mftp_sock, metrics());
+          });
 
   connect(m_mftp_processor.get(), &MFTPProcessor::frame_ready, this,
           &MercuryClient::insert_into_jitter_buffer);
@@ -151,8 +155,9 @@ void MercuryClient::insert_into_jitter_buffer(MFTP_Header header,
   if (!begun_playback &&
       m_jitter_buffer.size() >= MINIMUM_FRAME_COUNT_FOR_PLAYBACK)
   {
+    // Begin playing...
     begun_playback = true;
-
+    metrics().reset();
     emit jitter_buffer_sufficiently_full();
   }
 }

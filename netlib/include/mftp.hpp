@@ -1,5 +1,6 @@
 #pragma once
 
+#include "metrics.hpp"
 #include "netlib_global.h"
 #include <QAudioBuffer>
 #include <QBuffer>
@@ -62,13 +63,14 @@ public:
   PartialFrame partial_frames[MAX_FRAMES_TO_REASSEMBLE];
 
 public slots:
-  void process_ready_datagrams(std::shared_ptr<QUdpSocket> socket);
+  void process_ready_datagrams(std::shared_ptr<QUdpSocket> socket,
+                               Metrics &metrics);
 
 signals:
   void frame_ready(MFTP_Header header, QAudioBuffer audio, QImage video);
 
 private:
-  bool process_datagram(QNetworkDatagram datagram);
+  bool process_datagram(QNetworkDatagram datagram, Metrics &metrics);
   void release_complete_frame(int index);
   void fix_partial_frame_array();
 

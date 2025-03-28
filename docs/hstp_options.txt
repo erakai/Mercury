@@ -13,13 +13,13 @@ Structure of the HSTP Header Packet:
 char[alias_size = 18]     alias           <--- Name of sender, if less than 18 octets must be filled with \0.
 uint_16                   options_length  <--- Length of all options in octets including headers.
 uint_8                    num_of_options  <--- # of options
-<--- Options --->
+
+This is then followed by a dynamic number of options:
 
 Option Header:
 uint_8                type
 uint_16               option_length
 char[option_length]   data
-
 
 Options
 
@@ -74,3 +74,29 @@ Options
   Len: sizeof(uint32_t) = 4
   Data:
     - uint32_t viewers
+
+(ID: 8) Performance Metric Request
+  
+  Only sent by a host. Contains the current time so that the receiving
+  client can calculate network latency. Should be sent periodically. Expects
+  an ID: 9 Metrics response.
+
+  Len: 8
+  Data:
+    - uint64_t current_ms_since_epoch
+
+(ID: 9) Performance Metrics
+
+  Only sent by a client. Represents a bundle of information about network
+  performance. Reponse to an ID: 8 request.
+
+  Below, "recent average" refers to that property being the average of the
+  time since the data was last requested.
+
+  Len: 14
+  Data:
+    - uint16_t latency (in ms)
+    - uint32_t throughput (in bits per second recent average, technically goodput)
+    - float loss (as a percent - lower is better)
+    - float fps (true frames display per second recent average) (float = 4 bytes)
+

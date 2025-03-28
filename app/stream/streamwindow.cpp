@@ -239,6 +239,7 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
   {
     // acquire video frame from jitter buffer
     JitterEntry jitter = servc->client->retrieve_next_frame();
+    servc->client->metrics().register_frame();
 
     if (jitter.seq_num == -1)
     {

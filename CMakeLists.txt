@@ -39,7 +39,7 @@ elseif (UNIX)
 endif()
 
 # Install qt
-find_package(Qt6 REQUIRED COMPONENTS Gui Widgets Network Multimedia MultimediaWidgets Test)
+find_package(Qt6 REQUIRED COMPONENTS Gui Widgets Network Multimedia MultimediaWidgets Test Charts)
 qt_standard_project_setup()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)

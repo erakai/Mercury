@@ -3,12 +3,16 @@
 #include "mercury_client.hpp"
 #include "mercury_server.hpp"
 
+#include <QValueAxis>
 #include <QVBoxLayout>
 #include <QTimer>
 #include <QDateTime>
 #include <QWidget>
+#include <QChartView>
 #include <QSlider>
+#include <QChart>
 #include <QListWidget>
+#include <QLineSeries>
 #include <QStackedWidget>
 #include <QLabel>
 
@@ -80,14 +84,29 @@ public slots:
                                       uint64_t request_received_time);
 
 private:
-  // https://doc.qt.io/qt-6/qtcharts-chartsgallery-example.html
+  void update_jitter_label(double jitter);
+  void update_latency_label(uint16_t latency);
+  void update_fps_label(float fps);
+  void update_throughput_label(uint32_t throughput);
+  void update_loss_label(float loss);
+
   shared_ptr<MercuryClient> client;
   string alias;
 
   // For calculating jitter
   vector<uint16_t> latencies;
 
-  // just need to display latency, fps, throughput
-  // maybe as charts if care enough
+  // Actual data display
+  uint64_t last_reset_seconds = -1;
+  QLabel *jitter_label;
+  QLabel *latency_label;
+  QLabel *loss_label;
+  QLabel *fps_label;
+  QLabel *throughput_label;
+
+  // Charts
   // https://doc.qt.io/qt-6/qtcharts-chartsgallery-example.html
+  QChartView *latency_chart_view;
+  QChart *latency_chart;
+  QLineSeries *latency_series;
 };

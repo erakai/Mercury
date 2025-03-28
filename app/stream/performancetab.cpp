@@ -40,6 +40,9 @@ ServerPerformanceTab::ServerPerformanceTab(shared_ptr<MercuryServer> server,
   layout->addWidget(request_frequency_label);
   layout->addWidget(request_frequency_slider);
 
+  QLabel *client_label = new QLabel("Clients:");
+  layout->addWidget(client_label);
+
   alias_list = new QListWidget;
   QPalette list_palette = alias_list->palette();
   list_palette.setColor(QPalette::Base, Qt::white);
@@ -47,12 +50,12 @@ ServerPerformanceTab::ServerPerformanceTab(shared_ptr<MercuryServer> server,
   alias_list->setPalette(list_palette);
 
   performance_tabs = new QStackedWidget;
-  performance_tabs->addWidget(new QWidget());
+  performance_tabs->addWidget(new QWidget);
 
   layout->addWidget(alias_list);
-  layout->setStretch(4, 20);
+  layout->setStretch(5, 20);
   layout->addWidget(performance_tabs);
-  layout->setStretch(5, 60);
+  layout->setStretch(6, 60);
 
   connect(alias_list, &QListWidget::currentRowChanged, this,
           [=, this](int current_row)
@@ -76,12 +79,13 @@ void ServerPerformanceTab::update_request_frequency(int seconds_in_between)
   seconds_in_between_requests = seconds_in_between;
   update_timer->start(seconds_in_between_requests * 1000);
 
-  for (int i = 0; i < performance_tabs->count(); i++)
+  for (int i = 1; i < performance_tabs->count(); i++)
   {
     ClientPerformanceTab *tab =
-        static_cast<ClientPerformanceTab *>(performance_tabs->widget(i));
+        dynamic_cast<ClientPerformanceTab *>(performance_tabs->widget(i));
 
-    tab->reset_charts();
+    if (tab != nullptr)
+      tab->reset_charts();
   }
 }
 
@@ -89,8 +93,6 @@ void ServerPerformanceTab::request_metrics()
 {
   HstpHandler temp;
   temp.init_msg(server->get_alias().c_str());
-  uint64_t time = QDateTime::currentMSecsSinceEpoch();
-  qDebug() << "Sending request at time" << time;
   temp.add_option_performance_request(QDateTime::currentMSecsSinceEpoch());
   server->send_hstp_message_to_all_clients(*(temp.output_msg().get()));
 }
@@ -173,7 +175,44 @@ ClientPerformanceTab::ClientPerformanceTab(shared_ptr<MercuryClient> client,
 
   // Set up UI
   QVBoxLayout *layout = new QVBoxLayout(this);
-  layout->addWidget(new QLabel(QString::fromStdString(alias)));
+  layout->setAlignment(Qt::AlignTop);
+
+  if (!client)
+  {
+    QLabel *titleLabel =
+        new QLabel(QString("Network Performance: %1").arg(alias.c_str()));
+    titleLabel->setAlignment(Qt::AlignCenter);
+    QFont font;
+    font.setPointSize(20);
+    font.setBold(true);
+    font.setUnderline(true);
+    titleLabel->setFont(font);
+    layout->addWidget(titleLabel);
+  }
+
+  jitter_label = new QLabel;
+  latency_label = new QLabel;
+  loss_label = new QLabel;
+  fps_label = new QLabel;
+  throughput_label = new QLabel;
+
+  layout->addWidget(fps_label);
+  layout->addWidget(latency_label);
+  layout->addWidget(jitter_label);
+  layout->addWidget(loss_label);
+  layout->addWidget(throughput_label);
+
+  latency_series = new QLineSeries;
+  latency_chart = new QChart;
+  latency_chart->legend()->hide();
+  latency_chart->setTitle("Latency");
+  latency_chart->addSeries(latency_series);
+  latency_chart->createDefaultAxes();
+  latency_chart->setAnimationOptions(QChart::SeriesAnimations);
+  latency_chart_view = new QChartView(latency_chart);
+  layout->addWidget(latency_chart_view);
+
+  reset_charts();
 };
 
 double ClientPerformanceTab::calculate_jitter()
@@ -204,27 +243,45 @@ void ClientPerformanceTab::update_charts(const char alias[ALIAS_SIZE],
   if (latencies.size() > MAX_DATA_POINTS)
     latencies.erase(latencies.begin());
   double jitter = calculate_jitter();
-  qDebug("jitter for client %s is %lf", alias, jitter);
-  qDebug() << latencies;
+
+  uint64_t current = QDateTime::currentSecsSinceEpoch();
+  uint64_t seconds = current - last_reset_seconds;
+
+  update_jitter_label(jitter);
+  update_latency_label(latency);
+  update_fps_label(fps);
+  update_throughput_label(throughput);
+  update_loss_label(loss);
+
+  latency_series->append(seconds, latency);
+  latency_chart->createDefaultAxes();
+  latency_chart->update();
 }
 
 void ClientPerformanceTab::reset_charts()
 {
   latencies.clear();
+
+  update_jitter_label(0);
+  update_latency_label(0);
+  update_fps_label(0);
+  update_throughput_label(0);
+  update_loss_label(0);
+
+  latency_series->clear();
+
+  last_reset_seconds = QDateTime::currentSecsSinceEpoch();
 }
 
 void ClientPerformanceTab::reply_with_performance_metrics(
-    const char *_alias, uint64_t request_received_time)
+    const char *_alias, uint64_t request_sent_time)
 {
   Metrics &metrics = client->metrics();
   HstpHandler &handler = client->hstp_handler();
   uint64_t current_time = QDateTime::currentMSecsSinceEpoch();
 
-  qDebug() << "Received request at time" << request_received_time;
-
   handler.init_msg(client->get_alias().c_str());
-  uint16_t latency =
-      static_cast<uint16_t>(request_received_time - current_time);
+  uint16_t latency = static_cast<uint16_t>(current_time - request_sent_time);
   uint32_t throughput = metrics.retrieve_throughput();
   float loss = metrics.retrieve_loss();
   float fps = metrics.retrieve_fps();
@@ -234,4 +291,30 @@ void ClientPerformanceTab::reply_with_performance_metrics(
   metrics.reset();
 
   update_charts(alias.c_str(), latency, throughput, loss, fps);
+}
+
+void ClientPerformanceTab::update_jitter_label(double jitter)
+{
+  jitter_label->setText(QString::asprintf("Jitter (stddev): %.2fms", jitter));
+}
+
+void ClientPerformanceTab::update_latency_label(uint16_t latency)
+{
+  latency_label->setText(QString("TCP Latency: %1ms").arg(latency));
+}
+
+void ClientPerformanceTab::update_fps_label(float fps)
+{
+  fps_label->setText(QString::asprintf("True Frames Per Second: %.2f", fps));
+}
+
+void ClientPerformanceTab::update_throughput_label(uint32_t throughput)
+{
+  throughput_label->setText(
+      QString::asprintf("Frame Throughput: %.2f kbps", (throughput / 1000.0)));
+}
+
+void ClientPerformanceTab::update_loss_label(float loss)
+{
+  loss_label->setText(QString::asprintf("UDP Datagram Loss: %.2f%%", loss));
 }

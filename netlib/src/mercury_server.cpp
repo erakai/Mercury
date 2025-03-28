@@ -279,6 +279,9 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
     client.frame_seq_num++;
 
     client_sent_to_count++;
+
+    // TODO: This 100% should only be called once per frame, and should
+    // just accept a vector of addresses/ports. Important refactor.
     send_datagram(mftp_sock, client.hstp_sock->peerAddress(), client.mftp_port,
                   header, video.toImage(), audio);
   }

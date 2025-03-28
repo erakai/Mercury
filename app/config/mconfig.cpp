@@ -5,6 +5,8 @@
 #include <QSettings>
 #include <sys/stat.h>
 
+int FPS = 5;
+
 /* Checks to see if config file is present */
 bool mercury::check_config_file_presence()
 {

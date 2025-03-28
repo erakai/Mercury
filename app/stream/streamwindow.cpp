@@ -134,6 +134,12 @@ void StreamWindow::connect_signals_and_slots()
                                         std::string(stream_title));
             });
 
+  // connect new fps for client
+  if (is_client())
+    connect(servc->client->hstp_processor().get(), &HstpProcessor::received_fps,
+            this, [=, this](const char alias[ALIAS_SIZE], uint32_t new_fps)
+            { stream_display->set_new_fps(new_fps); });
+
   // connect stream fully initialized to client jitter buffer full signal
   if (is_host())
     stream_fully_initialized();

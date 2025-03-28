@@ -58,9 +58,13 @@ TEST_F(MftpTest, SendAndProcessBasic)
   QImage received_image;
   QAudioBuffer received_audio;
 
+  // Mock metrics
+  Metrics metrics;
+
   // Connect ready read to our processor
-  QObject::connect(sock2.get(), &QUdpSocket::readyRead,
-                   [&]() { sock2_processor->process_ready_datagrams(sock2); });
+  QObject::connect(
+      sock2.get(), &QUdpSocket::readyRead,
+      [&]() { sock2_processor->process_ready_datagrams(sock2, metrics); });
 
   // Connect our processor to receiving the data
   QObject::connect(sock2_processor.get(), &MFTPProcessor::frame_ready,

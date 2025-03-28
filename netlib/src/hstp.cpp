@@ -381,6 +381,9 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
     case 4: // viewer count
       handle_viewer_count(hdr_ptr->sender_alias, opt);
       break;
+    case 7: // fps
+      handle_fps(hdr_ptr->sender_alias, opt);
+      break;
     case 8: // performance request
       handle_performance_request(hdr_ptr->sender_alias, opt);
       break;

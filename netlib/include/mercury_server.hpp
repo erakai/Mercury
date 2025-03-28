@@ -87,6 +87,7 @@ public:
   int get_tcp_port() { return tcp_port; };
   int get_udp_port() { return udp_port; }
   Client &get_client(int id) { return clients[id]; }
+  std::string get_alias() { return host_alias; }
 
   /*
   Sends a message to every client.

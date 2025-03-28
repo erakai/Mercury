@@ -52,6 +52,10 @@ public:
     return m_hstp_processor_ptr;
   }
 
+  HstpHandler &hstp_handler() { return m_hstp_handler; }
+
+  std::shared_ptr<QTcpSocket> hstp_sock() { return m_hstp_sock; };
+
   std::string get_alias() { return m_alias; }
 
   int jitter_buffer_size() { return m_jitter_buffer.size(); }

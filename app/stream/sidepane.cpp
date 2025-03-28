@@ -27,7 +27,7 @@ void SidePane::initialize_server_performance_tab(
 void SidePane::initialize_client_performance_tab(
     shared_ptr<MercuryClient> client)
 {
-  client_performance = new ClientPerformanceTab(client);
+  client_performance = new ClientPerformanceTab(client, client->get_alias());
   addTab(client_performance, "Performance");
 }
 
@@ -131,6 +131,7 @@ void ViewerListTab::viewer_left(string alias)
       int row = viewer_list->row(item);
       viewer_list->takeItem(row);
       items.erase(items.begin() + i);
+      delete item;
       break;
     }
   }

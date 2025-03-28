@@ -75,6 +75,14 @@ Options
   Data:
     - uint32_t viewers
 
+(ID: 7) FPS
+
+  Represents a message containing a new fps to process the stream at.
+
+  Len: 4
+  Data:
+    - uint32_t fps
+
 (ID: 8) Performance Metric Request
   
   Only sent by a host. Contains the current time so that the receiving

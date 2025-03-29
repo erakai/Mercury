@@ -82,6 +82,9 @@ private:
   StreamDisplay *stream_display;
   QGridLayout *below_stream_layout;
 
+  // Only relevant if this is a client - displays itself when poor connection
+  QLabel *unstable_network_indicator;
+
   QLabel *stream_title;
   QLabel *host_name;
   QLabel *viewer_count;

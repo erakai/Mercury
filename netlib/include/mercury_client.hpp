@@ -64,12 +64,14 @@ public:
 
   void set_is_stable_connection(bool val = true, std::string reason = "")
   {
+    unstable_connection_reason = reason;
     if (val != stable_connection)
       emit connection_stablity_updated(val);
     stable_connection = val;
-    unstable_connection_reason = reason;
   }
+
   bool is_stable_connection() { return stable_connection; }
+  std::string get_connection_reason() { return unstable_connection_reason; }
 
 public slots:
   /*

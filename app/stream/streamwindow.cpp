@@ -46,6 +46,12 @@ void StreamWindow::set_up()
   below_stream_layout->addWidget(host_name, 1, 0);
   below_stream_layout->addWidget(viewer_count, 0, 2);
 
+  // TODO: Chris when you beautify us up add this widget wherever is best for
+  // you
+  if (is_client())
+    below_stream_layout->addWidget(unstable_network_indicator, 2, 2,
+                                   Qt::AlignCenter);
+
   /*
   |---------------------------|-------------|
   |75% - Stream Window Across | 25% - Chat  |
@@ -148,6 +154,17 @@ void StreamWindow::connect_signals_and_slots()
     connect(servc->client.get(),
             &MercuryClient::jitter_buffer_sufficiently_full, this,
             &StreamWindow::stream_fully_initialized);
+
+  // connect unstable network signal to icon on client
+  if (is_client())
+    connect(servc->client.get(), &MercuryClient::connection_stablity_updated,
+            this,
+            [=, this](bool new_status)
+            {
+              unstable_network_indicator->setVisible(!new_status);
+              unstable_network_indicator->setToolTip(
+                  servc->client->get_connection_reason().c_str());
+            });
 }
 
 void StreamWindow::initialize_primary_ui_widgets()
@@ -175,6 +192,15 @@ void StreamWindow::initialize_primary_ui_widgets()
       &StreamWindow::provide_next_audio_frame, this, std::placeholders::_1);
   stream_display = new StreamDisplay(this, video_func, audio_func);
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+  if (is_client())
+  {
+    unstable_network_indicator = new QLabel;
+    QPixmap pix("assets/unstable-indicator.png");
+    QIcon ico(pix);
+    unstable_network_indicator->setPixmap(ico.pixmap({48, 48}));
+    unstable_network_indicator->setVisible(false);
+  }
 
   below_stream_layout = new QGridLayout();
 

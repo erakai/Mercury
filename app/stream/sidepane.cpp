@@ -104,6 +104,9 @@ ViewerListTab::ViewerListTab(string my_alias_str, QWidget *parent)
   layout->addWidget(label_list);
 
   viewer_list = new QListWidget();
+  viewer_list->setSelectionMode(QAbstractItemView::NoSelection);
+  viewer_list->setFocusPolicy(Qt::NoFocus);
+  viewer_list->setEditTriggers(QAbstractItemView::NoEditTriggers);
   layout->addWidget(viewer_list);
 
   QPalette list_palette = viewer_list->palette();

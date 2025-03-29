@@ -9,6 +9,7 @@
 #include <QNetworkDatagram>
 #include <QUdpSocket>
 #include <memory>
+#include <vector>
 
 #define MAX_FRAMES_TO_REASSEMBLE 2
 #define SOURCE_NAME_LEN 12
@@ -91,6 +92,7 @@ Host-side functionality.
 */
 
 NETLIB_EXPORT bool send_datagram(std::shared_ptr<QUdpSocket> sock,
-                                 QHostAddress dest_ip, int dest_port,
+                                 std::vector<QHostAddress> dest_ip,
+                                 std::vector<int> dest_port,
                                  MFTP_Header &header, QImage video_image,
                                  QAudioBuffer audio);

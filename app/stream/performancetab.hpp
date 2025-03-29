@@ -3,25 +3,24 @@
 #include "mercury_client.hpp"
 #include "mercury_server.hpp"
 
-#include <QValueAxis>
+#include <QTableWidget>
 #include <QVBoxLayout>
 #include <QTimer>
 #include <QDateTime>
 #include <QWidget>
-#include <QChartView>
 #include <QSlider>
-#include <QChart>
 #include <QListWidget>
-#include <QLineSeries>
 #include <QStackedWidget>
 #include <QLabel>
+#include <QHeaderView>
 
 #include <vector>
 #include <memory>
 
 using namespace std;
 
-#define MAX_DATA_POINTS 10
+#define MAX_DATA_POINTS 5
+#define MAX_HISTORY_LEN 15
 
 class ServerPerformanceTab : public QWidget
 {
@@ -104,11 +103,5 @@ private:
   QLabel *fps_label;
   QLabel *throughput_label;
 
-  // Charts
-  // https://doc.qt.io/qt-6/qtcharts-chartsgallery-example.html
-  QChartView *latency_chart_view;
-  QChart *latency_chart;
-  QLineSeries *latency_series;
-  QValueAxis *latency_x_axis;
-  QValueAxis *latency_y_axis;
+  QTableWidget *history;
 };

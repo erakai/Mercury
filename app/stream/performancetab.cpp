@@ -53,9 +53,9 @@ ServerPerformanceTab::ServerPerformanceTab(shared_ptr<MercuryServer> server,
   performance_tabs->addWidget(new QWidget);
 
   layout->addWidget(alias_list);
-  layout->setStretch(5, 20);
+  layout->setStretch(5, 12);
   layout->addWidget(performance_tabs);
-  layout->setStretch(6, 60);
+  layout->setStretch(6, 68);
 
   connect(alias_list, &QListWidget::currentRowChanged, this,
           [=, this](int current_row)
@@ -200,22 +200,25 @@ ClientPerformanceTab::ClientPerformanceTab(shared_ptr<MercuryClient> client,
   layout->addWidget(jitter_label);
   layout->addWidget(loss_label);
   layout->addWidget(throughput_label);
+  layout->addWidget(new QWidget);
 
-  latency_series = new QLineSeries;
-  latency_chart = new QChart;
-  latency_chart->legend()->hide();
-  latency_chart->setTitle("Latency");
-  latency_chart->addSeries(latency_series);
-  latency_x_axis = new QValueAxis;
-  latency_y_axis = new QValueAxis;
-  latency_x_axis->setRange(0, 10);
-  latency_y_axis->setRange(0, 120);
-  latency_series->setPointsVisible();
-  latency_chart->addAxis(latency_x_axis, Qt::AlignBottom);
-  latency_chart->addAxis(latency_y_axis, Qt::AlignLeft);
-  latency_chart->setAnimationOptions(QChart::SeriesAnimations);
-  latency_chart_view = new QChartView(latency_chart);
-  layout->addWidget(latency_chart_view);
+  history = new QTableWidget(MAX_HISTORY_LEN, 6);
+  history->setHorizontalHeaderLabels(
+      {"#", "FPS", "Latency", "Jitter", "Loss", "Throughput"});
+
+  history->horizontalHeader()->setSectionResizeMode(
+      QHeaderView::ResizeToContents);
+  history->verticalHeader()->setSectionResizeMode(
+      QHeaderView::ResizeToContents);
+  history->verticalHeader()->setVisible(false);
+
+  history->setSelectionMode(QAbstractItemView::NoSelection);
+  history->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  history->setFocusPolicy(Qt::NoFocus);
+  history->setSizePolicy(QSizePolicy::MinimumExpanding,
+                         QSizePolicy::MinimumExpanding);
+
+  layout->addWidget(history);
 
   reset_charts();
 };
@@ -243,20 +246,16 @@ void ClientPerformanceTab::update_charts(const char alias[ALIAS_SIZE],
                                          uint16_t latency, uint32_t throughput,
                                          float loss, float fps)
 {
-  // Flag that indicates if we need to remove a previous data point
-  bool exceeding_max = false;
-
   // Retrieve updated jitter
   latencies.push_back(latency);
   if (latencies.size() > MAX_DATA_POINTS)
   {
-    exceeding_max = true;
     latencies.erase(latencies.begin());
   }
   double jitter = calculate_jitter();
 
-  uint64_t current = QDateTime::currentSecsSinceEpoch();
-  uint64_t seconds = current - last_reset_seconds;
+  uint64_t curr_secs = QDateTime::currentSecsSinceEpoch();
+  uint64_t time = curr_secs - last_reset_seconds;
 
   update_jitter_label(jitter);
   update_latency_label(latency);
@@ -264,28 +263,26 @@ void ClientPerformanceTab::update_charts(const char alias[ALIAS_SIZE],
   update_throughput_label(throughput);
   update_loss_label(loss);
 
-  if (latency != 0)
-  {
-    qDebug() << seconds << latency;
-    latency_series->append(seconds, latency);
+  // "Time (s)", "FPS", "Latency", "Jitter", "Loss", "Throughput"
+  history->insertRow(0);
 
-    if (exceeding_max)
-      latency_series->remove(0);
+  QTableWidgetItem *i1 = new QTableWidgetItem(tr("%1s").arg(time));
+  QTableWidgetItem *i2 = new QTableWidgetItem(QString::asprintf("%.2f", fps));
+  QTableWidgetItem *i3 = new QTableWidgetItem(tr("%1").arg(latency));
+  QTableWidgetItem *i4 =
+      new QTableWidgetItem(QString::asprintf("%.2f", jitter));
+  QTableWidgetItem *i5 = new QTableWidgetItem(QString::asprintf("%.2f", loss));
+  QTableWidgetItem *i6 =
+      new QTableWidgetItem(QString::asprintf("%.2f", throughput / 1000.0));
 
-    // Hacky solution I can't avoid because it doesn't want to update
-    latency_chart->removeSeries(latency_series);
-    latency_chart->addSeries(latency_series);
+  history->setItem(0, 0, i1);
+  history->setItem(0, 1, i2);
+  history->setItem(0, 2, i3);
+  history->setItem(0, 3, i4);
+  history->setItem(0, 4, i5);
+  history->setItem(0, 5, i6);
 
-    if (!latency_series->points().isEmpty() && latencies.size() > 0)
-    {
-      latency_x_axis->setRange(latency_series->at(0).x() - 1, seconds + 2);
-      latency_y_axis->setRange(
-          0, (*std::max_element(latencies.begin(), latencies.end())) + 2);
-    }
-
-    latency_chart->update();
-    latency_chart_view->update();
-  }
+  history->removeRow(history->rowCount() - 1);
 }
 
 void ClientPerformanceTab::reset_charts()
@@ -298,8 +295,8 @@ void ClientPerformanceTab::reset_charts()
   update_throughput_label(0);
   update_loss_label(0);
 
-  latency_series->clear();
   last_reset_seconds = QDateTime::currentSecsSinceEpoch();
+  history->clearContents();
 }
 
 void ClientPerformanceTab::reply_with_performance_metrics(

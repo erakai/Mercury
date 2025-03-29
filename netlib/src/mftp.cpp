@@ -25,9 +25,10 @@ void acquire_mftp_socket(std::shared_ptr<QUdpSocket> sock, int port)
   sock->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, 800000);
 }
 
-bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
-                   int dest_port, MFTP_Header &header, QImage video_image,
-                   QAudioBuffer audio)
+bool send_datagram(std::shared_ptr<QUdpSocket> sock,
+                   std::vector<QHostAddress> dest_ip,
+                   std::vector<int> dest_port, MFTP_Header &header,
+                   QImage video_image, QAudioBuffer audio)
 {
   QByteArray payload_array;
 
@@ -89,14 +90,16 @@ bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
     }
 
     // Define datagram
-    QNetworkDatagram dg(data, dest_ip, dest_port);
-
-    // Send
-    if (sock->writeDatagram(dg) < 0)
+    for (int i = 0; i < dest_ip.size(); i++)
     {
-      qCritical("Datagram failed to send due to size (%lld bytes).",
-                data.size());
-      return false;
+      QNetworkDatagram dg(data, dest_ip[i], dest_port[i]);
+
+      // Send
+      if (sock->writeDatagram(dg) < 0)
+      {
+        qCritical("Datagram failed to send due to size (%lld bytes).",
+                  data.size());
+      }
     }
   }
 

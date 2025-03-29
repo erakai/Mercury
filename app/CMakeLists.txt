@@ -30,7 +30,7 @@ qt_add_executable(mercury
 )
 
 # Qt set up
-target_link_libraries(mercury PRIVATE Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets Qt6::Charts)
+target_link_libraries(mercury PRIVATE Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets)
 
 # Prevents console window on windows (Qt stuff)
 set_target_properties(mercury PROPERTIES

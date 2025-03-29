@@ -245,7 +245,6 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
   {
     // acquire video frame from jitter buffer
     JitterEntry jitter = servc->client->retrieve_next_frame();
-    servc->client->metrics().register_frame();
 
     if (jitter.seq_num == -1)
     {
@@ -253,6 +252,7 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
       return false;
     }
 
+    servc->client->metrics().register_frame();
     next_video = jitter.video;
     return true;
   }
@@ -352,6 +352,7 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   client.handler.add_option_stream_title(
       stream_title->text().toStdString().c_str());
   client.handler.add_option_viewer_count(servh->viewer_count);
+  // TODO: client.handler.add_option_fps(FPS);
   client.handler.output_msg_to_socket(client.hstp_sock);
 }
 

@@ -419,6 +419,8 @@ bool StreamWindow::eventFilter(QObject *watched, QEvent *event)
 
 void StreamWindow::onAnnotationDisplayMousePressed(QMouseEvent *event)
 {
+  // Start a new annotation by clearing previous points.
+  points.clear();
   QPoint pos = event->pos();
   old_point = pos;
   points.push_back(pos);
@@ -427,13 +429,38 @@ void StreamWindow::onAnnotationDisplayMousePressed(QMouseEvent *event)
 void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
 {
   QPoint pos = event->pos();
-  annotation_display->addLine(old_point, pos);
+
+  PaintToolWidget *toolWidget = annotation_display->paint_tool_widget;
+  QColor currentColor = toolWidget->selectedColor();
+  int thickness = toolWidget->brushSize();
+
+  // TODO add erase support
+  if (toolWidget->isEraseMode())
+  {
+    currentColor = QColor(Qt::white);
+  }
+
+  annotation_display->addLine(old_point, pos, currentColor, thickness);
   old_point = pos;
   points.push_back(pos);
 }
 
 void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
 {
-  send_annotation(HSTP_Annotation(points, 255, 0, 0, 2));
+  Q_UNUSED(event);
+
+  PaintToolWidget *toolWidget = annotation_display->paint_tool_widget;
+  QColor currentColor = toolWidget->selectedColor();
+  int thickness = toolWidget->brushSize();
+
+  // TODO add erase support
+  if (toolWidget->isEraseMode())
+  {
+    currentColor = QColor(Qt::white);
+  }
+
+  send_annotation(HSTP_Annotation(points, currentColor.red(),
+                                  currentColor.green(), currentColor.blue(),
+                                  thickness));
   points.clear();
 }

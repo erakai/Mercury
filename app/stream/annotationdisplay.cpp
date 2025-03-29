@@ -1,8 +1,11 @@
 #include "annotationdisplay.hpp"
+#include "painttoolwidget.hpp"
+
 #include <QPainter>
 #include <QPen>
 #include <QDebug>
 #include <QResizeEvent>
+#include <QVBoxLayout>
 
 AnnotationDisplay::AnnotationDisplay(QWidget *parent) : QWidget(parent)
 {
@@ -13,6 +16,18 @@ AnnotationDisplay::AnnotationDisplay(QWidget *parent) : QWidget(parent)
   // Initialize the pixmap with the current widget size and fill it transparent.
   m_pixmap = QPixmap(size());
   m_pixmap.fill(Qt::transparent);
+
+  // Create a vertical layout for this widget.
+  QVBoxLayout *mainLayout = new QVBoxLayout(this);
+  mainLayout->setContentsMargins(0, 0, 0, 0);
+
+  // Create the PaintToolWidget and add it at the top of the display.
+  paint_tool_widget = new PaintToolWidget(this);
+  mainLayout->addWidget(paint_tool_widget, 0, Qt::AlignTop);
+
+  // Add a stretch to push remaining content (your drawing) to fill the rest of
+  // the area.
+  mainLayout->addStretch();
 }
 
 void AnnotationDisplay::addLine(const QPoint &start, const QPoint &end,

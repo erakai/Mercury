@@ -187,6 +187,7 @@ ClientPerformanceTab::ClientPerformanceTab(shared_ptr<MercuryClient> client,
     font.setBold(true);
     titleLabel->setFont(font);
     layout->addWidget(titleLabel);
+    layout->addWidget(new QWidget);
   }
 
   jitter_label = new QLabel;
@@ -204,7 +205,7 @@ ClientPerformanceTab::ClientPerformanceTab(shared_ptr<MercuryClient> client,
 
   history = new QTableWidget(MAX_HISTORY_LEN, 6);
   history->setHorizontalHeaderLabels(
-      {"#", "FPS", "Latency", "Jitter", "Loss", "Throughput"});
+      {"t", "FPS", "Latency", "Jitter", "Loss", "Throughput"});
 
   history->horizontalHeader()->setSectionResizeMode(
       QHeaderView::ResizeToContents);
@@ -273,7 +274,7 @@ void ClientPerformanceTab::update_charts(const char alias[ALIAS_SIZE],
       new QTableWidgetItem(QString::asprintf("%.2f", jitter));
   QTableWidgetItem *i5 = new QTableWidgetItem(QString::asprintf("%.2f", loss));
   QTableWidgetItem *i6 =
-      new QTableWidgetItem(QString::asprintf("%.2f", throughput / 1000.0));
+      new QTableWidgetItem(QString::asprintf("%.3f", throughput / 1000000.0));
 
   history->setItem(0, 0, i1);
   history->setItem(0, 1, i2);
@@ -336,8 +337,8 @@ void ClientPerformanceTab::update_fps_label(float fps)
 
 void ClientPerformanceTab::update_throughput_label(uint32_t throughput)
 {
-  throughput_label->setText(
-      QString::asprintf("Frame Throughput: %.2f kbps", (throughput / 1000.0)));
+  throughput_label->setText(QString::asprintf("Frame Throughput: %.3f mbps",
+                                              (throughput / 1000000.0)));
 }
 
 void ClientPerformanceTab::update_loss_label(float loss)

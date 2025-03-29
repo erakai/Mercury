@@ -141,6 +141,7 @@ bool MFTPProcessor::process_datagram(QNetworkDatagram datagram,
   // if new find first -1 in partial_frames and fill
 
   QByteArray data = datagram.data();
+  metrics.register_data_received(data.size() * 8);
   MFTP_Header header = {0};
 
   if (data.size() < size_of_mftp_header())

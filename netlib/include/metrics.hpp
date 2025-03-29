@@ -32,7 +32,7 @@ public:
            ((float) expected_datagrams);
   }
 
-  uint16_t retrieve_throughput()
+  uint32_t retrieve_throughput()
   {
     uint64_t current = QDateTime::currentMSecsSinceEpoch();
     double elapsed_s = (current - last_reset) / 1000.0;
@@ -41,7 +41,7 @@ public:
   }
 
   void register_frame() { frames++; }
-  void register_data_received(int bits) { throughput += bits; }
+  void register_data_received(uint64_t bits) { throughput += bits; }
 
   void register_datagram_received() { datagrams_received++; }
   void register_expected_datagrams(int fragments)

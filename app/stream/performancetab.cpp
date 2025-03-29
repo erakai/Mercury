@@ -245,7 +245,7 @@ double ClientPerformanceTab::calculate_jitter()
 
 void ClientPerformanceTab::update_charts(const char alias[ALIAS_SIZE],
                                          uint16_t latency, uint32_t throughput,
-                                         float loss, float fps)
+                                         float loss, float true_fps)
 {
   // Retrieve updated jitter
   latencies.push_back(latency);
@@ -258,17 +258,20 @@ void ClientPerformanceTab::update_charts(const char alias[ALIAS_SIZE],
   uint64_t curr_secs = QDateTime::currentSecsSinceEpoch();
   uint64_t time = curr_secs - last_reset_seconds;
 
+  // Update labgels
   update_jitter_label(jitter);
   update_latency_label(latency);
-  update_fps_label(fps);
+  update_fps_label(true_fps);
   update_throughput_label(throughput);
   update_loss_label(loss);
 
+  // Update table
   // "Time (s)", "FPS", "Latency", "Jitter", "Loss", "Throughput"
   history->insertRow(0);
 
   QTableWidgetItem *i1 = new QTableWidgetItem(tr("%1s").arg(time));
-  QTableWidgetItem *i2 = new QTableWidgetItem(QString::asprintf("%.2f", fps));
+  QTableWidgetItem *i2 =
+      new QTableWidgetItem(QString::asprintf("%.2f", true_fps));
   QTableWidgetItem *i3 = new QTableWidgetItem(tr("%1").arg(latency));
   QTableWidgetItem *i4 =
       new QTableWidgetItem(QString::asprintf("%.2f", jitter));
@@ -284,6 +287,20 @@ void ClientPerformanceTab::update_charts(const char alias[ALIAS_SIZE],
   history->setItem(0, 5, i6);
 
   history->removeRow(history->rowCount() - 1);
+
+  // Update client
+  if (client)
+  {
+    if (latency > 250)
+      client->set_is_stable_connection(false, "Latency exceeds 250ms.");
+    else if (true_fps < FPS - 1)
+      client->set_is_stable_connection(
+          false,
+          std::format("Unable to reach target of {} fps - currently at {:.2f}.",
+                      FPS, true_fps));
+    else if (!client->is_stable_connection())
+      client->set_is_stable_connection(true);
+  }
 }
 
 void ClientPerformanceTab::reset_charts()

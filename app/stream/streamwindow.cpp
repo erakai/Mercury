@@ -1,4 +1,5 @@
 #include "streamwindow.hpp"
+#include "config/mconfig.hpp"
 #include "hstp.hpp"
 #include "singleton/videomanager.h"
 #include <QApplication>
@@ -352,7 +353,7 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   client.handler.add_option_stream_title(
       stream_title->text().toStdString().c_str());
   client.handler.add_option_viewer_count(servh->viewer_count);
-  // TODO: client.handler.add_option_fps(FPS);
+  client.handler.add_option_fps(FPS);
   client.handler.output_msg_to_socket(client.hstp_sock);
 }
 

@@ -62,6 +62,17 @@ public:
 
   Metrics &metrics() { return m_metrics; }
 
+  void set_is_stable_connection(bool val = true, std::string reason = "")
+  {
+    unstable_connection_reason = reason;
+    if (val != stable_connection)
+      emit connection_stablity_updated(val);
+    stable_connection = val;
+  }
+
+  bool is_stable_connection() { return stable_connection; }
+  std::string get_connection_reason() { return unstable_connection_reason; }
+
 public slots:
   /*
    * Connects to the given host address and port via both UDP/TCP. Slot allows
@@ -108,9 +119,19 @@ signals:
   */
   void jitter_buffer_sufficiently_full();
 
+  /*
+  Emitted when the boolean stable_connection changes
+  */
+  void connection_stablity_updated(bool is_stable_connection);
+
 private:
   // Represents whether this client has begun playback
   bool begun_playback = false;
+
+  // Represents whether or not this client has a stable connection
+  // This is set by stream/performancetab.cpp
+  bool stable_connection = true;
+  std::string unstable_connection_reason;
 
   /*
   Private method to help set up the signals/slots of the client.

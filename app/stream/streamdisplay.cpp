@@ -56,18 +56,20 @@ void StreamDisplay::begin_playback()
 
 void StreamDisplay::set_new_fps(int new_fps)
 {
-  current_fps = new_fps;
-  fps_timer->start(1000 / new_fps);
-  FPS = new_fps;
+  if (new_fps != current_fps)
+  {
+    current_fps = new_fps;
+    FPS = new_fps;
+    if (fps_timer->isActive())
+      fps_timer->start(1000 / new_fps);
+  }
 }
 
 void StreamDisplay::acquire_next_frame()
 {
   // Hacky way to watch for FPS being updated
   if (current_fps != FPS)
-  {
     set_new_fps(FPS);
-  }
 
   if (get_next_audio_frame(next_audio_frame))
   {

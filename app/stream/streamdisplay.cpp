@@ -1,5 +1,6 @@
 #include "streamdisplay.hpp"
 #include <QtMultimedia/qaudiosink.h>
+#include "config/mconfig.hpp"
 
 StreamDisplay::StreamDisplay(QWidget *parent,
                              function<bool(QImage &)> get_next_video_frame,
@@ -9,6 +10,7 @@ StreamDisplay::StreamDisplay(QWidget *parent,
 {
   // TODO: Add Audio
 
+  current_fps = FPS;
   fps_timer = new QTimer(this);
   connect(fps_timer, &QTimer::timeout, this,
           &StreamDisplay::acquire_next_frame);
@@ -21,9 +23,11 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   format.setSampleFormat(QAudioFormat::Int16);
 
   audio_sink = new QAudioSink(format, this);
+  /*
   sourceFile.setFileName("assets/fart.raw");
   sourceFile.open(QIODevice::ReadOnly);
   audio_sink->start(&sourceFile);
+  */
   // AUDIO TESTING END ====
 
   video_player = new QMediaPlayer(this);
@@ -50,8 +54,21 @@ void StreamDisplay::begin_playback()
   fps_timer->start(1000 / FPS);
 }
 
+void StreamDisplay::set_new_fps(int new_fps)
+{
+  current_fps = new_fps;
+  fps_timer->start(1000 / new_fps);
+  FPS = new_fps;
+}
+
 void StreamDisplay::acquire_next_frame()
 {
+  // Hacky way to watch for FPS being updated
+  if (current_fps != FPS)
+  {
+    set_new_fps(FPS);
+  }
+
   if (get_next_audio_frame(next_audio_frame))
   {
     // somehow add audio frame to audio buffer?

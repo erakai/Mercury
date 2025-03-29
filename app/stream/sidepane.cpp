@@ -17,6 +17,20 @@ void SidePane::initialize_viewer_list_tab(const string &display_name)
   addTab(viewer_list, "Viewer List");
 }
 
+void SidePane::initialize_server_performance_tab(
+    shared_ptr<MercuryServer> server)
+{
+  server_performance = new ServerPerformanceTab(server);
+  addTab(server_performance, "Performance");
+}
+
+void SidePane::initialize_client_performance_tab(
+    shared_ptr<MercuryClient> client)
+{
+  client_performance = new ClientPerformanceTab(client, client->get_alias());
+  addTab(client_performance, "Performance");
+}
+
 ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
     : QWidget(parent), displayName(displayName)
 {
@@ -90,6 +104,9 @@ ViewerListTab::ViewerListTab(string my_alias_str, QWidget *parent)
   layout->addWidget(label_list);
 
   viewer_list = new QListWidget();
+  viewer_list->setSelectionMode(QAbstractItemView::NoSelection);
+  viewer_list->setFocusPolicy(Qt::NoFocus);
+  viewer_list->setEditTriggers(QAbstractItemView::NoEditTriggers);
   layout->addWidget(viewer_list);
 
   QPalette list_palette = viewer_list->palette();
@@ -117,6 +134,7 @@ void ViewerListTab::viewer_left(string alias)
       int row = viewer_list->row(item);
       viewer_list->takeItem(row);
       items.erase(items.begin() + i);
+      delete item;
       break;
     }
   }

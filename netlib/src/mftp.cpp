@@ -25,9 +25,10 @@ void acquire_mftp_socket(std::shared_ptr<QUdpSocket> sock, int port)
   sock->setSocketOption(QAbstractSocket::ReceiveBufferSizeSocketOption, 800000);
 }
 
-bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
-                   int dest_port, MFTP_Header &header, QImage video_image,
-                   QAudioBuffer audio)
+bool send_datagram(std::shared_ptr<QUdpSocket> sock,
+                   std::vector<QHostAddress> dest_ip,
+                   std::vector<int> dest_port, MFTP_Header &header,
+                   QImage video_image, QAudioBuffer audio)
 {
   QByteArray payload_array;
 
@@ -89,29 +90,33 @@ bool send_datagram(std::shared_ptr<QUdpSocket> sock, QHostAddress dest_ip,
     }
 
     // Define datagram
-    QNetworkDatagram dg(data, dest_ip, dest_port);
-
-    // Send
-    if (sock->writeDatagram(dg) < 0)
+    for (int i = 0; i < dest_ip.size(); i++)
     {
-      qCritical("Datagram failed to send due to size (%lld bytes).",
-                data.size());
-      return false;
+      QNetworkDatagram dg(data, dest_ip[i], dest_port[i]);
+
+      // Send
+      if (sock->writeDatagram(dg) < 0)
+      {
+        qCritical("Datagram failed to send due to size (%lld bytes).",
+                  data.size());
+      }
     }
   }
 
   return true;
 }
 
-void MFTPProcessor::process_ready_datagrams(std::shared_ptr<QUdpSocket> socket)
+void MFTPProcessor::process_ready_datagrams(std::shared_ptr<QUdpSocket> socket,
+                                            Metrics &metrics)
 {
   while (socket->hasPendingDatagrams())
   {
     QNetworkDatagram datagram = socket->receiveDatagram();
+    metrics.register_datagram_received();
 
-    process_datagram(datagram);
+    process_datagram(datagram, metrics);
 
-    // See if we can released any of the frames
+    // See if we can release any of the frames
     bool released_any = false;
     for (int i = 0; i < MAX_FRAMES_TO_REASSEMBLE; i++)
     {
@@ -130,11 +135,13 @@ void MFTPProcessor::process_ready_datagrams(std::shared_ptr<QUdpSocket> socket)
   }
 }
 
-bool MFTPProcessor::process_datagram(QNetworkDatagram datagram)
+bool MFTPProcessor::process_datagram(QNetworkDatagram datagram,
+                                     Metrics &metrics)
 {
   // if new find first -1 in partial_frames and fill
 
   QByteArray data = datagram.data();
+  metrics.register_data_received(data.size() * 8);
   MFTP_Header header = {0};
 
   if (data.size() < size_of_mftp_header())
@@ -193,9 +200,19 @@ bool MFTPProcessor::process_datagram(QNetworkDatagram datagram)
   new_frame.datagrams.resize(header.total_fragments);
   new_frame.datagrams[header.fragment_num] = data;
 
+  // For loss calculation
+  metrics.register_expected_datagrams(header.total_fragments);
+
   if (first_free_frame == -1)
   {
     // Case: new frame and we don't have space
+    if (partial_frames[0].header.seq_num > new_frame.header.seq_num)
+    {
+      qInfo("Received partial frame %d but oldest current frame is %d.",
+            new_frame.header.seq_num, partial_frames[0].header.seq_num);
+      return false;
+    }
+
     qInfo("Dropping partial frame %d (had %d remaining fragments out of %d) in "
           "exchange for new frame %d.",
           partial_frames[0].header.seq_num,

@@ -58,9 +58,13 @@ TEST_F(MftpTest, SendAndProcessBasic)
   QImage received_image;
   QAudioBuffer received_audio;
 
+  // Mock metrics
+  Metrics metrics;
+
   // Connect ready read to our processor
-  QObject::connect(sock2.get(), &QUdpSocket::readyRead,
-                   [&]() { sock2_processor->process_ready_datagrams(sock2); });
+  QObject::connect(
+      sock2.get(), &QUdpSocket::readyRead,
+      [&]() { sock2_processor->process_ready_datagrams(sock2, metrics); });
 
   // Connect our processor to receiving the data
   QObject::connect(sock2_processor.get(), &MFTPProcessor::frame_ready,
@@ -73,8 +77,9 @@ TEST_F(MftpTest, SendAndProcessBasic)
 
   // Send and receive
   auto before_send = std::chrono::system_clock::now();
-  ASSERT_TRUE(send_datagram(sock1, QHostAddress::LocalHost, sock2->localPort(),
-                            sent_header, sent_image, sent_audio));
+  ASSERT_TRUE(send_datagram(sock1, {QHostAddress::LocalHost},
+                            {sock2->localPort()}, sent_header, sent_image,
+                            sent_audio));
   auto after_send = std::chrono::system_clock::now();
   auto send_time = std::chrono::duration_cast<std::chrono::milliseconds>(
       after_send - before_send);

@@ -32,9 +32,6 @@ struct NETLIB_EXPORT Client
   HstpHandler handler;
   std::shared_ptr<HstpProcessor> processor; // must be pointer
   std::shared_ptr<QTcpSocket> hstp_sock;
-
-  // Keeps track of the sequence number of the protocol.
-  uint32_t frame_seq_num = 1;
 };
 
 class NETLIB_EXPORT MercuryServer : public QTcpServer
@@ -87,6 +84,7 @@ public:
   int get_tcp_port() { return tcp_port; };
   int get_udp_port() { return udp_port; }
   Client &get_client(int id) { return clients[id]; }
+  std::string get_alias() { return host_alias; }
 
   /*
   Sends a message to every client.
@@ -186,4 +184,7 @@ private:
   // Client list for this server
   std::unordered_map<int, Client> clients;
   int id_counter = 0;
+
+  // Frame counter
+  uint32_t frame_seq_num = 1;
 };

@@ -1,5 +1,4 @@
 #include "streamwindow.hpp"
-#include "hosttoolbar.hpp"
 #include "hstp.hpp"
 #include "singleton/videomanager.h"
 #include <QApplication>
@@ -64,9 +63,6 @@ void StreamWindow::set_up()
 
   main_layout->setColumnStretch(0, 75);
   main_layout->setColumnStretch(1, 25);
-
-  if (is_host())
-    addToolBar(toolbar);
 
   // Center this window
   move(QGuiApplication::screens().at(0)->geometry().center() -
@@ -138,6 +134,12 @@ void StreamWindow::connect_signals_and_slots()
                                         std::string(stream_title));
             });
 
+  // connect new fps for client
+  if (is_client())
+    connect(servc->client->hstp_processor().get(), &HstpProcessor::received_fps,
+            this, [=, this](const char alias[ALIAS_SIZE], uint32_t new_fps)
+            { stream_display->set_new_fps(new_fps); });
+
   // connect stream fully initialized to client jitter buffer full signal
   if (is_host())
     stream_fully_initialized();
@@ -158,7 +160,13 @@ void StreamWindow::initialize_primary_ui_widgets()
   side_pane->initialize_chat_tab(alias);
 
   if (is_host())
+  {
     side_pane->initialize_viewer_list_tab(alias);
+    side_pane->initialize_server_performance_tab(servh->server);
+  }
+
+  if (is_client())
+    side_pane->initialize_client_performance_tab(servc->client);
 
   std::function<bool(QImage &)> video_func = std::bind(
       &StreamWindow::provide_next_video_frame, this, std::placeholders::_1);
@@ -177,9 +185,6 @@ void StreamWindow::initialize_primary_ui_widgets()
         std::format("Viewers: {}", servh->viewer_count).c_str(), this);
   else
     viewer_count = new QLabel("Viewers: 1", this);
-
-  if (is_host())
-    toolbar = new HostToolBar(this);
 
   if (is_host())
     host_name = new QLabel(std::format("Host: {}", alias).c_str(), this);
@@ -247,6 +252,7 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
       return false;
     }
 
+    servc->client->metrics().register_frame();
     next_video = jitter.video;
     return true;
   }
@@ -346,6 +352,7 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   client.handler.add_option_stream_title(
       stream_title->text().toStdString().c_str());
   client.handler.add_option_viewer_count(servh->viewer_count);
+  // TODO: client.handler.add_option_fps(FPS);
   client.handler.output_msg_to_socket(client.hstp_sock);
 }
 

@@ -20,10 +20,6 @@
 
 using namespace std;
 
-// TODO: This should instead be pulled from the settings somehow - Kris
-// responsibility
-constexpr int FPS = 5;
-
 class StreamDisplay : public QWidget
 {
   Q_OBJECT;
@@ -42,10 +38,13 @@ public slots:
   // Called FPS times a second
   void acquire_next_frame();
 
+  void set_new_fps(int fps);
+
 private:
   // This timer will emit a timeout signal every x milliseconds, which will tell
   // the display to try to acquire the next video/audio frame
   QTimer *fps_timer;
+  int current_fps;
 
   // methods to ensure we know what to next display
   function<bool(QImage &)> get_next_video_frame;

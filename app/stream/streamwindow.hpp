@@ -1,6 +1,5 @@
 #pragma once
 
-#include "hosttoolbar.hpp"
 #include "sidepane.hpp"
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
@@ -89,8 +88,6 @@ private:
 
   QMenu *stream_menu;
   QAction *stop_or_leave_stream_action;
-
-  HostToolBar *toolbar;
 
   // Determines whether or not this window is a client or a host
   const MercuryMode mode;

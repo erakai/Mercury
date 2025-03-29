@@ -44,7 +44,7 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
   if (m_hstp_sock->waitForConnected(2000))
   {
     std::string address = host.toString().toStdString();
-    qInfo("Connected to client at %s with HSTP: %d, MFTP: %d", address.c_str(),
+    qInfo("Connected as client on %s with HSTP: %d, MFTP: %d", address.c_str(),
           hstp_port, mftp_port);
 
     // send establishment message
@@ -118,8 +118,9 @@ void MercuryClient::connect_signals_and_slots()
   connect(m_hstp_sock.get(), &QTcpSocket::disconnected, this,
           &MercuryClient::client_disconnected);
 
-  connect(m_mftp_sock.get(), &QUdpSocket::readyRead, this,
-          [&]() { m_mftp_processor->process_ready_datagrams(m_mftp_sock); });
+  connect(
+      m_mftp_sock.get(), &QUdpSocket::readyRead, this, [&]()
+      { m_mftp_processor->process_ready_datagrams(m_mftp_sock, metrics()); });
 
   connect(m_mftp_processor.get(), &MFTPProcessor::frame_ready, this,
           &MercuryClient::insert_into_jitter_buffer);
@@ -151,8 +152,9 @@ void MercuryClient::insert_into_jitter_buffer(MFTP_Header header,
   if (!begun_playback &&
       m_jitter_buffer.size() >= MINIMUM_FRAME_COUNT_FOR_PLAYBACK)
   {
+    // Begin playing...
     begun_playback = true;
-
+    metrics().reset();
     emit jitter_buffer_sufficiently_full();
   }
 }

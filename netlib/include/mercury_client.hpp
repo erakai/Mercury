@@ -1,5 +1,6 @@
 #pragma once
 
+#include "metrics.hpp"
 #include "netlib_global.h"
 #include "hstp.hpp"
 #include "mftp.hpp"
@@ -51,9 +52,15 @@ public:
     return m_hstp_processor_ptr;
   }
 
+  HstpHandler &hstp_handler() { return m_hstp_handler; }
+
+  std::shared_ptr<QTcpSocket> hstp_sock() { return m_hstp_sock; };
+
   std::string get_alias() { return m_alias; }
 
   int jitter_buffer_size() { return m_jitter_buffer.size(); }
+
+  Metrics &metrics() { return m_metrics; }
 
 public slots:
   /*
@@ -123,4 +130,6 @@ private:
   std::shared_ptr<HstpProcessor> m_hstp_processor_ptr;
 
   std::shared_ptr<MFTPProcessor> m_mftp_processor;
+
+  Metrics m_metrics;
 };

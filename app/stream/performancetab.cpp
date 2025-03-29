@@ -185,7 +185,6 @@ ClientPerformanceTab::ClientPerformanceTab(shared_ptr<MercuryClient> client,
     QFont font;
     font.setPointSize(20);
     font.setBold(true);
-    font.setUnderline(true);
     titleLabel->setFont(font);
     layout->addWidget(titleLabel);
   }
@@ -207,7 +206,13 @@ ClientPerformanceTab::ClientPerformanceTab(shared_ptr<MercuryClient> client,
   latency_chart->legend()->hide();
   latency_chart->setTitle("Latency");
   latency_chart->addSeries(latency_series);
-  latency_chart->createDefaultAxes();
+  latency_x_axis = new QValueAxis;
+  latency_y_axis = new QValueAxis;
+  latency_x_axis->setRange(0, 10);
+  latency_y_axis->setRange(0, 120);
+  latency_series->setPointsVisible();
+  latency_chart->addAxis(latency_x_axis, Qt::AlignBottom);
+  latency_chart->addAxis(latency_y_axis, Qt::AlignLeft);
   latency_chart->setAnimationOptions(QChart::SeriesAnimations);
   latency_chart_view = new QChartView(latency_chart);
   layout->addWidget(latency_chart_view);
@@ -238,10 +243,16 @@ void ClientPerformanceTab::update_charts(const char alias[ALIAS_SIZE],
                                          uint16_t latency, uint32_t throughput,
                                          float loss, float fps)
 {
+  // Flag that indicates if we need to remove a previous data point
+  bool exceeding_max = false;
+
   // Retrieve updated jitter
   latencies.push_back(latency);
   if (latencies.size() > MAX_DATA_POINTS)
+  {
+    exceeding_max = true;
     latencies.erase(latencies.begin());
+  }
   double jitter = calculate_jitter();
 
   uint64_t current = QDateTime::currentSecsSinceEpoch();
@@ -253,9 +264,28 @@ void ClientPerformanceTab::update_charts(const char alias[ALIAS_SIZE],
   update_throughput_label(throughput);
   update_loss_label(loss);
 
-  latency_series->append(seconds, latency);
-  latency_chart->createDefaultAxes();
-  latency_chart->update();
+  if (latency != 0)
+  {
+    qDebug() << seconds << latency;
+    latency_series->append(seconds, latency);
+
+    if (exceeding_max)
+      latency_series->remove(0);
+
+    // Hacky solution I can't avoid because it doesn't want to update
+    latency_chart->removeSeries(latency_series);
+    latency_chart->addSeries(latency_series);
+
+    if (!latency_series->points().isEmpty() && latencies.size() > 0)
+    {
+      latency_x_axis->setRange(latency_series->at(0).x() - 1, seconds + 2);
+      latency_y_axis->setRange(
+          0, (*std::max_element(latencies.begin(), latencies.end())) + 2);
+    }
+
+    latency_chart->update();
+    latency_chart_view->update();
+  }
 }
 
 void ClientPerformanceTab::reset_charts()
@@ -269,7 +299,6 @@ void ClientPerformanceTab::reset_charts()
   update_loss_label(0);
 
   latency_series->clear();
-
   last_reset_seconds = QDateTime::currentSecsSinceEpoch();
 }
 

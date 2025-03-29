@@ -109,4 +109,6 @@ private:
   QChartView *latency_chart_view;
   QChart *latency_chart;
   QLineSeries *latency_series;
+  QValueAxis *latency_x_axis;
+  QValueAxis *latency_y_axis;
 };

@@ -437,7 +437,7 @@ void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
   // TODO add erase support
   if (toolWidget->isEraseMode())
   {
-    currentColor = QColor(Qt::white);
+    thickness *= -1;
   }
 
   annotation_display->addLine(old_point, pos, currentColor, thickness);
@@ -456,7 +456,7 @@ void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
   // TODO add erase support
   if (toolWidget->isEraseMode())
   {
-    currentColor = QColor(Qt::white);
+    thickness *= -1;
   }
 
   send_annotation(HSTP_Annotation(points, currentColor.red(),

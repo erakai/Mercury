@@ -34,10 +34,22 @@ void AnnotationDisplay::addLine(const QPoint &start, const QPoint &end,
                                 QColor color, int thickness)
 {
   qDebug() << "Drawing line persistently from" << start << "to" << end;
-  // Paint the new line onto the pixmap.
+
   QPainter painter(&m_pixmap);
   QPen pen(color);
-  pen.setWidth(thickness);
+
+  if (thickness < 0)
+  {
+    // Erasing mode: use the absolute thickness and set composition mode to
+    // clear.
+    pen.setWidth(-thickness);
+    painter.setCompositionMode(QPainter::CompositionMode_Clear);
+  }
+  else
+  {
+    pen.setWidth(thickness);
+  }
+
   painter.setPen(pen);
   painter.drawLine(start, end);
 

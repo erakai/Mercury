@@ -101,7 +101,7 @@ struct NETLIB_EXPORT HSTP_Annotation
   uint8_t green;
   uint8_t blue;
   // Thickness instead of the erase flag
-  uint8_t thickness;
+  int8_t thickness;
 
   // Default constructor
   HSTP_Annotation() = default;

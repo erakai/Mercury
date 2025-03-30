@@ -48,6 +48,11 @@ void StreamWindow::set_up()
   // Add both widgets in the same cell.
   containerLayout->addWidget(stream_display, 0, 0);
   containerLayout->addWidget(annotation_display, 0, 0);
+
+  stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  annotation_display->setSizePolicy(QSizePolicy::Expanding,
+                                    QSizePolicy::Expanding);
+
   annotation_display->raise();
 
   main_layout->addWidget(videoAnnotationContainer, 0, 0);

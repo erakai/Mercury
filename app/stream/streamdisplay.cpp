@@ -48,6 +48,12 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   graphics_view->setMinimumWidth(1280);
   graphics_view->setMinimumHeight(720);
 
+  // Set the size of the scene (this is necessary for some reason)
+  graphics_scene->setSceneRect(0, -50, graphics_view->width(),
+                               graphics_view->height());
+  video_item->setPos(0, 0);
+  video_item->setSize(QSizeF(graphics_view->width(), graphics_view->height()));
+
   // Show the graphics view.
   graphics_view->show();
 }

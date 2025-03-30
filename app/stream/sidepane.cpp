@@ -126,7 +126,7 @@ void ViewerListTab::viewer_joined(string alias)
 
 void ViewerListTab::viewer_left(string alias)
 {
-  for (int i = 0; i < items.size(); i++)
+  for (int i = 0; i < (int) items.size(); i++)
   {
     QListWidgetItem *item = items[i];
     if (item->text() == QString::fromStdString(alias))

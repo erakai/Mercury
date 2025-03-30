@@ -90,7 +90,7 @@ bool send_datagram(std::shared_ptr<QUdpSocket> sock,
     }
 
     // Define datagram
-    for (int i = 0; i < dest_ip.size(); i++)
+    for (int i = 0; i < (int) dest_ip.size(); i++)
     {
       QNetworkDatagram dg(data, dest_ip[i], dest_port[i]);
 

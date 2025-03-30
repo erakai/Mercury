@@ -114,7 +114,7 @@ void ServerPerformanceTab::on_client_disconnect(int id, string alias)
 {
   // We have to add 1 to the client size because we already removed it in the
   // server
-  for (int i = 0; i < server->get_clients().size() + 1; i++)
+  for (int i = 0; i < (int) server->get_clients().size() + 1; i++)
   {
     QListWidgetItem *item = alias_list->item(i);
     if (item && item->text() == QString::fromStdString(alias))

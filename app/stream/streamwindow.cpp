@@ -61,7 +61,6 @@ bool StreamWindow::set_up()
   if (is_client())
     below_stream_layout->addWidget(unstable_network_indicator, 2, 2,
                                    Qt::AlignCenter);
-
   /*
   |---------------------------|-------------|
   |75% - Stream Window Across | 25% - Chat  |

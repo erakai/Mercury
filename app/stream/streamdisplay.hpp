@@ -42,6 +42,9 @@ public slots:
 
   void set_new_fps(int fps);
 
+protected:
+  void resizeEvent(QResizeEvent *event) override;
+
 private:
   // This timer will emit a timeout signal every x milliseconds, which will tell
   // the display to try to acquire the next video/audio frame
@@ -63,7 +66,6 @@ private:
   QFile sourceFile;
 
   QMediaPlayer *video_player;
-  QVideoWidget *video_widget;
   QVideoSink *video_sink;
 
   QGraphicsView *graphics_view;

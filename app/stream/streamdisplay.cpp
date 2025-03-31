@@ -47,8 +47,7 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   video_player->setVideoOutput(video_item);
 
   // Set the minimum size as before.
-  graphics_view->setMinimumWidth(1280);
-  graphics_view->setMinimumHeight(720);
+  graphics_view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   // Set the size of the scene (this is necessary for some reason)
   graphics_scene->setSceneRect(0, -50, graphics_view->width(),
@@ -58,6 +57,15 @@ StreamDisplay::StreamDisplay(QWidget *parent,
 
   // Show the graphics view.
   graphics_view->show();
+}
+
+void StreamDisplay::resizeEvent(QResizeEvent *event)
+{
+  QWidget::resizeEvent(event);
+  graphics_view->setGeometry(0, 0, width(), height()); // Force full expansion
+  graphics_scene->setSceneRect(0, -50, graphics_view->width(),
+                               graphics_view->height());
+  video_item->setSize(QSizeF(graphics_view->width(), graphics_view->height()));
 }
 
 void StreamDisplay::begin_playback()

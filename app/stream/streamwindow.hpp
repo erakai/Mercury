@@ -5,6 +5,7 @@
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
 #include "hstp.hpp"
+#include "streaminfo.hpp"
 #include <QAudioBuffer>
 #include <QFile>
 #include <QGridLayout>
@@ -99,14 +100,11 @@ private:
   SidePane *side_pane;
   StreamDisplay *stream_display;
   AnnotationDisplay *annotation_display;
-  QGridLayout *below_stream_layout;
 
   // Only relevant if this is a client - displays itself when poor connection
   QLabel *unstable_network_indicator;
 
-  QLabel *stream_title;
-  QLabel *host_name;
-  QLabel *viewer_count;
+  StreamInfo *stream_info;
 
   QMenu *stream_menu;
   QAction *stop_or_leave_stream_action;

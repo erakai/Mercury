@@ -33,6 +33,7 @@ bool StreamWindow::set_up()
   configure_menu_and_tool_bar();
 
   display->setLayout(main_layout);
+  display->setStyleSheet("background-color: #3C4143;");
   setCentralWidget(display);
 
   // Create a container widget to stack the stream display and the annotation
@@ -53,11 +54,7 @@ bool StreamWindow::set_up()
 
   main_layout->addWidget(videoAnnotationContainer, 0, 0);
   main_layout->addWidget(side_pane, 0, 1, 2, 1);
-  main_layout->addLayout(below_stream_layout, 1, 0);
-
-  below_stream_layout->addWidget(stream_title, 0, 0);
-  below_stream_layout->addWidget(host_name, 1, 0);
-  below_stream_layout->addWidget(viewer_count, 0, 2);
+  main_layout->addWidget(stream_info, 1, 0);
 
   // TODO: Chris when you beautify us up add this widget wherever is best for
   // you
@@ -226,33 +223,15 @@ void StreamWindow::initialize_primary_ui_widgets()
   stream_display = new StreamDisplay(this, video_func, audio_func);
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-  if (is_client())
-  {
-    unstable_network_indicator = new QLabel;
-    QPixmap pix("assets/unstable-indicator.png");
-    QIcon ico(pix);
-    unstable_network_indicator->setPixmap(ico.pixmap({48, 48}));
-    unstable_network_indicator->setVisible(false);
-  }
+  stream_info = new StreamInfo(this, "Host\'s Stream", "Host");
 
-  annotation_display = new AnnotationDisplay(this);
-  annotation_display->installEventFilter(this);
-
-  below_stream_layout = new QGridLayout();
-
-  stream_title = new QLabel("Stream Title", this);
   if (is_host() && servh->stream_name.size() > 0)
-    stream_title->setText(servh->stream_name.c_str());
+    stream_info->setStreamTitle(servh->stream_name.c_str());
   if (is_host())
-    viewer_count = new QLabel(
-        std::format("Viewers: {}", servh->viewer_count).c_str(), this);
-  else
-    viewer_count = new QLabel("Viewers: 1", this);
-
-  if (is_host())
-    host_name = new QLabel(std::format("Host: {}", alias).c_str(), this);
-  if (is_client())
-    host_name = new QLabel(std::format("Host: {}", "Host").c_str(), this);
+  {
+    stream_info->setViewerCount(servh->viewer_count);
+    stream_info->setHostName(alias.c_str());
+  }
 }
 
 void StreamWindow::stream_fully_initialized()
@@ -380,7 +359,7 @@ void StreamWindow::send_annotation(HSTP_Annotation annotation)
 
 void StreamWindow::viewer_count_updated(int new_count)
 {
-  viewer_count->setText(("Viewers: " + std::to_string(new_count)).c_str());
+  stream_info->setViewerCount(new_count);
 
   // This slot is called whenever a viewer connects/disconnects for the host,
   // who then must propagate it to the clients
@@ -396,7 +375,7 @@ void StreamWindow::viewer_count_updated(int new_count)
 
 void StreamWindow::stream_name_changed(string host_alias, string new_name)
 {
-  stream_title->setText(new_name.c_str());
+  stream_info->setStreamTitle((new_name).c_str());
 
   if (is_host() && servh->viewer_count > 0)
   {
@@ -409,7 +388,7 @@ void StreamWindow::stream_name_changed(string host_alias, string new_name)
 
   if (is_client())
   {
-    host_name->setText(std::format("Host: {}", host_alias).c_str());
+    stream_info->setHostName(host_alias.c_str());
   }
 }
 
@@ -428,7 +407,7 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   Client &client = servh->server->get_client(id);
   client.handler.init_msg(alias.c_str());
   client.handler.add_option_stream_title(
-      stream_title->text().toStdString().c_str());
+      stream_info->getStreamTitle().c_str());
   client.handler.add_option_viewer_count(servh->viewer_count);
   client.handler.add_option_fps(FPS);
   client.handler.output_msg_to_socket(client.hstp_sock);

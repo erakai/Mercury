@@ -3,6 +3,7 @@
 #include "sidepane.hpp"
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
+#include "streaminfo.hpp"
 #include <QAudioBuffer>
 #include <QFile>
 #include <QGridLayout>
@@ -80,11 +81,7 @@ private:
   QGridLayout *main_layout;
   SidePane *side_pane;
   StreamDisplay *stream_display;
-  QGridLayout *below_stream_layout;
-
-  QLabel *stream_title;
-  QLabel *host_name;
-  QLabel *viewer_count;
+  StreamInfo *stream_info;
 
   QMenu *stream_menu;
   QAction *stop_or_leave_stream_action;

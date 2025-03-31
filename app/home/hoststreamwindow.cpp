@@ -34,6 +34,9 @@ HostStreamWindow::HostStreamWindow(QWidget *parent)
       QString::number(Utils::instance().getDefaultHostUdpPort()));
 
   ui->streamNameLineEdit->setFocus();
+
+  // To make it look like password
+  ui->passwordLineEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
 }
 
 HostStreamWindow::~HostStreamWindow()
@@ -81,7 +84,6 @@ void HostStreamWindow::open_stream_window()
   QByteArray hashedPassword = nullptr;
   std::string password = ui->passwordLineEdit->text().toStdString();
 
-  qDebug() << password;
   if (!password.empty())
   {
     QCryptographicHash hasher(QCryptographicHash::Sha256);

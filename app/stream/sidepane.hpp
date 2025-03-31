@@ -5,40 +5,87 @@
 #include <QPalette>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QLabel>
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QSettings>
+#include <QTabWidget>
+#include <QtCore/qtmetamacros.h>
+
+#include "performancetab.hpp"
+
+using namespace std;
 
 struct ChatMessage
 {
-  // maybe add timestamp?
-  std::string sender;
-  std::string message;
+  string sender;
+  string message;
 };
 
-/*
-Will have both chat and participants. I would check out:
-
-https://doc.qt.io/qt-6/qtabwidget.html
-*/
-class SidePane : public QWidget
+class ChatTab : public QWidget
 {
   Q_OBJECT;
 
 public:
-  SidePane(QWidget *parent = nullptr,
-           const std::string &displayName = "User3279760");
+  ChatTab(const string &displayName, QWidget *parent = nullptr);
 
   void new_chat_message(ChatMessage msg);
-
-  void render_and_send_message(std::string msgContent);
+  void render_and_send_message(string msgContent);
 
 signals:
-  void send_chat_message(std::string message);
+  void send_chat_message(string message);
 
 private:
   QListWidget *chatBox;
   QLineEdit *messageInput;
-  std::string displayName;
+  string displayName;
+};
+
+class ViewerListTab : public QWidget
+{
+  Q_OBJECT;
+
+public:
+  ViewerListTab(string host_alias, QWidget *parent = nullptr);
+
+  void viewer_joined(string alias);
+  void viewer_left(string alias);
+
+private:
+  QListWidget *viewer_list;
+  QLabel *label_list;
+  vector<QListWidgetItem *> items;
+};
+
+class SidePane : public QTabWidget
+{
+  Q_OBJECT;
+
+public:
+  SidePane(QWidget *parent = nullptr);
+
+  void initialize_chat_tab(const string &display_name);
+  ChatTab *get_chat_tab() { return chat_tab; }
+
+  void initialize_viewer_list_tab(const string &display_name);
+  ViewerListTab *get_viewer_list_tab() { return viewer_list; }
+
+  void initialize_server_performance_tab(shared_ptr<MercuryServer> server);
+  ServerPerformanceTab *get_server_performance_tab()
+  {
+    return server_performance;
+  }
+
+  void initialize_client_performance_tab(shared_ptr<MercuryClient> client);
+  ClientPerformanceTab *get_client_performance_tab()
+  {
+    return client_performance;
+  }
+
+private:
+  ChatTab *chat_tab;
+  ViewerListTab *viewer_list;
+  ServerPerformanceTab *server_performance;
+  ClientPerformanceTab *client_performance;
 };

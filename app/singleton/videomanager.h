@@ -3,9 +3,12 @@
 
 #include <QObject>
 #include <QImage>
+#include <QDateTime>
 #include <QMediaCaptureSession>
 #include <QVideoSink>
 #include <QVideoFrame>
+
+#include "config/mconfig.hpp"
 
 class VideoManager : public QObject
 {
@@ -33,6 +36,8 @@ private:
   QVideoSink *m_videoSink;
   QImage m_lastImage;
 
+  uint64_t last_frame_s = 0;
+
   // Private constructor prevents direct instantiation.
   explicit VideoManager(QObject *parent = nullptr)
       : QObject(parent), m_captureSession(nullptr),
@@ -44,6 +49,13 @@ private:
     connect(m_videoSink, &QVideoSink::videoFrameChanged, this,
             [this](const QVideoFrame &frame)
             {
+              uint64_t current_time = QDateTime::currentMSecsSinceEpoch();
+              uint64_t delta = current_time - last_frame_s;
+
+              if (delta < (1000.0 / FPS - 5))
+                return;
+
+              last_frame_s = current_time;
               if (frame.isValid())
               {
                 // Create a copy of the frame and map it for reading.

@@ -7,6 +7,7 @@
 #include <Qbuffer>
 #include <QtCore/qdebug.h>
 #include <QtCore/qlogging.h>
+#include <vector>
 
 void MercuryServer::connect_signals_and_slots()
 {
@@ -18,13 +19,13 @@ bool MercuryServer::start_server()
 {
   if (udp_port == -1 || tcp_port == -1)
   {
-    qFatal("Server ports are not set, cannot start.");
+    qCritical("Server ports are not set, cannot start.");
     return false;
   }
 
   if (!listen(QHostAddress::Any, tcp_port))
   {
-    qFatal("Error: Unable to start server.");
+    qCritical("Error: Unable to start server.");
     close();
     return false;
   }
@@ -32,7 +33,7 @@ bool MercuryServer::start_server()
   mftp_sock = acquire_mftp_socket(udp_port);
   if (mftp_sock == nullptr)
   {
-    qFatal("Unable to construct MFTP socket.");
+    qCritical("Unable to construct MFTP socket.");
     return false;
   }
 
@@ -283,6 +284,8 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
   // Set up header fields
   header.version = MFTP_VERSION;
   header.payload_type = 0;
+  header.seq_num = frame_seq_num;
+  frame_seq_num++;
 
   auto current_time = std::chrono::system_clock::now();
   std::chrono::duration<double, std::milli> delta = current_time - server_start;
@@ -294,18 +297,23 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
 
   // Send data
   int client_sent_to_count = 0;
+
+  std::vector<QHostAddress> dest_addr;
+  std::vector<int> dest_ports;
+
   for (auto &[id, client] : clients)
   {
     if (!client.validated || client.mftp_port == 0 || id == -1)
       continue;
 
-    header.seq_num = client.frame_seq_num;
-    client.frame_seq_num++;
-
     client_sent_to_count++;
-    send_datagram(mftp_sock, client.hstp_sock->peerAddress(), client.mftp_port,
-                  header, video.toImage(), audio);
+
+    dest_addr.push_back(client.hstp_sock->peerAddress());
+    dest_ports.push_back(client.mftp_port);
   }
+
+  send_datagram(mftp_sock, dest_addr, dest_ports, header, video.toImage(),
+                audio);
 
   return client_sent_to_count;
 }

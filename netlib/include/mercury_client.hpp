@@ -1,5 +1,6 @@
 #pragma once
 
+#include "metrics.hpp"
 #include "netlib_global.h"
 #include "hstp.hpp"
 #include "mftp.hpp"
@@ -51,9 +52,26 @@ public:
     return m_hstp_processor_ptr;
   }
 
+  HstpHandler &hstp_handler() { return m_hstp_handler; }
+
+  std::shared_ptr<QTcpSocket> hstp_sock() { return m_hstp_sock; };
+
   std::string get_alias() { return m_alias; }
 
   int jitter_buffer_size() { return m_jitter_buffer.size(); }
+
+  Metrics &metrics() { return m_metrics; }
+
+  void set_is_stable_connection(bool val = true, std::string reason = "")
+  {
+    unstable_connection_reason = reason;
+    if (val != stable_connection)
+      emit connection_stablity_updated(val);
+    stable_connection = val;
+  }
+
+  bool is_stable_connection() { return stable_connection; }
+  std::string get_connection_reason() { return unstable_connection_reason; }
 
 public slots:
   /*
@@ -107,9 +125,19 @@ signals:
   */
   void jitter_buffer_sufficiently_full();
 
+  /*
+  Emitted when the boolean stable_connection changes
+  */
+  void connection_stablity_updated(bool is_stable_connection);
+
 private:
   // Represents whether this client has begun playback
   bool begun_playback = false;
+
+  // Represents whether or not this client has a stable connection
+  // This is set by stream/performancetab.cpp
+  bool stable_connection = true;
+  std::string unstable_connection_reason;
 
   /*
   Private method to help set up the signals/slots of the client.
@@ -129,4 +157,6 @@ private:
   std::shared_ptr<HstpProcessor> m_hstp_processor_ptr;
 
   std::shared_ptr<MFTPProcessor> m_mftp_processor;
+
+  Metrics m_metrics;
 };

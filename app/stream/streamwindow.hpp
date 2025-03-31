@@ -1,7 +1,6 @@
 #pragma once
 
 #include "annotationdisplay.hpp"
-#include "hosttoolbar.hpp"
 #include "sidepane.hpp"
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
@@ -59,6 +58,9 @@ public slots:
 
   // These are generic update slots that should be connected to a signal either
   // in the client or server
+  // The rest are generic update slots that should be connected to a signal
+  // either in the client or server
+
   void viewer_count_updated(int new_count);
   void stream_name_changed(string host_alias, string new_name);
   void new_chat_message(string alias, string msg);
@@ -70,7 +72,10 @@ public slots:
   void onAnnotationDisplayMouseMoved(QMouseEvent *event);
   void onAnnotationDisplayMouseReleased(QMouseEvent *event);
 
-signals:
+  // These next two are host-only
+  void viewer_disconnected(int id, std::string alias);
+  // This is called after a client is validated
+  void viewer_connected(int id, std::string _alias);
 
 protected:
   bool eventFilter(QObject *watched, QEvent *event) override;
@@ -95,14 +100,15 @@ private:
   AnnotationDisplay *annotation_display;
   QGridLayout *below_stream_layout;
 
+  // Only relevant if this is a client - displays itself when poor connection
+  QLabel *unstable_network_indicator;
+
   QLabel *stream_title;
   QLabel *host_name;
   QLabel *viewer_count;
 
   QMenu *stream_menu;
   QAction *stop_or_leave_stream_action;
-
-  HostToolBar *toolbar;
 
   // Determines whether or not this window is a client or a host
   const MercuryMode mode;

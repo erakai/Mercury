@@ -10,6 +10,7 @@ qt_add_executable(mercury
   stream/streamservice.hpp
   stream/sidepane.cpp stream/sidepane.hpp
   stream/streamdisplay.cpp stream/streamdisplay.hpp
+  stream/performancetab.cpp
   home/main.cpp
   home/mainwindow.cpp home/mainwindow.hpp home/mainwindow.ui
   home/settingswindow.h home/settingswindow.cpp home/settingswindow.ui

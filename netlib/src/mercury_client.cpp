@@ -1,4 +1,5 @@
 #include "mercury_client.hpp"
+#include <QtCore/qlogging.h>
 
 JitterEntry MercuryClient::retrieve_next_frame()
 {
@@ -21,13 +22,13 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
 {
   if (host.isNull())
   {
-    qFatal("Invalid QHostAddress");
+    qCritical("Invalid QHostAddress");
     return false;
   }
 
   if (hstp_port == 0 || mftp_port == 0)
   {
-    qFatal("Invalid ports");
+    qCritical("Invalid ports");
   }
 
   m_hstp_sock->connectToHost(host, hstp_port);
@@ -43,7 +44,7 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
   if (m_hstp_sock->waitForConnected(2000))
   {
     std::string address = host.toString().toStdString();
-    qInfo("Connected to client at %s with HSTP: %d, MFTP: %d", address.c_str(),
+    qInfo("Connected as client on %s with HSTP: %d, MFTP: %d", address.c_str(),
           hstp_port, mftp_port);
 
     // send establishment message
@@ -55,7 +56,14 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
       return false;
     }
 
-    return true;
+    if (m_hstp_sock->waitForDisconnected(1000))
+    {
+      qCritical(
+          "Client disconnected by host, likely due to incorrect password.");
+      return false;
+    }
+
+    return (m_hstp_sock->state() == QAbstractSocket::ConnectedState);
   }
   else
   {
@@ -123,8 +131,9 @@ void MercuryClient::connect_signals_and_slots()
   connect(m_hstp_sock.get(), &QTcpSocket::disconnected, this,
           &MercuryClient::client_disconnected);
 
-  connect(m_mftp_sock.get(), &QUdpSocket::readyRead, this,
-          [&]() { m_mftp_processor->process_ready_datagrams(m_mftp_sock); });
+  connect(
+      m_mftp_sock.get(), &QUdpSocket::readyRead, this, [&]()
+      { m_mftp_processor->process_ready_datagrams(m_mftp_sock, metrics()); });
 
   connect(m_mftp_processor.get(), &MFTPProcessor::frame_ready, this,
           &MercuryClient::insert_into_jitter_buffer);
@@ -156,8 +165,9 @@ void MercuryClient::insert_into_jitter_buffer(MFTP_Header header,
   if (!begun_playback &&
       m_jitter_buffer.size() >= MINIMUM_FRAME_COUNT_FOR_PLAYBACK)
   {
+    // Begin playing...
     begun_playback = true;
-
+    metrics().reset();
     emit jitter_buffer_sufficiently_full();
   }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "metrics.hpp"
 #include "netlib_global.h"
 #include <QAudioBuffer>
 #include <QBuffer>
@@ -8,6 +9,7 @@
 #include <QNetworkDatagram>
 #include <QUdpSocket>
 #include <memory>
+#include <vector>
 
 #define MAX_FRAMES_TO_REASSEMBLE 2
 #define SOURCE_NAME_LEN 12
@@ -62,13 +64,14 @@ public:
   PartialFrame partial_frames[MAX_FRAMES_TO_REASSEMBLE];
 
 public slots:
-  void process_ready_datagrams(std::shared_ptr<QUdpSocket> socket);
+  void process_ready_datagrams(std::shared_ptr<QUdpSocket> socket,
+                               Metrics &metrics);
 
 signals:
   void frame_ready(MFTP_Header header, QAudioBuffer audio, QImage video);
 
 private:
-  bool process_datagram(QNetworkDatagram datagram);
+  bool process_datagram(QNetworkDatagram datagram, Metrics &metrics);
   void release_complete_frame(int index);
   void fix_partial_frame_array();
 
@@ -89,6 +92,7 @@ Host-side functionality.
 */
 
 NETLIB_EXPORT bool send_datagram(std::shared_ptr<QUdpSocket> sock,
-                                 QHostAddress dest_ip, int dest_port,
+                                 std::vector<QHostAddress> dest_ip,
+                                 std::vector<int> dest_port,
                                  MFTP_Header &header, QImage video_image,
                                  QAudioBuffer audio);

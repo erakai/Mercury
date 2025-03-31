@@ -236,6 +236,15 @@ public:
     return add_option_generic_uint32(4, viewers);
   }
 
+  bool add_option_fps(uint32_t fps)
+  {
+    return add_option_generic_uint32(7, fps);
+  }
+
+  bool add_option_performance_request(uint64_t time);
+  bool add_option_performance_metrics(uint16_t latency, uint32_t throughput,
+                                      float loss, float fps);
+
   void clear_msg();
   std::shared_ptr<QByteArray> output_msg();
   bool output_msg_to_socket(const std::shared_ptr<QTcpSocket> &sock);
@@ -333,6 +342,24 @@ signals:
    */
   void received_viewer_count(const char alias[ALIAS_SIZE], uint32_t viewers);
 
+  /*
+   * Emitted whenever a new fps is received
+   */
+  void received_fps(const char alias[ALIAS_SIZE], uint32_t fps);
+
+  /*
+   * Emitted when a performance metric request is received.
+   */
+  void received_performance_request(const char alias[ALIAS_SIZE],
+                                    uint64_t timestamp);
+
+  /*
+   * Emitted when a performance metric request is received.
+   */
+  void received_performance_metrics(const char alias[ALIAS_SIZE],
+                                    uint16_t latency, uint32_t throughput,
+                                    float loss, float fps);
+
 private:
 #define HANDLER_PARAMS const char alias[ALIAS_SIZE], const Option &opt
 
@@ -369,4 +396,10 @@ private:
   }
 
   void handle_annotation(HANDLER_PARAMS); // 5
+  void handle_fps(HANDLER_PARAMS)         // 7
+  {
+    handle_uint32(alias, opt, &HstpProcessor::received_fps);
+  }
+  void handle_performance_request(HANDLER_PARAMS); // 8
+  void handle_performance_metrics(HANDLER_PARAMS); // 9
 };

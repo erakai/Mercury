@@ -3,6 +3,11 @@
 
 #include <QSettings>
 
+// TODO: Move into settings as default FPS
+// Right now this is pulled by streamdisplay, and updated
+// by performance tab.
+extern int FPS;
+
 namespace mercury
 {
 

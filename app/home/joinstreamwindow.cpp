@@ -20,6 +20,9 @@ JoinStreamWindow::JoinStreamWindow(QWidget *parent)
   ui->clientUdpPortLineEdit->setText(
       QString::number(Utils::instance().getDefaultClientUdpPort()));
   ui->displayNameLineEdit->setText(Utils::instance().getDisplayName());
+
+  // To make it look like password
+  ui->passwordLineEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
 }
 
 JoinStreamWindow::~JoinStreamWindow()
@@ -42,7 +45,6 @@ void JoinStreamWindow::on_joinButton_clicked()
 
   std::string password = ui->passwordLineEdit->text().toStdString();
 
-  qDebug() << password;
   if (!password.empty())
   {
     QCryptographicHash hasher(QCryptographicHash::Sha256);

@@ -1,7 +1,5 @@
 #include "streamwindow.hpp"
-
-#include "annotationdisplay.hpp"
-#include "hosttoolbar.hpp"
+#include "config/mconfig.hpp"
 #include "hstp.hpp"
 #include "singleton/videomanager.h"
 #include <QApplication>
@@ -33,6 +31,8 @@ void StreamWindow::set_up()
   setWindowTitle("Mercury");
   setAttribute(Qt::WA_DeleteOnClose);
 
+  this->showMaximized(); // Sets Window size to max
+
   initialize_primary_ui_widgets();
   configure_menu_and_tool_bar();
 
@@ -57,14 +57,36 @@ void StreamWindow::set_up()
 
   main_layout->addWidget(videoAnnotationContainer, 0, 0);
   main_layout->addWidget(side_pane, 0, 1, 2, 1);
-  main_layout->addLayout(below_stream_layout, 1, 0, 1, 2);
+  main_layout->addLayout(below_stream_layout, 1, 0);
 
   below_stream_layout->addWidget(stream_title, 0, 0);
   below_stream_layout->addWidget(host_name, 1, 0);
   below_stream_layout->addWidget(viewer_count, 0, 2);
 
-  if (is_host())
-    addToolBar(toolbar);
+  // TODO: Chris when you beautify us up add this widget wherever is best for
+  // you
+  if (is_client())
+    below_stream_layout->addWidget(unstable_network_indicator, 2, 2,
+                                   Qt::AlignCenter);
+
+  /*
+  |---------------------------|-------------|
+  |75% - Stream Window Across | 25% - Chat  |
+  |                           |             |
+  |                           |             |
+  |                           |             |
+  |                           |             |
+  |-80% display---------------|             |
+  |                           |             |
+  |                           |             |
+  |-20% info------------------|-------------|
+  */
+
+  main_layout->setRowStretch(0, 80);
+  main_layout->setRowStretch(1, 20);
+
+  main_layout->setColumnStretch(0, 75);
+  main_layout->setColumnStretch(1, 25);
 
   // Center this window
   move(QGuiApplication::screens().at(0)->geometry().center() -
@@ -118,31 +140,16 @@ void StreamWindow::connect_signals_and_slots()
             { this->new_chat_message(std::string(alias_of_chatter), chat); });
 
   // connect chat message sent on side pane
-  connect(side_pane, &SidePane::send_chat_message, this,
+  connect(side_pane->get_chat_tab(), &ChatTab::send_chat_message, this,
           &StreamWindow::send_chat_message);
 
-  // connect viewer count updated for host (todo move this into own functions)
+  // connect viewer count updated for host
   if (is_host())
   {
     connect(servh->server.get(), &MercuryServer::client_connected, this,
-            [&](int id, std::string _alias)
-            {
-              servh->viewer_count++;
-              viewer_count_updated(servh->viewer_count);
-
-              Client &client = servh->server->get_client(id);
-              client.handler.init_msg(alias.c_str());
-              client.handler.add_option_stream_title(
-                  stream_title->text().toStdString().c_str());
-              client.handler.add_option_viewer_count(servh->viewer_count);
-              client.handler.output_msg_to_socket(client.hstp_sock);
-            });
+            &StreamWindow::viewer_connected);
     connect(servh->server.get(), &MercuryServer::client_disconnected, this,
-            [&]()
-            {
-              servh->viewer_count--;
-              viewer_count_updated(servh->viewer_count);
-            });
+            &StreamWindow::viewer_disconnected);
   }
 
   // connect viewer count updated for client
@@ -162,6 +169,12 @@ void StreamWindow::connect_signals_and_slots()
                                         std::string(stream_title));
             });
 
+  // connect new fps for client
+  if (is_client())
+    connect(servc->client->hstp_processor().get(), &HstpProcessor::received_fps,
+            this, [=, this](const char alias[ALIAS_SIZE], uint32_t new_fps)
+            { stream_display->set_new_fps(new_fps); });
+
   // connect stream fully initialized to client jitter buffer full signal
   if (is_host())
     stream_fully_initialized();
@@ -169,30 +182,58 @@ void StreamWindow::connect_signals_and_slots()
     connect(servc->client.get(),
             &MercuryClient::jitter_buffer_sufficiently_full, this,
             &StreamWindow::stream_fully_initialized);
+
+  // connect unstable network signal to icon on client
+  if (is_client())
+    connect(servc->client.get(), &MercuryClient::connection_stablity_updated,
+            this,
+            [=, this](bool new_status)
+            {
+              unstable_network_indicator->setVisible(!new_status);
+              unstable_network_indicator->setToolTip(
+                  servc->client->get_connection_reason().c_str());
+            });
 }
 
 void StreamWindow::initialize_primary_ui_widgets()
 {
   main_layout = new QGridLayout();
-  main_layout->setColumnMinimumWidth(0, 1280);
-  main_layout->setColumnMinimumWidth(1, 400);
-  main_layout->setRowMinimumHeight(0, 720);
-  main_layout->setRowMinimumHeight(1, 75);
 
   display = new QWidget(this);
-  side_pane = new SidePane(this, alias);
+
+  side_pane = new SidePane(this);
+  side_pane->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  side_pane->initialize_chat_tab(alias);
+
+  if (is_host())
+  {
+    side_pane->initialize_viewer_list_tab(alias);
+    side_pane->initialize_server_performance_tab(servh->server);
+  }
+
+  if (is_client())
+    side_pane->initialize_client_performance_tab(servc->client);
 
   std::function<bool(QImage &)> video_func = std::bind(
       &StreamWindow::provide_next_video_frame, this, std::placeholders::_1);
   std::function<bool(QBuffer &)> audio_func = std::bind(
       &StreamWindow::provide_next_audio_frame, this, std::placeholders::_1);
   stream_display = new StreamDisplay(this, video_func, audio_func);
+  stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+  if (is_client())
+  {
+    unstable_network_indicator = new QLabel;
+    QPixmap pix("assets/unstable-indicator.png");
+    QIcon ico(pix);
+    unstable_network_indicator->setPixmap(ico.pixmap({48, 48}));
+    unstable_network_indicator->setVisible(false);
+  }
 
   annotation_display = new AnnotationDisplay(this);
   annotation_display->installEventFilter(this);
 
   below_stream_layout = new QGridLayout();
-  below_stream_layout->setRowMinimumHeight(0, 100);
 
   stream_title = new QLabel("Stream Title", this);
   if (is_host() && servh->stream_name.size() > 0)
@@ -202,9 +243,6 @@ void StreamWindow::initialize_primary_ui_widgets()
         std::format("Viewers: {}", servh->viewer_count).c_str(), this);
   else
     viewer_count = new QLabel("Viewers: 1", this);
-
-  if (is_host())
-    toolbar = new HostToolBar(this);
 
   if (is_host())
     host_name = new QLabel(std::format("Host: {}", alias).c_str(), this);
@@ -272,6 +310,7 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
       return false;
     }
 
+    servc->client->metrics().register_frame();
     next_video = jitter.video;
     return true;
   }
@@ -364,12 +403,38 @@ void StreamWindow::stream_name_changed(string host_alias, string new_name)
   }
 
   if (is_client())
+  {
     host_name->setText(std::format("Host: {}", host_alias).c_str());
+  }
 }
 
 void StreamWindow::new_chat_message(string alias, string msg)
 {
-  side_pane->new_chat_message({alias, msg});
+  side_pane->get_chat_tab()->new_chat_message({alias, msg});
+}
+
+void StreamWindow::viewer_connected(int id, std::string _alias)
+{
+  servh->viewer_count++;
+  viewer_count_updated(servh->viewer_count);
+
+  side_pane->get_viewer_list_tab()->viewer_joined(_alias);
+
+  Client &client = servh->server->get_client(id);
+  client.handler.init_msg(alias.c_str());
+  client.handler.add_option_stream_title(
+      stream_title->text().toStdString().c_str());
+  client.handler.add_option_viewer_count(servh->viewer_count);
+  client.handler.add_option_fps(FPS);
+  client.handler.output_msg_to_socket(client.hstp_sock);
+}
+
+void StreamWindow::viewer_disconnected(int id, std::string _alias)
+{
+  servh->viewer_count--;
+  viewer_count_updated(servh->viewer_count);
+
+  side_pane->get_viewer_list_tab()->viewer_left(_alias);
 }
 
 void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)

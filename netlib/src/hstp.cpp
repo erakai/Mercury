@@ -119,6 +119,66 @@ bool HstpHandler::add_option_annotation(const HSTP_Annotation &annotation)
   return true;
 }
 
+bool HstpHandler::add_option_performance_request(uint64_t time)
+{
+  if (get_status() != MSG_STATUS::IN_PROGRESS)
+  {
+    qCritical("Unable to add option, uninitalized message.");
+    return false;
+  }
+
+  Option opt;
+  opt.type = 8;
+  opt.len = sizeof(uint64_t);
+  opt.data = std::shared_ptr<char[]>(new char[opt.len]);
+
+  uint64_t net_int = qToBigEndian((uint64_t) time);
+  std::memcpy(opt.data.get(), &net_int, sizeof(uint64_t));
+
+  m_hdr->options.push_back(opt);
+
+  return true;
+}
+
+bool HstpHandler::add_option_performance_metrics(uint16_t latency,
+                                                 uint32_t throughput,
+                                                 float loss, float fps)
+{
+  if (get_status() != MSG_STATUS::IN_PROGRESS)
+  {
+    qCritical("Unable to add option, uninitalized message.");
+    return false;
+  }
+
+  Option opt;
+  opt.type = 9;
+  opt.len = 14;
+  opt.data = std::shared_ptr<char[]>(new char[opt.len]);
+
+  /*
+    - uint16_t latency
+    - uint32_t throughput
+    - float loss
+    - float fps
+  */
+
+  uint16_t net_latency = qToBigEndian(latency);
+  std::memcpy(opt.data.get(), &net_latency, sizeof(uint16_t));
+
+  uint32_t net_throughput = qToBigEndian(throughput);
+  std::memcpy(opt.data.get() + 2, &net_throughput, sizeof(uint32_t));
+
+  float net_loss = qToBigEndian(loss);
+  std::memcpy(opt.data.get() + 6, &net_loss, sizeof(float));
+
+  float net_fps = qToBigEndian(fps);
+  std::memcpy(opt.data.get() + 10, &net_fps, sizeof(float));
+
+  m_hdr->options.push_back(opt);
+
+  return true;
+}
+
 std::shared_ptr<QByteArray> HstpHandler::output_msg()
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
@@ -280,7 +340,7 @@ bool HstpHandler::add_option_generic_uint32(uint8_t type, uint32_t uint32)
   }
 
   Option opt;
-  opt.type = 4;
+  opt.type = type;
   opt.len = sizeof(uint32_t);
   opt.data = std::shared_ptr<char[]>(new char[opt.len]);
 
@@ -344,6 +404,15 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
       break;
     case 5: // annotation
       handle_annotation((hdr_ptr->sender_alias), opt);
+      break;
+    case 7: // fps
+      handle_fps(hdr_ptr->sender_alias, opt);
+      break;
+    case 8: // performance request
+      handle_performance_request(hdr_ptr->sender_alias, opt);
+      break;
+    case 9: // performance metrics
+      handle_performance_metrics(hdr_ptr->sender_alias, opt);
       break;
     default:
       handle_default(hdr_ptr->sender_alias, opt);
@@ -464,6 +533,51 @@ void HstpProcessor::handle_annotation(HANDLER_PARAMS)
   HSTP_Annotation annotation(opt.data);
 
   emit received_annotation(alias, annotation);
+}
+
+void HstpProcessor::handle_performance_request(HANDLER_PARAMS)
+{
+  if (!opt.data || opt.len == 0)
+  {
+    qCritical(
+        "Something went wrong with handling a performance request option...");
+    handle_default(alias, opt);
+    return;
+  }
+
+  uint64_t time;
+  std::memcpy(&time, opt.data.get(), sizeof(uint64_t));
+  time = qFromBigEndian((uint64_t) time);
+
+  emit received_performance_request(alias, time);
+}
+
+void HstpProcessor::handle_performance_metrics(HANDLER_PARAMS)
+{
+  if (!opt.data || opt.len == 0)
+  {
+    qCritical(
+        "Something went wrong with handling a performance metrics option...");
+    handle_default(alias, opt);
+    return;
+  }
+
+  uint16_t latency;
+  uint32_t throughput;
+  float loss;
+  float fps;
+
+  std::memcpy(&latency, opt.data.get(), sizeof(uint16_t));
+  std::memcpy(&throughput, opt.data.get() + 2, sizeof(uint32_t));
+  std::memcpy(&loss, opt.data.get() + 6, sizeof(float));
+  std::memcpy(&fps, opt.data.get() + 10, sizeof(float));
+
+  latency = qFromBigEndian(latency);
+  throughput = qFromBigEndian(throughput);
+  loss = qFromBigEndian(loss);
+  fps = qFromBigEndian(fps);
+
+  emit received_performance_metrics(alias, latency, throughput, loss, fps);
 }
 
 void HstpProcessor::handle_string(

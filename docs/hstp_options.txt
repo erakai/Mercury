@@ -75,6 +75,25 @@ Options
   Data:
     - uint32_t viewers
 
+(ID: 5) Annotations
+
+  Represents an annotation pixel.
+
+  Len: 8
+  Data:
+    - uint16 x_position
+      - x position of the pixel to modify
+    - uint16 y_position
+      - y position of the pixel to modify
+    - uint8 red
+      - (r,g,b) component of this pixel
+    - uint8 green
+      - (r,g,b) component of this pixel
+    - uint8 blue
+      - (r,g,b) component of this pixel
+    - bool erase
+      - denotes whether to erase this pixel or not
+
 (ID: 7) FPS
 
   Represents a message containing a new fps to process the stream at.
@@ -84,7 +103,7 @@ Options
     - uint32_t fps
 
 (ID: 8) Performance Metric Request
-  
+
   Only sent by a host. Contains the current time so that the receiving
   client can calculate network latency. Should be sent periodically. Expects
   an ID: 9 Metrics response.

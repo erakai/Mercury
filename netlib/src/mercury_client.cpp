@@ -97,6 +97,19 @@ bool MercuryClient::send_chat_message(const std::string &chat_msg)
   return true;
 }
 
+bool MercuryClient::send_annotations(const HSTP_Annotation &annotation)
+{
+  qDebug() << "MercuryClient sending annotations";
+  m_hstp_handler.init_msg(m_alias.c_str());
+  m_hstp_handler.add_option_annotation(annotation);
+  if (!m_hstp_handler.output_msg_to_socket(m_hstp_sock))
+  {
+    qCritical("Failed to send annotations to socket");
+    return false;
+  }
+  return true;
+}
+
 void MercuryClient::process_received_hstp_messages()
 {
   if (m_hstp_sock && m_hstp_sock->state() == QAbstractSocket::ConnectedState)

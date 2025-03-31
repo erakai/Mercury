@@ -23,28 +23,41 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   format.setSampleFormat(QAudioFormat::Int16);
 
   audio_sink = new QAudioSink(format, this);
-  /*
-  sourceFile.setFileName("assets/fart.raw");
-  sourceFile.open(QIODevice::ReadOnly);
-  audio_sink->start(&sourceFile);
-  */
+  //  sourceFile.setFileName("assets/fart.raw");
+  //  sourceFile.open(QIODevice::ReadOnly);
+  //  audio_sink->start(&sourceFile);
   // AUDIO TESTING END ====
 
+  // Set up the media player.
   video_player = new QMediaPlayer(this);
 
-  video_widget = new QVideoWidget(this);
-  video_sink = video_widget->videoSink();
+  // Instead of a QVideoWidget, create a QGraphicsView and scene.
+  graphics_view = new QGraphicsView(this);
+  graphics_scene = new QGraphicsScene(this);
+  graphics_view->setScene(graphics_scene);
 
-  video_widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  video_player->setVideoOutput(video_sink);
+  // Create the QGraphicsVideoItem and add it to the scene.
+  video_item = new QGraphicsVideoItem();
+  graphics_scene->addItem(video_item);
 
-  video_widget->show();
-}
+  // Retrieve the video sink from the video item.
+  video_sink = video_item->videoSink();
 
-void StreamDisplay::resizeEvent(QResizeEvent *event)
-{
-  QWidget::resizeEvent(event);
-  video_widget->setGeometry(0, 0, width(), height()); // Force full expansion
+  // Set the media player's video output to the video item.
+  video_player->setVideoOutput(video_item);
+
+  // Set the minimum size as before.
+  graphics_view->setMinimumWidth(1280);
+  graphics_view->setMinimumHeight(720);
+
+  // Set the size of the scene (this is necessary for some reason)
+  graphics_scene->setSceneRect(0, -50, graphics_view->width(),
+                               graphics_view->height());
+  video_item->setPos(0, 0);
+  video_item->setSize(QSizeF(graphics_view->width(), graphics_view->height()));
+
+  // Show the graphics view.
+  graphics_view->show();
 }
 
 void StreamDisplay::begin_playback()

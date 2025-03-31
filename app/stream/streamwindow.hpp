@@ -1,8 +1,10 @@
 #pragma once
 
+#include "annotationdisplay.hpp"
 #include "sidepane.hpp"
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
+#include "hstp.hpp"
 #include <QAudioBuffer>
 #include <QFile>
 #include <QGridLayout>
@@ -51,17 +53,32 @@ public slots:
   // Sends a chat message out
   void send_chat_message(string message);
 
+  // Sends an annotation out
+  void send_annotation(HSTP_Annotation annotation);
+
+  // These are generic update slots that should be connected to a signal either
+  // in the client or server
   // The rest are generic update slots that should be connected to a signal
   // either in the client or server
 
   void viewer_count_updated(int new_count);
   void stream_name_changed(string host_alias, string new_name);
   void new_chat_message(string alias, string msg);
+  // void new_viewer_joined(Client client); // update participant_display_list
+  // in side_pane
+  void new_annotation(string alias, HSTP_Annotation annotation);
+
+  void onAnnotationDisplayMousePressed(QMouseEvent *event);
+  void onAnnotationDisplayMouseMoved(QMouseEvent *event);
+  void onAnnotationDisplayMouseReleased(QMouseEvent *event);
 
   // These next two are host-only
   void viewer_disconnected(int id, std::string alias);
   // This is called after a client is validated
   void viewer_connected(int id, std::string _alias);
+
+protected:
+  bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
   /*
@@ -80,6 +97,7 @@ private:
   QGridLayout *main_layout;
   SidePane *side_pane;
   StreamDisplay *stream_display;
+  AnnotationDisplay *annotation_display;
   QGridLayout *below_stream_layout;
 
   // Only relevant if this is a client - displays itself when poor connection
@@ -103,4 +121,7 @@ private:
   // count, stream name, etc)
   const shared_ptr<HostService> servh = nullptr;
   const shared_ptr<ClientService> servc = nullptr;
+
+  QPoint old_point;
+  std::vector<QPoint> points;
 };

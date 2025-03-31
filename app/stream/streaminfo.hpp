@@ -34,5 +34,4 @@ private:
   QLabel *stream_start_time_label;
   QLabel *info_label2;
   QLabel *info_label3;
-
 };

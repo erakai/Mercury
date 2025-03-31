@@ -405,8 +405,7 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
 
   Client &client = servh->server->get_client(id);
   client.handler.init_msg(alias.c_str());
-  client.handler.add_option_stream_title(
-      stream_info->getStreamTitle().c_str());
+  client.handler.add_option_stream_title(stream_info->getStreamTitle().c_str());
   client.handler.add_option_viewer_count(servh->viewer_count);
   client.handler.add_option_fps(FPS);
   client.handler.output_msg_to_socket(client.hstp_sock);

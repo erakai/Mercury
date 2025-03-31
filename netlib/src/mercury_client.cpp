@@ -56,13 +56,6 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
       return false;
     }
 
-    if (m_hstp_sock->waitForDisconnected(1000))
-    {
-      qCritical(
-          "Client disconnected by host, likely due to incorrect password.");
-      return false;
-    }
-
     return (m_hstp_sock->state() == QAbstractSocket::ConnectedState);
   }
   else
@@ -94,6 +87,19 @@ bool MercuryClient::send_chat_message(const std::string &chat_msg)
     return false;
   }
 
+  return true;
+}
+
+bool MercuryClient::send_annotations(const HSTP_Annotation &annotation)
+{
+  qDebug() << "MercuryClient sending annotations";
+  m_hstp_handler.init_msg(m_alias.c_str());
+  m_hstp_handler.add_option_annotation(annotation);
+  if (!m_hstp_handler.output_msg_to_socket(m_hstp_sock))
+  {
+    qCritical("Failed to send annotations to socket");
+    return false;
+  }
   return true;
 }
 

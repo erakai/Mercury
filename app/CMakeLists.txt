@@ -27,6 +27,10 @@ qt_add_executable(mercury
   streampreview/audioinputlistmodel.h streampreview/audioinputlistmodel.cpp
 
   singleton/videomanager.h singleton/videomanager.cpp
+        stream/annotationdisplay.cpp
+        stream/annotationdisplay.hpp
+        stream/painttoolwidget.cpp
+        stream/painttoolwidget.hpp
 )
 
 # Qt set up

@@ -6,6 +6,7 @@
 #include <QMenuBar>
 #include <QScreen>
 #include <QtDebug>
+#include <QMouseEvent>
 #include <QAudioSink>
 
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
@@ -13,7 +14,6 @@ StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
     : QMainWindow(parent), mode(MercuryMode::HOST), alias(alias),
       servh(host_data)
 {
-  set_up();
 }
 
 StreamWindow::StreamWindow(std::string alias,
@@ -22,15 +22,12 @@ StreamWindow::StreamWindow(std::string alias,
     : QMainWindow(parent), mode(MercuryMode::CLIENT), alias(alias),
       servc(client_data)
 {
-  set_up();
 }
 
-void StreamWindow::set_up()
+bool StreamWindow::set_up()
 {
   setWindowTitle("Mercury");
   setAttribute(Qt::WA_DeleteOnClose);
-
-  this->showMaximized(); // Sets Window size to max
 
   initialize_primary_ui_widgets();
   configure_menu_and_tool_bar();
@@ -38,7 +35,23 @@ void StreamWindow::set_up()
   display->setLayout(main_layout);
   setCentralWidget(display);
 
-  main_layout->addWidget(stream_display, 0, 0);
+  // Create a container widget to stack the stream display and the annotation
+  // display.
+  QWidget *videoAnnotationContainer = new QWidget(this);
+  QGridLayout *containerLayout = new QGridLayout(videoAnnotationContainer);
+  containerLayout->setContentsMargins(0, 0, 0, 0);
+  containerLayout->setSpacing(0);
+  // Add both widgets in the same cell.
+  containerLayout->addWidget(stream_display, 0, 0);
+  containerLayout->addWidget(annotation_display, 0, 0);
+
+  stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  annotation_display->setSizePolicy(QSizePolicy::Expanding,
+                                    QSizePolicy::Expanding);
+
+  annotation_display->raise();
+
+  main_layout->addWidget(videoAnnotationContainer, 0, 0);
   main_layout->addWidget(side_pane, 0, 1, 2, 1);
   main_layout->addLayout(below_stream_layout, 1, 0);
 
@@ -76,6 +89,15 @@ void StreamWindow::set_up()
        frameGeometry().center());
 
   connect_signals_and_slots();
+
+  if (is_client() && servc->client->hstp_sock()->waitForDisconnected(1000))
+  {
+    qCritical("Client disconnected by host, likely due to incorrect password.");
+    return false;
+  }
+
+  this->showMaximized(); // Sets Window size to max
+  return true;
 }
 
 void StreamWindow::configure_menu_and_tool_bar()
@@ -103,6 +125,17 @@ void StreamWindow::connect_signals_and_slots()
   if (is_host())
     connect(servh->server.get(), &MercuryServer::chat_message_received, this,
             &StreamWindow::new_chat_message);
+
+  // connect annotation received to annotation display
+  if (is_host())
+    connect(servh->server.get(), &MercuryServer::annotation_received, this,
+            &StreamWindow::new_annotation);
+
+  if (is_client())
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_annotation, this,
+            &StreamWindow::new_annotation);
+
   if (is_client())
     connect(servc->client->hstp_processor().get(),
             &HstpProcessor::received_chat, this,
@@ -201,6 +234,9 @@ void StreamWindow::initialize_primary_ui_widgets()
     unstable_network_indicator->setPixmap(ico.pixmap({48, 48}));
     unstable_network_indicator->setVisible(false);
   }
+
+  annotation_display = new AnnotationDisplay(this);
+  annotation_display->installEventFilter(this);
 
   below_stream_layout = new QGridLayout();
 
@@ -327,6 +363,21 @@ void StreamWindow::send_chat_message(string message)
     servc->client->send_chat_message(message);
 }
 
+void StreamWindow::send_annotation(HSTP_Annotation annotation)
+{
+  if (is_host())
+  {
+    // qDebug() << "Sending annotation as host";
+    servh->server->forward_annotations(-1, annotation);
+  }
+
+  if (is_client())
+  {
+    // qDebug() << "Sending annotation as client";
+    servc->client->send_annotations(annotation);
+  }
+}
+
 void StreamWindow::viewer_count_updated(int new_count)
 {
   viewer_count->setText(("Viewers: " + std::to_string(new_count)).c_str());
@@ -389,4 +440,102 @@ void StreamWindow::viewer_disconnected(int id, std::string _alias)
   viewer_count_updated(servh->viewer_count);
 
   side_pane->get_viewer_list_tab()->viewer_left(_alias);
+}
+
+void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
+{
+  if (annotation.points.size() < 1)
+    return;
+  else if (annotation.points.size() == 1)
+  {
+    QPoint p(annotation.points[0].x, annotation.points[0].y);
+    annotation_display->addLine(
+        p, p, QColor(annotation.red, annotation.green, annotation.blue),
+        annotation.thickness);
+  }
+  else
+  {
+    for (int i = 1; i < (int) annotation.points.size(); i++)
+    {
+      QPoint q(annotation.points[i].x, annotation.points[i].y);
+      QPoint p(annotation.points[i - 1].x, annotation.points[i - 1].y);
+      annotation_display->addLine(
+          p, q, QColor(annotation.red, annotation.green, annotation.blue),
+          annotation.thickness);
+    }
+  }
+}
+
+bool StreamWindow::eventFilter(QObject *watched, QEvent *event)
+{
+  if (watched == annotation_display)
+  {
+    if (event->type() == QEvent::MouseButtonPress)
+    {
+      QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+      onAnnotationDisplayMousePressed(mouseEvent);
+      return true;
+    }
+    else if (event->type() == QEvent::MouseMove)
+    {
+      QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+      onAnnotationDisplayMouseMoved(mouseEvent);
+      return true;
+    }
+    else if (event->type() == QEvent::MouseButtonRelease)
+    {
+      QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+      onAnnotationDisplayMouseReleased(mouseEvent);
+      return true;
+    }
+  }
+  return QMainWindow::eventFilter(watched, event);
+}
+
+void StreamWindow::onAnnotationDisplayMousePressed(QMouseEvent *event)
+{
+  // Start a new annotation by clearing previous points.
+  points.clear();
+  QPoint pos = event->pos();
+  old_point = pos;
+  points.push_back(pos);
+}
+
+void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
+{
+  QPoint pos = event->pos();
+
+  PaintToolWidget *toolWidget = annotation_display->paint_tool_widget;
+  QColor currentColor = toolWidget->selectedColor();
+  int thickness = toolWidget->brushSize();
+
+  // TODO add erase support
+  if (toolWidget->isEraseMode())
+  {
+    thickness *= -1;
+  }
+
+  annotation_display->addLine(old_point, pos, currentColor, thickness);
+  old_point = pos;
+  points.push_back(pos);
+}
+
+void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
+{
+  Q_UNUSED(event);
+
+  PaintToolWidget *toolWidget = annotation_display->paint_tool_widget;
+  QColor currentColor = toolWidget->selectedColor();
+  int thickness = toolWidget->brushSize();
+
+  // TODO add erase support
+  if (toolWidget->isEraseMode())
+  {
+    thickness *= -1;
+  }
+
+  send_annotation(HSTP_Annotation(points, currentColor.red(),
+                                  currentColor.green(), currentColor.blue(),
+                                  thickness));
+  points.clear();
 }

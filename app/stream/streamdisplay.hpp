@@ -1,5 +1,7 @@
 #pragma once
 
+#include "home/mainwindow.hpp"
+
 #include <QAudioBuffer>
 #include <QAudioFormat>
 #include <QAudioOutput>
@@ -12,6 +14,9 @@
 #include <QVideoFrame>
 #include <QVideoSink>
 #include <QVideoWidget>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsVideoItem>
 #include <QWidget>
 #include <QtMultimedia/qaudiooutput.h>
 #include <QtMultimedia/qmediaplayer.h>
@@ -31,14 +36,14 @@ public:
   // Begins drawing and requesting frames
   void begin_playback();
 
-protected:
-  void resizeEvent(QResizeEvent *event) override;
-
 public slots:
   // Called FPS times a second
   void acquire_next_frame();
 
   void set_new_fps(int fps);
+
+protected:
+  void resizeEvent(QResizeEvent *event) override;
 
 private:
   // This timer will emit a timeout signal every x milliseconds, which will tell
@@ -61,6 +66,9 @@ private:
   QFile sourceFile;
 
   QMediaPlayer *video_player;
-  QVideoWidget *video_widget;
   QVideoSink *video_sink;
+
+  QGraphicsView *graphics_view;
+  QGraphicsScene *graphics_scene;
+  QGraphicsVideoItem *video_item;
 };

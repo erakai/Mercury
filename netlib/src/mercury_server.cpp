@@ -177,6 +177,15 @@ void MercuryServer::validate_client(int id, bool is_start, std::string alias,
             emit chat_message_received(std::string(alias), chat);
           });
 
+  // Also connect client annotations for replication
+  connect(
+      new_client.processor.get(), &HstpProcessor::received_annotation, this,
+      [=, this](const char alias[ALIAS_SIZE], const HSTP_Annotation &annotation)
+      {
+        this->forward_annotations(new_client.id, annotation);
+        emit annotation_received(std::string(alias), annotation);
+      });
+
   emit client_connected(id, std::string(alias));
 }
 
@@ -238,6 +247,21 @@ void MercuryServer::forward_chat_message(int sender_id, std::string alias,
     {
       client.handler.init_msg(host_alias.c_str());
       client.handler.add_option_chat(alias.c_str(), message.c_str());
+      client.hstp_sock->write(*(client.handler.output_msg()));
+    }
+  }
+}
+
+void MercuryServer::forward_annotations(int sender_id,
+                                        HSTP_Annotation annotation)
+{
+  // qDebug() << "MercuryServer forwarding annotations";
+  for (auto &[id, client] : clients)
+  {
+    if (id != sender_id)
+    {
+      client.handler.init_msg(host_alias.c_str());
+      client.handler.add_option_annotation(annotation);
       client.hstp_sock->write(*(client.handler.output_msg()));
     }
   }

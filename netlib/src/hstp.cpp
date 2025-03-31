@@ -98,6 +98,27 @@ bool HstpHandler::add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
   return true;
 }
 
+bool HstpHandler::add_option_annotation(const HSTP_Annotation &annotation)
+{
+  if (get_status() != MSG_STATUS::IN_PROGRESS)
+  {
+    qCritical("Unable to add option, uninitalized message.");
+    return false;
+  }
+
+  Option opt;
+  opt.type = 5; // im using 5 for now
+  opt.len = sizeof(uint16_t) +
+            annotation.points.size() * (sizeof(uint16_t) * 2) +
+            sizeof(annotation.red) + sizeof(annotation.green) +
+            sizeof(annotation.blue) + sizeof(annotation.thickness);
+  opt.data = annotation.serialize();
+
+  m_hdr->options.push_back(opt);
+
+  return true;
+}
+
 bool HstpHandler::add_option_performance_request(uint64_t time)
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
@@ -381,6 +402,9 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
     case 4: // viewer count
       handle_viewer_count(hdr_ptr->sender_alias, opt);
       break;
+    case 5: // annotation
+      handle_annotation((hdr_ptr->sender_alias), opt);
+      break;
     case 7: // fps
       handle_fps(hdr_ptr->sender_alias, opt);
       break;
@@ -493,6 +517,22 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
   }
 
   emit received_chat(alias, alias_of_chatter, chat_msg);
+}
+
+void HstpProcessor::handle_annotation(HANDLER_PARAMS)
+{
+  // qDebug() << "HstpProcessor handling annotations";
+
+  if (!opt.data || opt.len == 0)
+  {
+    qCritical("Something went wrong with handling an annotation option...");
+    handle_default(alias, opt);
+    return;
+  }
+
+  HSTP_Annotation annotation(opt.data);
+
+  emit received_annotation(alias, annotation);
 }
 
 void HstpProcessor::handle_performance_request(HANDLER_PARAMS)

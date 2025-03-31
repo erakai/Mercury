@@ -99,10 +99,11 @@ void HostStreamWindow::open_stream_window()
   serv->server->start_server();
   // This sets itself to delete on close, so no memory leak (I think)
   StreamWindow *w = new StreamWindow(alias, serv);
-  w->show();
-
-  parentWidget()->hide();
-  this->close();
+  if (w->set_up())
+  {
+    parentWidget()->hide();
+    this->close();
+  }
 }
 
 void HostStreamWindow::tutorial_button_press()

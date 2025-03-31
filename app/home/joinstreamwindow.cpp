@@ -66,9 +66,16 @@ void JoinStreamWindow::on_joinButton_clicked()
   }
 
   StreamWindow *w = new StreamWindow(alias, serv);
-  w->show();
-
-  parentWidget()
-      ->hide(); // I think we want home to show back up after stream is closed
-  this->close();
+  if (w->set_up())
+  {
+    parentWidget()
+        ->hide(); // I think we want home to show back up after stream is closed
+    this->close();
+  }
+  else
+  {
+    ToastNotification::showToast(this, "No server could be found on that IP.",
+                                 4000);
+    return;
+  }
 }

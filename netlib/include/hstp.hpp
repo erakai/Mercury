@@ -9,6 +9,7 @@
 #include <QtCore/qtmetamacros.h>
 #include <QtCore/qtypes.h>
 #include <QtNetwork/qtcpsocket.h>
+#include <QPoint>
 #include <cstdint>
 #include <iomanip>
 #include <iostream>
@@ -84,6 +85,121 @@ enum class MSG_STATUS
   IN_PROGRESS,
 };
 
+// Helper structure for a 2D point
+struct AnnotationPoint
+{
+  uint16_t x;
+  uint16_t y;
+};
+
+struct NETLIB_EXPORT HSTP_Annotation
+{
+  // A vector of points
+  std::vector<AnnotationPoint> points;
+  // RGB color values
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+  // Thickness instead of the erase flag
+  int8_t thickness;
+
+  // Default constructor
+  HSTP_Annotation() = default;
+
+  HSTP_Annotation(const std::vector<QPoint> &v, uint8_t r, uint8_t g, uint8_t b,
+                  uint8_t thick)
+      : red(r), green(g), blue(b), thickness(thick)
+  {
+    points.reserve(v.size());
+    for (const auto &qp : v)
+    {
+      // Convert QPoint to Point (casting to uint16_t)
+      points.push_back(
+          {static_cast<uint16_t>(qp.x()), static_cast<uint16_t>(qp.y())});
+    }
+  }
+
+  // Constructor that deserializes from a shared_ptr<char[]>
+  HSTP_Annotation(const std::shared_ptr<char[]> &buffer)
+  {
+    const char *ptr = buffer.get();
+
+    // First, deserialize the number of points
+    uint16_t num_points;
+    std::memcpy(&num_points, ptr, sizeof(num_points));
+    ptr += sizeof(num_points);
+
+    // Resize the vector and deserialize each point
+    points.resize(num_points);
+    for (size_t i = 0; i < num_points; ++i)
+    {
+      std::memcpy(&points[i].x, ptr, sizeof(points[i].x));
+      ptr += sizeof(points[i].x);
+      std::memcpy(&points[i].y, ptr, sizeof(points[i].y));
+      ptr += sizeof(points[i].y);
+    }
+
+    // Deserialize the RGB values
+    std::memcpy(&red, ptr, sizeof(red));
+    ptr += sizeof(red);
+
+    std::memcpy(&green, ptr, sizeof(green));
+    ptr += sizeof(green);
+
+    std::memcpy(&blue, ptr, sizeof(blue));
+    ptr += sizeof(blue);
+
+    // Deserialize the thickness (stored as a single byte)
+    std::memcpy(&thickness, ptr, sizeof(thickness));
+  }
+
+  // Serializes the current annotation to a shared_ptr<char[]>
+  std::shared_ptr<char[]> serialize() const
+  {
+    // Calculate total size:
+    // - 2 bytes for the number of points
+    // - 4 bytes per point (2 bytes for x and 2 for y)
+    // - 3 bytes for RGB
+    // - 1 byte for thickness
+    size_t dataSize = sizeof(uint16_t) +
+                      points.size() * (sizeof(uint16_t) * 2) + sizeof(red) +
+                      sizeof(green) + sizeof(blue) + sizeof(thickness);
+
+    std::shared_ptr<char[]> buffer(new char[dataSize],
+                                   std::default_delete<char[]>());
+    char *ptr = buffer.get();
+
+    // Serialize the number of points
+    uint16_t num_points = points.size();
+    std::memcpy(ptr, &num_points, sizeof(num_points));
+    ptr += sizeof(num_points);
+
+    // Serialize each point
+    for (const auto &pt : points)
+    {
+      std::memcpy(ptr, &pt.x, sizeof(pt.x));
+      ptr += sizeof(pt.x);
+      std::memcpy(ptr, &pt.y, sizeof(pt.y));
+      ptr += sizeof(pt.y);
+    }
+
+    // Serialize the RGB values
+    std::memcpy(ptr, &red, sizeof(red));
+    ptr += sizeof(red);
+
+    std::memcpy(ptr, &green, sizeof(green));
+    ptr += sizeof(green);
+
+    std::memcpy(ptr, &blue, sizeof(blue));
+    ptr += sizeof(blue);
+
+    // Serialize the thickness as a byte
+    std::memcpy(ptr, &thickness, sizeof(thickness));
+
+    return buffer;
+  }
+};
+
 /*
  * HstpHandler offers the user an object to build out a HSTP message
  * through a series of function calls to ensure safety and proper use.
@@ -110,6 +226,7 @@ public:
                                 const QByteArray &password = nullptr);
   bool add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
                        const char *chat_msg);
+  bool add_option_annotation(const HSTP_Annotation &annotation);
   bool add_option_stream_title(const char *stream_title)
   {
     return add_option_generic_string(3, stream_title);
@@ -202,11 +319,17 @@ signals:
                               uint16_t mftp_port,
                               const QByteArray &password = nullptr);
   /*
-   * Emtis when a chat option is used informing user of a new chat.
+   * Emits when a chat option is used informing user of a new chat.
    */
   void received_chat(const char alias[ALIAS_SIZE],
                      const char alias_of_chatter[ALIAS_SIZE],
                      const std::string &chat);
+
+  /*
+   * Emits when an annotation pixel is received
+   */
+  void received_annotation(const char alias[ALIAS_SIZE],
+                           const HSTP_Annotation &annotation);
 
   /*
    * Emits when a (new) stream title is used.
@@ -271,9 +394,11 @@ private:
   {
     handle_uint32(alias, opt, &HstpProcessor::received_viewer_count);
   }
-  void handle_fps(HANDLER_PARAMS) // 7
+
+  void handle_annotation(HANDLER_PARAMS); // 5
+  void handle_fps(HANDLER_PARAMS)         // 7
   {
-    handle_uint32(alias, opt, &HstpProcessor::received_viewer_count);
+    handle_uint32(alias, opt, &HstpProcessor::received_fps);
   }
   void handle_performance_request(HANDLER_PARAMS); // 8
   void handle_performance_metrics(HANDLER_PARAMS); // 9

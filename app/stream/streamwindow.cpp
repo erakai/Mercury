@@ -56,11 +56,6 @@ bool StreamWindow::set_up()
   main_layout->addWidget(side_pane, 0, 1, 2, 1);
   main_layout->addWidget(stream_info, 1, 0);
 
-  // TODO: Chris when you beautify us up add this widget wherever is best for
-  // you
-  if (is_client())
-    below_stream_layout->addWidget(unstable_network_indicator, 2, 2,
-                                   Qt::AlignCenter);
   /*
   |---------------------------|-------------|
   |75% - Stream Window Across | 25% - Chat  |
@@ -170,6 +165,13 @@ void StreamWindow::connect_signals_and_slots()
                                         std::string(stream_title));
             });
 
+  // connect stream start time for client
+  if (is_client())
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_stream_start_time, this,
+            [=, this](const char alias[ALIAS_SIZE], uint32_t timestamp)
+            { this->stream_start_time_changed(timestamp); });
+
   // connect new fps for client
   if (is_client())
     connect(servc->client->hstp_processor().get(), &HstpProcessor::received_fps,
@@ -190,9 +192,8 @@ void StreamWindow::connect_signals_and_slots()
             this,
             [=, this](bool new_status)
             {
-              unstable_network_indicator->setVisible(!new_status);
-              unstable_network_indicator->setToolTip(
-                  servc->client->get_connection_reason().c_str());
+              stream_info->setUnstableNetworkIndicator(
+                  !new_status, servc->client->get_connection_reason());
             });
 }
 
@@ -222,6 +223,9 @@ void StreamWindow::initialize_primary_ui_widgets()
   stream_display = new StreamDisplay(this, video_func, audio_func);
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+  annotation_display = new AnnotationDisplay(this);
+  annotation_display->installEventFilter(this);
+
   stream_info = new StreamInfo(this, "Host\'s Stream", "Host");
 
   if (is_host() && servh->stream_name.size() > 0)
@@ -236,6 +240,8 @@ void StreamWindow::initialize_primary_ui_widgets()
 void StreamWindow::stream_fully_initialized()
 {
   qInfo("Beginning stream playback.");
+  stream_info->setStreamStartTime(
+      static_cast<uint32_t>(QDateTime::currentDateTime().toSecsSinceEpoch()));
   stream_display->begin_playback();
 }
 
@@ -388,6 +394,15 @@ void StreamWindow::stream_name_changed(string host_alias, string new_name)
   if (is_client())
   {
     stream_info->setHostName(host_alias.c_str());
+  }
+}
+
+void StreamWindow::stream_start_time_changed(uint32_t timestamp)
+{
+  // timestamp is in seconds since epoch
+  if (is_client())
+  {
+    stream_info->setStreamStartTime(timestamp);
   }
 }
 

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "netlib_global.h"
+#include "../../cmake-build-debug/_deps/googletest-src/googlemock/include/gmock/gmock-matchers.h"
+
 #include <QHostAddress>
 #include <QTcpSocket>
 #include <QtCore/qhashfunctions.h>
@@ -343,6 +345,12 @@ signals:
   void received_viewer_count(const char alias[ALIAS_SIZE], uint32_t viewers);
 
   /*
+   * Emits when a user joins to the new user
+   */
+  void received_stream_start_time(const char alias[ALIAS_SIZE],
+                                  uint32_t timestamp);
+
+  /*
    * Emitted whenever a new fps is received
    */
   void received_fps(const char alias[ALIAS_SIZE], uint32_t fps);
@@ -393,6 +401,10 @@ private:
   void handle_viewer_count(HANDLER_PARAMS) // 4
   {
     handle_uint32(alias, opt, &HstpProcessor::received_viewer_count);
+  }
+  void handle_stream_start_time(HANDLER_PARAMS)
+  {
+    halder_uint32(alias, opt, &HstpProcessor::received_stream_start_time);
   }
 
   void handle_annotation(HANDLER_PARAMS); // 5

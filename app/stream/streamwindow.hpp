@@ -66,6 +66,7 @@ public slots:
 
   void viewer_count_updated(int new_count);
   void stream_name_changed(string host_alias, string new_name);
+  void stream_start_time_changed(uint32_t timestamp);
   void new_chat_message(string alias, string msg);
   // void new_viewer_joined(Client client); // update participant_display_list
   // in side_pane
@@ -100,9 +101,6 @@ private:
   SidePane *side_pane;
   StreamDisplay *stream_display;
   AnnotationDisplay *annotation_display;
-
-  // Only relevant if this is a client - displays itself when poor connection
-  QLabel *unstable_network_indicator;
 
   StreamInfo *stream_info;
 

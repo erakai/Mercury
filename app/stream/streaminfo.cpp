@@ -1,4 +1,5 @@
 #include "streaminfo.hpp"
+#include "streamwindow.hpp"
 
 #include <QDateTime>
 #include <QPropertyAnimation>
@@ -7,6 +8,7 @@
 StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
                        const QString &host_name)
 {
+  StreamWindow *stream_window = qobject_cast<StreamWindow *>(parent);
   main_layout = new QHBoxLayout(this);
   basic_stream_info_layout = new QVBoxLayout();
 
@@ -36,6 +38,15 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   basic_stream_info_layout->addWidget(stream_title_label);
   basic_stream_info_layout->addWidget(host_name_label);
   basic_stream_info_layout->addWidget(viewer_count_label);
+  if (stream_window->is_client())
+  {
+    unstable_network_indicator = new QLabel(this);
+    QPixmap pix("assets/unstable-indicator.png");
+    QIcon ico(pix);
+    unstable_network_indicator->setPixmap(ico.pixmap({48, 48}));
+    unstable_network_indicator->setVisible(false);
+    basic_stream_info_layout->addWidget(unstable_network_indicator);
+  }
   basic_stream_info_layout->addStretch();
 
   extra_info_sidebar = new QWidget(this);
@@ -122,11 +133,11 @@ void StreamInfo::mousePressEvent(QMouseEvent *event)
   }
 }
 
-// void StreamInfo::setupLayout()
-// {
-//   info_layout->addWidget(host_name_label, 1, 0);
-//   info_layout->addWidget(viewer_count_label, 1, 1);
-// }
+void StreamInfo::setUnstableNetworkIndicator(bool visible, string toolTip)
+{
+  unstable_network_indicator->setVisible(visible);
+  unstable_network_indicator->setToolTip(toolTip.c_str());
+}
 
 void StreamInfo::setViewerCount(int count)
 {

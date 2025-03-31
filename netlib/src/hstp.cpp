@@ -414,6 +414,9 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
     case 9: // performance metrics
       handle_performance_metrics(hdr_ptr->sender_alias, opt);
       break;
+    case 10: // stream start time
+      handle_stream_start_time(hdr_ptr->sender_alias, opt);
+      break;
     default:
       handle_default(hdr_ptr->sender_alias, opt);
     }

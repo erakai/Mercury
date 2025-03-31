@@ -41,8 +41,8 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
   chatBox = new QListWidget(this);
 
   QPalette chatBoxPalette = chatBox->palette();
-  chatBoxPalette.setColor(QPalette::Window, Qt::gray);
-  chatBoxPalette.setColor(QPalette::Text, Qt::white);
+  chatBoxPalette.setColor(QPalette::Base, QColor(64, 68, 69));
+  chatBoxPalette.setColor(QPalette::Text, QColor(221, 231, 235));
   chatBox->setPalette(chatBoxPalette);
 
   chatBox->setSelectionMode(QAbstractItemView::NoSelection);
@@ -55,7 +55,7 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
 
   messageInput = new QLineEdit(this);
   QPalette inputPalette = messageInput->palette();
-  inputPalette.setColor(QPalette::Base, Qt::white);
+  inputPalette.setColor(QPalette::Base, QColor(197, 197, 197));
   inputPalette.setColor(QPalette::Text, Qt::black);
   messageInput->setPalette(inputPalette);
 
@@ -79,6 +79,7 @@ void ChatTab::new_chat_message(ChatMessage msg)
 {
   QString messageToRender =
       QString::fromStdString(msg.sender + ":\n" + msg.message + "\n");
+
   chatBox->addItem(new QListWidgetItem(messageToRender));
   chatBox->scrollToBottom();
 }

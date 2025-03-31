@@ -80,6 +80,7 @@ void ChatTab::new_chat_message(ChatMessage msg)
   QString messageToRender =
       QString::fromStdString(msg.sender + ":\n" + msg.message + "\n");
   chatBox->addItem(new QListWidgetItem(messageToRender));
+  chatBox->scrollToBottom();
 }
 
 void ChatTab::render_and_send_message(std::string msgContent)

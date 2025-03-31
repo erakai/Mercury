@@ -273,7 +273,7 @@ private:
   }
   void handle_fps(HANDLER_PARAMS) // 7
   {
-    handle_uint32(alias, opt, &HstpProcessor::received_fps);
+    handle_uint32(alias, opt, &HstpProcessor::received_viewer_count);
   }
   void handle_performance_request(HANDLER_PARAMS); // 8
   void handle_performance_metrics(HANDLER_PARAMS); // 9

@@ -288,8 +288,10 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
     dest_ports.push_back(client.mftp_port);
   }
 
-  send_datagram(mftp_sock, dest_addr, dest_ports, header, video.toImage(),
-                audio);
+  // Compress image
+  QImage image = video.toImage();
+
+  send_datagram(mftp_sock, dest_addr, dest_ports, header, image, audio);
 
   return client_sent_to_count;
 }

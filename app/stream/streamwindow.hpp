@@ -36,8 +36,7 @@ public:
   bool is_host() { return mode == MercuryMode::HOST; }
   bool is_client() { return mode == MercuryMode::CLIENT; }
 
-  bool provide_next_video_frame(QImage &next_video);
-  bool provide_next_audio_frame(QBuffer &next_audio);
+  bool provide_next_frame(QImage &next_video, QBuffer &next_audio);
 
   void closeEvent(QCloseEvent *event) override;
 

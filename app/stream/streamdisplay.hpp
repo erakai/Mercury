@@ -30,8 +30,8 @@ class StreamDisplay : public QWidget
   Q_OBJECT;
 
 public:
-  StreamDisplay(QWidget *parent, function<bool(QImage &)> get_next_video_frame,
-                function<bool(QBuffer &)> get_next_audio_frame);
+  StreamDisplay(QWidget *parent,
+                function<bool(QImage &, QBuffer &)> get_next_frame);
 
   // Begins drawing and requesting frames
   void begin_playback();
@@ -52,8 +52,7 @@ private:
   int current_fps;
 
   // methods to ensure we know what to next display
-  function<bool(QImage &)> get_next_video_frame;
-  function<bool(QBuffer &)> get_next_audio_frame;
+  function<bool(QImage &, QBuffer &)> get_next_frame;
   QImage next_video_image;
   QBuffer next_audio_frame;
 

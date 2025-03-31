@@ -3,10 +3,8 @@
 #include "config/mconfig.hpp"
 
 StreamDisplay::StreamDisplay(QWidget *parent,
-                             function<bool(QImage &)> get_next_video_frame,
-                             function<bool(QBuffer &)> get_next_audio_frame)
-    : QWidget(parent), get_next_video_frame(get_next_video_frame),
-      get_next_audio_frame(get_next_audio_frame)
+                             function<bool(QImage &, QBuffer &)> get_next_frame)
+    : QWidget(parent), get_next_frame(get_next_frame)
 {
   // TODO: Add Audio
 
@@ -92,12 +90,7 @@ void StreamDisplay::acquire_next_frame()
   if (current_fps != FPS)
     set_new_fps(FPS);
 
-  if (get_next_audio_frame(next_audio_frame))
-  {
-    // somehow add audio frame to audio buffer?
-  }
-
-  if (get_next_video_frame(next_video_image))
+  if (get_next_frame(next_video_image, next_audio_frame))
   {
     QVideoFrame frame(next_video_image);
     if (frame.isValid())

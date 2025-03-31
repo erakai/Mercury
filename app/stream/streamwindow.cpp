@@ -219,11 +219,10 @@ void StreamWindow::initialize_primary_ui_widgets()
   if (is_client())
     side_pane->initialize_client_performance_tab(servc->client);
 
-  std::function<bool(QImage &)> video_func = std::bind(
-      &StreamWindow::provide_next_video_frame, this, std::placeholders::_1);
-  std::function<bool(QBuffer &)> audio_func = std::bind(
-      &StreamWindow::provide_next_audio_frame, this, std::placeholders::_1);
-  stream_display = new StreamDisplay(this, video_func, audio_func);
+  std::function<bool(QImage &, QBuffer &)> frame_func =
+      std::bind(&StreamWindow::provide_next_frame, this, std::placeholders::_1,
+                std::placeholders::_2);
+  stream_display = new StreamDisplay(this, frame_func);
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   if (is_client())
@@ -281,7 +280,7 @@ void StreamWindow::shut_down_window()
   close();
 }
 
-bool StreamWindow::provide_next_video_frame(QImage &next_video)
+bool StreamWindow::provide_next_frame(QImage &next_video, QBuffer &next_audio)
 {
   if (is_host())
   {
@@ -319,38 +318,6 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
     next_video = jitter.video;
     return true;
   }
-
-  return false;
-}
-
-bool StreamWindow::provide_next_audio_frame(QBuffer &next_audio)
-{
-  if (is_host())
-  {
-    // acquire audio frame from desktop
-  }
-  else
-  {
-    // acquire audio frame from jitter buffer
-  }
-
-  // TESTING!:
-  /*
-  QFile fart_file("assets/fart.mp3");
-  if (!fart_file.open(QIODevice::ReadOnly))
-  {
-    // Handle error opening file
-    qInfo("failed to load audio file");
-    return false;
-  }
-
-  QByteArray audio_byte_array = fart_file.readAll();
-  fart_file.close();
-  next_audio.open(QIODevice::WriteOnly);
-  next_audio.write(audio_byte_array);
-  next_audio.close();
-  return true;
-  */
 
   return false;
 }

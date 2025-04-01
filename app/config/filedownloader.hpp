@@ -3,11 +3,11 @@
 
 #include <QString>
 
-namespace mercury {
+namespace mercury
+{
 
-  void download_file(const QString &url, const QString &fileName);
+void download_file(const QString &url, const QString &fileName);
 
 }
-
 
 #endif // FILEDOWNLOADER_HPP

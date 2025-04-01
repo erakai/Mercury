@@ -1,4 +1,5 @@
 #include "sidepane.hpp"
+#include <QtWidgets/qlistwidget.h>
 
 SidePane::SidePane(QWidget *parent) : QTabWidget(parent)
 {
@@ -110,8 +111,8 @@ ViewerListTab::ViewerListTab(string my_alias_str, QWidget *parent)
   layout->addWidget(viewer_list);
 
   QPalette list_palette = viewer_list->palette();
-  list_palette.setColor(QPalette::Base, Qt::white);
-  list_palette.setColor(QPalette::Text, Qt::black);
+  list_palette.setColor(QPalette::Base, QColor(64, 68, 69));
+  list_palette.setColor(QPalette::Text, QColor(221, 231, 235));
   viewer_list->setPalette(list_palette);
 }
 

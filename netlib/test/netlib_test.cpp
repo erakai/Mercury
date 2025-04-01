@@ -5,7 +5,6 @@
 #include <QScreen>
 #include <gtest/gtest.h>
 #include <random>
-#include <thread>
 
 // For generating random data.
 using random_bytes_engine =

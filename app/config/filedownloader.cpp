@@ -19,23 +19,32 @@ void mercury::download_file(const QString &url, const QString &fileName)
 
   QEventLoop loop;
 
-  QObject::connect(reply, &QNetworkReply::finished, [&]() {
-    if (reply->error() == QNetworkReply::NoError) {
-      QFile file(fileName);
-      if (file.open(QIODevice::WriteOnly)) {
-        file.write(reply->readAll());
-        file.close();
-      } else {
-        qWarning() << "Failed to open file for writing:" << fileName;
-      }
-    } else {
-      qWarning() << "Download error:" << reply->errorString();
-    }
+  QObject::connect(reply, &QNetworkReply::finished,
+                   [&]()
+                   {
+                     if (reply->error() == QNetworkReply::NoError)
+                     {
+                       QFile file(fileName);
+                       if (file.open(QIODevice::WriteOnly))
+                       {
+                         file.write(reply->readAll());
+                         file.close();
+                       }
+                       else
+                       {
+                         qWarning()
+                             << "Failed to open file for writing:" << fileName;
+                       }
+                     }
+                     else
+                     {
+                       qWarning() << "Download error:" << reply->errorString();
+                     }
 
-    reply->deleteLater();
-    manager.deleteLater();
-    loop.quit();
-  });
+                     reply->deleteLater();
+                     manager.deleteLater();
+                     loop.quit();
+                   });
 
   loop.exec();
   return;

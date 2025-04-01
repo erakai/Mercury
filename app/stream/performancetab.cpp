@@ -36,18 +36,17 @@ ServerPerformanceTab::ServerPerformanceTab(shared_ptr<MercuryServer> server,
           &ServerPerformanceTab::on_request_slider_update);
 
   compression_label = new QLabel;
-  on_compression_slider_update(server->get_compression());
   compression_slider = new QSlider(Qt::Horizontal);
   compression_slider->setTickPosition(QSlider::TicksBothSides);
+  compression_slider->setTickInterval(10);
   compression_slider->setSingleStep(5);
   compression_slider->setPageStep(10);
-  compression_slider->setMinimum(1);
+  compression_slider->setMinimum(0);
   compression_slider->setMaximum(100);
   compression_slider->setValue(server->get_compression());
+  on_compression_slider_release();
   connect(compression_slider, &QAbstractSlider::sliderReleased, this,
           &ServerPerformanceTab::on_compression_slider_release);
-  connect(compression_slider, &QAbstractSlider::valueChanged, this,
-          &ServerPerformanceTab::on_compression_slider_update);
 
   layout->addWidget(fps_label);
   layout->addWidget(fps_slider);
@@ -61,16 +60,17 @@ ServerPerformanceTab::ServerPerformanceTab(shared_ptr<MercuryServer> server,
 
   alias_list = new QListWidget;
   QPalette list_palette = alias_list->palette();
-  list_palette.setColor(QPalette::Base, Qt::white);
-  list_palette.setColor(QPalette::Text, Qt::black);
+  list_palette.setColor(QPalette::Base, QColor(64, 68, 69));
+  list_palette.setColor(QPalette::Text, QColor(221, 231, 235));
   alias_list->setPalette(list_palette);
 
   performance_tabs = new QStackedWidget;
   performance_tabs->addWidget(new QWidget);
 
+  alias_list->setMaximumHeight(60);
+  alias_list->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
   layout->addWidget(alias_list);
   layout->addWidget(performance_tabs);
-  layout->setStretch(6, 58);
 
   connect(alias_list, &QListWidget::currentRowChanged, this,
           [=, this](int current_row)
@@ -115,6 +115,7 @@ void ServerPerformanceTab::request_metrics()
 void ServerPerformanceTab::on_client_connect(int id, string alias)
 {
   alias_list->addItem(QString::fromStdString(alias));
+  alias_list->setMaximumHeight(alias_list->sizeHintForRow(0) * 5 + 10);
 
   ClientPerformanceTab *tab = new ClientPerformanceTab(nullptr, alias);
 
@@ -177,13 +178,21 @@ void ServerPerformanceTab::on_request_slider_update(int value)
       QString("Performance Update Frequency: %1s").arg(value));
 }
 
-void ServerPerformanceTab::on_compression_slider_update(int value)
-{
-  compression_label->setText(QString("Frame Compression: %1%").arg(value));
-}
-
 void ServerPerformanceTab::on_compression_slider_release()
 {
+  int value = compression_slider->value();
+  int tickInterval = compression_slider->tickInterval();
+  if (tickInterval > 0)
+  {
+    int snappedValue = qRound(double(value) / tickInterval) * tickInterval;
+    if (snappedValue != value)
+    {
+      compression_slider->setValue(snappedValue);
+    }
+  }
+
+  compression_label->setText(
+      QString("Frame Compression: %1%").arg(compression_slider->value()));
   server->set_compression(compression_slider->value() * 0.01);
 }
 

@@ -40,7 +40,6 @@ public slots:
 
   void on_fps_slider_update(int value);
   void on_fps_slider_release();
-  void on_compression_slider_update(int value);
   void on_compression_slider_release();
   void on_request_slider_update(int value);
 

@@ -199,6 +199,7 @@ void StreamWindow::connect_signals_and_slots()
 
 void StreamWindow::initialize_primary_ui_widgets()
 {
+  qDebug() << ("about to initialize ui widgets");
   main_layout = new QGridLayout();
 
   display = new QWidget(this);
@@ -228,20 +229,22 @@ void StreamWindow::initialize_primary_ui_widgets()
 
   stream_info = new StreamInfo(this, "Host\'s Stream", "Host");
 
+  qDebug() << ("about to goto is_host section");
+
+
   if (is_host() && servh->stream_name.size() > 0)
     stream_info->setStreamTitle(servh->stream_name.c_str());
   if (is_host())
   {
     stream_info->setViewerCount(servh->viewer_count);
     stream_info->setHostName(alias.c_str());
+    stream_info->setStreamStartTime(servh->start_timestamp);
   }
 }
 
 void StreamWindow::stream_fully_initialized()
 {
   qInfo("Beginning stream playback.");
-  stream_info->setStreamStartTime(
-      static_cast<uint32_t>(QDateTime::currentDateTime().toSecsSinceEpoch()));
   stream_display->begin_playback();
 }
 
@@ -421,6 +424,7 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   Client &client = servh->server->get_client(id);
   client.handler.init_msg(alias.c_str());
   client.handler.add_option_stream_title(stream_info->getStreamTitle().c_str());
+  client.handler.add_option_stream_start_time(stream_info->getStreamStartTime());
   client.handler.add_option_viewer_count(servh->viewer_count);
   client.handler.add_option_fps(FPS);
   client.handler.output_msg_to_socket(client.hstp_sock);

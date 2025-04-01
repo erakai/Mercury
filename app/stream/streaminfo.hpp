@@ -20,6 +20,9 @@ public:
   std::string getStreamTitle();
   uint32_t getStreamStartTime();
 
+private slots:
+  void updateStreamDuration();
+
 private:
   // void setupLayout();
   void toggleExtraInfoSidebar();
@@ -27,6 +30,7 @@ private:
   QHBoxLayout *main_layout;
   QVBoxLayout *basic_stream_info_layout;
   QLabel *stream_title_label;
+  QLabel *viewer_count_icon;
   QLabel *viewer_count_label;
   QLabel *host_name_label;
 
@@ -38,6 +42,8 @@ private:
   QVBoxLayout *extra_info_sidebar_layout;
   QDateTime *stream_start_time;
   QLabel *stream_start_time_label;
+  QLabel *stream_duration_label;
+  QTimer *seconds_timer;
   QLabel *info_label2;
   QLabel *info_label3;
 };

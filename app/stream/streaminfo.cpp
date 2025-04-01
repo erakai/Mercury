@@ -18,15 +18,21 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
                                     "    font-weight: bold;" // Bold text
   );
 
-  // host_name_label = new QLabel(this);
-  // host_name_label->setText("Host: {}" + host_name);
   host_name_label = new QLabel("Host: " + host_name, this);
-  host_name_label->setStyleSheet(
-      "    color: #f0f0f0;"  // Almost white text
-      "    font-size: 18px;" // Large text
-                             // "    font-weight: bold;"          // Bold text
-  );
+  host_name_label->setStyleSheet("color: #f0f0f0; font-size: 18px;");
+  auto *host_name_container = new QWidget(this);
+  host_name_container->setStyleSheet("border-radius: 10px; background-color: #333333;");
+  auto *host_name_layout = new QHBoxLayout(host_name_container);
+  host_name_container->setLayout(host_name_layout);
+  host_name_layout->addWidget(host_name_label);
+  host_name_container->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+  // host_name_layout->addStretch();
 
+  viewer_count_icon = new QLabel(this);
+  QPixmap vc_pix("assets/viewer-count-icon.png");
+  QIcon ico(vc_pix);
+  viewer_count_icon->setPixmap(ico.pixmap({24, 24}));
+  // viewer_count_label->setVisible(true);
   // set viewer count
   viewer_count_label = new QLabel("Viewers: 1", this);
   viewer_count_label->setStyleSheet(
@@ -34,10 +40,18 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
       "    font-size: 18px;" // Large text
                              // "    font-weight: ;"          // Bold text
   );
+  auto *viewer_count_container = new QWidget(this);
+  viewer_count_container->setStyleSheet("border-radius: 10px; background-color: #333333;");
+  auto *viewer_count_layout = new QHBoxLayout(viewer_count_container);
+  viewer_count_container->setLayout(viewer_count_layout);
+  viewer_count_layout->addWidget(viewer_count_icon);
+  viewer_count_layout->addWidget(viewer_count_label);
+  viewer_count_container->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+  // viewer_count_layout->addStretch();
 
   basic_stream_info_layout->addWidget(stream_title_label);
-  basic_stream_info_layout->addWidget(host_name_label);
-  basic_stream_info_layout->addWidget(viewer_count_label);
+  basic_stream_info_layout->addWidget(host_name_container);
+  basic_stream_info_layout->addWidget(viewer_count_container);
   if (stream_window->is_client())
   {
     unstable_network_indicator = new QLabel(this);
@@ -50,33 +64,40 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   basic_stream_info_layout->addStretch();
 
   extra_info_sidebar = new QWidget(this);
-  extra_info_sidebar->setStyleSheet(
-      "    background-color: #333333;" // Dark gray background
-      "    border-radius: 10px;"       // Rounded edges
-      "    padding: 15px;"             // Inner spacing
-  );
+  extra_info_sidebar->setStyleSheet("background-color: #333333; border-radius: 10px; padding: 24px;");
   extra_info_sidebar->setFixedSize(400, height()); // Adjust width if needed
   extra_info_sidebar->move(this->width(), 0);      // Start off-screen
   main_layout->addLayout(basic_stream_info_layout);
+  main_layout->addStretch();
 
   // adding info to sidebar
   extra_info_sidebar_layout = new QVBoxLayout(extra_info_sidebar);
-  extra_info_sidebar_layout->setSpacing(2);
+  extra_info_sidebar->setContentsMargins(8, 8, 8, 8);
 
-  stream_start_time_label = new QLabel("Stream Info:", extra_info_sidebar);
-  stream_start_time_label->setStyleSheet(
-      "color: #f0f0f0; font-size: 16px; font-weight: bold; padding: 4px 8px");
+  stream_start_time_label = new QLabel("Stream Start: ", extra_info_sidebar);
+  stream_start_time_label->setStyleSheet("color: #dddddd; font-size: 18px; padding: 0px;");
+  stream_start_time_label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+
+  stream_duration_label = new QLabel("Stream Duration: 00:00:00", extra_info_sidebar);
+  stream_duration_label->setStyleSheet("color: #dddddd; font-size: 18px; padding: 0px;");
+  stream_duration_label->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+  seconds_timer = new QTimer(this);
+  connect(seconds_timer, &QTimer::timeout, this, &StreamInfo::updateStreamDuration);
+  seconds_timer->start(1000);
+
+
   info_label2 = new QLabel("Viewers: 120", extra_info_sidebar);
-  info_label2->setStyleSheet(
-      "color: #dddddd; font-size: 14px; padding: 4px 8px");
+  info_label2->setStyleSheet("color: #dddddd; font-size: 18px; padding: 0px;");
+  info_label2->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+
   info_label3 = new QLabel("Uptime: 2h 15m", extra_info_sidebar);
-  info_label3->setStyleSheet(
-      "color: #dddddd; font-size: 14px; padding: 4px 8px");
+  info_label3->setStyleSheet("color: #dddddd; font-size: 18px; padding: 0px;");
+  info_label3->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
   // Add labels to layout
   extra_info_sidebar_layout->addWidget(stream_start_time_label);
+  extra_info_sidebar_layout->addWidget(stream_duration_label);
   extra_info_sidebar_layout->addWidget(info_label2);
-  extra_info_sidebar_layout->addWidget(info_label3);
   extra_info_sidebar_layout->addWidget(info_label3);
   extra_info_sidebar_layout->addStretch(); // Push content to the top
 
@@ -163,8 +184,22 @@ void StreamInfo::setStreamStartTime(uint32_t timestamp)
 {
   // timestamp is seconds since epoch
   stream_start_time = new QDateTime(QDateTime::fromSecsSinceEpoch(timestamp));
-  QString formattedDt = stream_start_time->toString("yyyy-MM-dd HH:mm:ss");
-  stream_start_time_label->setText(formattedDt);
+  QString formattedDt = stream_start_time->toString("h:mm AP, MMMM d, yyyy");
+  stream_start_time_label->setText("Stream Start: " + formattedDt);
+}
+
+void StreamInfo::updateStreamDuration()
+{
+  uint32_t duration_in_sec = QDateTime::currentSecsSinceEpoch() - stream_start_time->toSecsSinceEpoch();
+  int seconds = duration_in_sec % 60;
+  int minutes = (duration_in_sec / 60) % 60;
+  int hours = (duration_in_sec / 60 / 60);
+
+  QString timeString = QString("%1:%2:%3")
+    .arg(hours, 2, 10, QChar('0'))
+    .arg(minutes, 2, 10, QChar('0'))
+    .arg(seconds, 2, 10, QChar('0'));
+  stream_duration_label->setText("Stream Duration: " + timeString);
 }
 
 std::string StreamInfo::getStreamTitle()

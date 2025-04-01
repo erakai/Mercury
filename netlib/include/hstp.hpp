@@ -1,7 +1,6 @@
 #pragma once
 
 #include "netlib_global.h"
-#include "../../cmake-build-debug/_deps/googletest-src/googlemock/include/gmock/gmock-matchers.h"
 
 #include <QHostAddress>
 #include <QTcpSocket>
@@ -237,6 +236,10 @@ public:
   {
     return add_option_generic_uint32(4, viewers);
   }
+  bool add_option_stream_start_time(uint32_t start_timestamp)
+  {
+    return add_option_generic_uint32(10, start_timestamp);
+  }
 
   bool add_option_fps(uint32_t fps)
   {
@@ -404,7 +407,7 @@ private:
   }
   void handle_stream_start_time(HANDLER_PARAMS)
   {
-    halder_uint32(alias, opt, &HstpProcessor::received_stream_start_time);
+    handle_uint32(alias, opt, &HstpProcessor::received_stream_start_time);
   }
 
   void handle_annotation(HANDLER_PARAMS); // 5

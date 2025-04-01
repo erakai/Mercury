@@ -35,8 +35,24 @@ ServerPerformanceTab::ServerPerformanceTab(shared_ptr<MercuryServer> server,
   connect(request_frequency_slider, &QAbstractSlider::valueChanged, this,
           &ServerPerformanceTab::on_request_slider_update);
 
+  compression_label = new QLabel;
+  on_compression_slider_update(server->get_compression());
+  compression_slider = new QSlider(Qt::Horizontal);
+  compression_slider->setTickPosition(QSlider::TicksBothSides);
+  compression_slider->setSingleStep(5);
+  compression_slider->setPageStep(10);
+  compression_slider->setMinimum(1);
+  compression_slider->setMaximum(100);
+  compression_slider->setValue(server->get_compression());
+  connect(compression_slider, &QAbstractSlider::sliderReleased, this,
+          &ServerPerformanceTab::on_compression_slider_release);
+  connect(compression_slider, &QAbstractSlider::valueChanged, this,
+          &ServerPerformanceTab::on_compression_slider_update);
+
   layout->addWidget(fps_label);
   layout->addWidget(fps_slider);
+  layout->addWidget(compression_label);
+  layout->addWidget(compression_slider);
   layout->addWidget(request_frequency_label);
   layout->addWidget(request_frequency_slider);
 
@@ -53,9 +69,8 @@ ServerPerformanceTab::ServerPerformanceTab(shared_ptr<MercuryServer> server,
   performance_tabs->addWidget(new QWidget);
 
   layout->addWidget(alias_list);
-  layout->setStretch(5, 12);
   layout->addWidget(performance_tabs);
-  layout->setStretch(6, 68);
+  layout->setStretch(6, 58);
 
   connect(alias_list, &QListWidget::currentRowChanged, this,
           [=, this](int current_row)
@@ -160,6 +175,16 @@ void ServerPerformanceTab::on_request_slider_update(int value)
   update_request_frequency(value);
   request_frequency_label->setText(
       QString("Performance Update Frequency: %1s").arg(value));
+}
+
+void ServerPerformanceTab::on_compression_slider_update(int value)
+{
+  compression_label->setText(QString("Frame Compression: %1%").arg(value));
+}
+
+void ServerPerformanceTab::on_compression_slider_release()
+{
+  server->set_compression(compression_slider->value() * 0.01);
 }
 
 ClientPerformanceTab::ClientPerformanceTab(shared_ptr<MercuryClient> client,

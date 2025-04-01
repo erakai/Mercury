@@ -94,6 +94,7 @@ public:
     }
     compression = comp;
   }
+  bool get_compression() { return compression; }
 
   /*
   Sends a message to every client.

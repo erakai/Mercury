@@ -93,7 +93,7 @@ TEST_F(NetlibTest, ServerClientBasic)
   EXPECT_EQ(server.get_client(client_id).alias, client.get_alias());
 
   // Test MFTP
-  QAudioBuffer audio;
+  QByteArray audio;
 
   // Get screen for test video data
   QPixmap video = QGuiApplication::primaryScreen()->grabWindow(0);

@@ -1,9 +1,10 @@
 #include "streamdisplay.hpp"
+#include <QtCore/qbuffer.h>
 #include <QtMultimedia/qaudiosink.h>
 #include "config/mconfig.hpp"
 
-StreamDisplay::StreamDisplay(QWidget *parent,
-                             function<bool(QImage &, QBuffer &)> get_next_frame)
+StreamDisplay::StreamDisplay(
+    QWidget *parent, function<bool(QImage &, QByteArray &)> get_next_frame)
     : QWidget(parent), get_next_frame(get_next_frame)
 {
   // TODO: Add Audio
@@ -13,18 +14,18 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   connect(fps_timer, &QTimer::timeout, this,
           &StreamDisplay::acquire_next_frame);
 
-  // AUDIO TESTING ===
   QAudioFormat format;
   // Set up the format, eg.
   format.setSampleRate(44100);
   format.setChannelCount(1);
   format.setSampleFormat(QAudioFormat::Int16);
 
+  // Audio:
   audio_sink = new QAudioSink(format, this);
-  //  sourceFile.setFileName("assets/fart.raw");
-  //  sourceFile.open(QIODevice::ReadOnly);
-  //  audio_sink->start(&sourceFile);
-  // AUDIO TESTING END ====
+  int bytes_per_s =
+      (format.sampleRate() * format.channelCount() * format.bytesPerSample());
+  audio_sink->setBufferSize(bytes_per_s * 10);
+  audio_buffer = audio_sink->start();
 
   // Set up the media player.
   video_player = new QMediaPlayer(this);
@@ -100,6 +101,13 @@ void StreamDisplay::acquire_next_frame()
     else
     {
       qCritical("Invalid VideoFrame received.");
+    }
+
+    if (audio_buffer)
+    {
+      QMutexLocker locker(&audio_mutex);
+      audio_buffer->write(next_audio_frame);
+      audio_buffer->waitForBytesWritten(1000 / FPS);
     }
   }
 }

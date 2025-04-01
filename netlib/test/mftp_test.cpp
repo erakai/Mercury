@@ -1,6 +1,5 @@
 #include "mftp.hpp"
 #include <QApplication>
-#include <QAudioBuffer>
 #include <QBuffer>
 #include <QImage>
 #include <QPixmap>
@@ -48,7 +47,7 @@ TEST_F(MftpTest, SendAndProcessBasic)
 {
 
   // Create data
-  QAudioBuffer sent_audio;
+  QByteArray sent_audio;
 
   QPixmap video = QGuiApplication::primaryScreen()->grabWindow(0);
   QImage sent_image = video.toImage();
@@ -56,7 +55,7 @@ TEST_F(MftpTest, SendAndProcessBasic)
   // Set up variables we will fill
   MFTP_Header received_header = {0};
   QImage received_image;
-  QAudioBuffer received_audio;
+  QByteArray received_audio;
 
   // Mock metrics
   Metrics metrics;
@@ -68,7 +67,7 @@ TEST_F(MftpTest, SendAndProcessBasic)
 
   // Connect our processor to receiving the data
   QObject::connect(sock2_processor.get(), &MFTPProcessor::frame_ready,
-                   [&](MFTP_Header header, QAudioBuffer audio, QImage video)
+                   [&](MFTP_Header header, QByteArray audio, QImage video)
                    {
                      received_header = header;
                      received_image = video;
@@ -118,7 +117,7 @@ TEST_F(MftpTest, SendAndProcessBasic)
 
   // Check audio and header
   ASSERT_EQ(sent_header, received_header);
-  EXPECT_EQ(sent_audio.constData<char>(), received_audio.constData<char>());
+  EXPECT_EQ(sent_audio, received_audio);
 
   // Correctly removed it
   EXPECT_EQ(sock2_processor->partial_frames[0].remaining_fragments, -1);

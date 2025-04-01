@@ -28,7 +28,7 @@ void acquire_mftp_socket(std::shared_ptr<QUdpSocket> sock, int port)
 bool send_datagram(std::shared_ptr<QUdpSocket> sock,
                    std::vector<QHostAddress> dest_ip,
                    std::vector<int> dest_port, MFTP_Header &header,
-                   QImage video_image, QAudioBuffer audio)
+                   QImage video_image, QByteArray &audio)
 {
   QByteArray payload_array;
 
@@ -43,7 +43,7 @@ bool send_datagram(std::shared_ptr<QUdpSocket> sock,
   }
   video_buffer.close();
 
-  QByteArray audio_bytes = QByteArray(audio.constData<char>());
+  QByteArray audio_bytes = audio;
   payload_array.append(audio_bytes);
   payload_array.append(video_bytes);
 
@@ -245,7 +245,7 @@ void MFTPProcessor::release_complete_frame(int index)
 
   QImage video;
   video.loadFromData(video_bytes, "JPG");
-  QAudioBuffer audio(audio_bytes, QAudioFormat());
+  QByteArray audio(audio_bytes);
 
   frame.remaining_fragments = -1;
 

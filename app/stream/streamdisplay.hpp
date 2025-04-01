@@ -2,7 +2,6 @@
 
 #include "home/mainwindow.hpp"
 
-#include <QAudioBuffer>
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include <QAudioSink>
@@ -22,6 +21,7 @@
 #include <QtMultimedia/qmediaplayer.h>
 #include <functional>
 #include <QtLogging>
+#include <QMutex>
 
 using namespace std;
 
@@ -31,7 +31,7 @@ class StreamDisplay : public QWidget
 
 public:
   StreamDisplay(QWidget *parent,
-                function<bool(QImage &, QBuffer &)> get_next_frame);
+                function<bool(QImage &, QByteArray &)> get_next_frame);
 
   // Begins drawing and requesting frames
   void begin_playback();
@@ -52,15 +52,15 @@ private:
   int current_fps;
 
   // methods to ensure we know what to next display
-  function<bool(QImage &, QBuffer &)> get_next_frame;
+  function<bool(QImage &, QByteArray &)> get_next_frame;
   QImage next_video_image;
-  QBuffer next_audio_frame;
+  QByteArray next_audio_frame;
 
   // I think that audio will have to somehow be written to a QIODevice that a
   // QMediaPlayer reads from.
   // https://stackoverflow.com/questions/35365600/play-a-qaudiobuffer
   // https://stackoverflow.com/questions/4473608/how-to-play-sound-with-qt
-  QBuffer *audio_buffer;
+  QIODevice *audio_buffer;
   QAudioSink *audio_sink;
   QFile sourceFile;
 
@@ -70,4 +70,6 @@ private:
   QGraphicsView *graphics_view;
   QGraphicsScene *graphics_scene;
   QGraphicsVideoItem *video_item;
+
+  QMutex audio_mutex;
 };

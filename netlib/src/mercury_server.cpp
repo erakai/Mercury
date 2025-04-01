@@ -267,7 +267,7 @@ void MercuryServer::forward_annotations(int sender_id,
   }
 }
 
-int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
+int MercuryServer::send_frame(const char *source, QByteArray &audio,
                               QVideoFrame video)
 {
   if (strlen(source) > 12)

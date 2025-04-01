@@ -5,6 +5,8 @@
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
+#include <QtCore/qlogging.h>
+#include <QtCore/qstringview.h>
 #include <QtDebug>
 #include <QMouseEvent>
 #include <QAudioSink>
@@ -219,7 +221,7 @@ void StreamWindow::initialize_primary_ui_widgets()
   if (is_client())
     side_pane->initialize_client_performance_tab(servc->client);
 
-  std::function<bool(QImage &, QBuffer &)> frame_func =
+  std::function<bool(QImage &, QByteArray &)> frame_func =
       std::bind(&StreamWindow::provide_next_frame, this, std::placeholders::_1,
                 std::placeholders::_2);
   stream_display = new StreamDisplay(this, frame_func);
@@ -258,6 +260,10 @@ void StreamWindow::stream_fully_initialized()
 {
   qInfo("Beginning stream playback.");
   stream_display->begin_playback();
+
+  // start recording audio of host
+  if (is_host())
+    AudioManager::instance().start_recording(10000);
 }
 
 void StreamWindow::closeEvent(QCloseEvent *event)
@@ -271,6 +277,10 @@ void StreamWindow::closeEvent(QCloseEvent *event)
 
 void StreamWindow::shut_down_window()
 {
+  // stop recording audio of host
+  if (is_host())
+    AudioManager::instance().stop_recording();
+
   if (is_host())
     servh->server->close_server();
 
@@ -280,7 +290,8 @@ void StreamWindow::shut_down_window()
   close();
 }
 
-bool StreamWindow::provide_next_frame(QImage &next_video, QBuffer &next_audio)
+bool StreamWindow::provide_next_frame(QImage &next_video,
+                                      QByteArray &next_audio)
 {
   if (is_host())
   {
@@ -288,9 +299,15 @@ bool StreamWindow::provide_next_frame(QImage &next_video, QBuffer &next_audio)
     QImage img;
     VideoManager::VideoImageStatus status =
         VideoManager::instance().GetVideoImage(img);
+
+    // acquire audio frame from desktop
+    // int audio_msec = 1000 / FPS;
+    // int audio_msec = qMin(100, 1000 / FPS + 50);
+    QByteArray audio_array =
+        AudioManager::instance().get_lastmsec(1000.0 / FPS);
     if (status == VideoManager::VideoImageStatus::SUCCESS)
     {
-      servh->server->send_frame("desktop", QAudioBuffer(), QVideoFrame(img));
+      servh->server->send_frame("desktop", audio_array, QVideoFrame(img));
       next_video = img;
       return true;
     }
@@ -316,6 +333,7 @@ bool StreamWindow::provide_next_frame(QImage &next_video, QBuffer &next_audio)
 
     servc->client->metrics().register_frame();
     next_video = jitter.video;
+    next_audio = jitter.audio;
     return true;
   }
 

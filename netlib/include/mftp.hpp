@@ -2,7 +2,6 @@
 
 #include "metrics.hpp"
 #include "netlib_global.h"
-#include <QAudioBuffer>
 #include <QBuffer>
 #include <QByteArray>
 #include <QImage>
@@ -68,7 +67,7 @@ public slots:
                                Metrics &metrics);
 
 signals:
-  void frame_ready(MFTP_Header header, QAudioBuffer audio, QImage video);
+  void frame_ready(MFTP_Header header, QByteArray audio, QImage video);
 
 private:
   bool process_datagram(QNetworkDatagram datagram, Metrics &metrics);
@@ -95,4 +94,4 @@ NETLIB_EXPORT bool send_datagram(std::shared_ptr<QUdpSocket> sock,
                                  std::vector<QHostAddress> dest_ip,
                                  std::vector<int> dest_port,
                                  MFTP_Header &header, QImage video_image,
-                                 QAudioBuffer audio);
+                                 QByteArray &audio);

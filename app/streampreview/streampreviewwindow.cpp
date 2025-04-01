@@ -6,6 +6,7 @@
 #include "windowlistmodel.h"
 #include "audioinputlistmodel.h"
 #include "../singleton/videomanager.h"
+#include "singleton/audiomanager.hpp"
 
 #include <QMediaCaptureSession>
 #include <QScreenCapture>
@@ -198,6 +199,8 @@ void StreamPreviewWindow::onScreenCaptureErrorChanged()
 void StreamPreviewWindow::onStartStopButtonClicked()
 {
   VideoManager::instance().setMediaCaptureSession(*mediaCaptureSession);
+  QAudioDevice audio_device = audioCapture->device();
+  AudioManager::instance().set_audio_device(audio_device);
   close();
 }
 

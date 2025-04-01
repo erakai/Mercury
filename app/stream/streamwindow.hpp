@@ -5,13 +5,13 @@
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
 #include "hstp.hpp"
-#include <QAudioBuffer>
 #include <QFile>
 #include <QGridLayout>
 #include <QLabel>
 #include <QMainWindow>
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qwidget.h>
+#include "singleton/audiomanager.hpp"
 
 using namespace std;
 
@@ -36,7 +36,7 @@ public:
   bool is_host() { return mode == MercuryMode::HOST; }
   bool is_client() { return mode == MercuryMode::CLIENT; }
 
-  bool provide_next_frame(QImage &next_video, QBuffer &next_audio);
+  bool provide_next_frame(QImage &next_video, QByteArray &next_audio);
 
   void closeEvent(QCloseEvent *event) override;
 

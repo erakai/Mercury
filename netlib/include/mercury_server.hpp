@@ -122,7 +122,7 @@ public slots:
   client in the client list. Returns the number of clients it tried to send the
   frame too.
   */
-  int send_frame(char const *source, QAudioBuffer audio, QVideoFrame video);
+  int send_frame(char const *source, QByteArray &audio, QVideoFrame video);
 
   /*
   Handles a client's initial establishment message and validates the client,

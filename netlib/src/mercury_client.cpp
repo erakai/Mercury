@@ -133,7 +133,7 @@ void MercuryClient::connect_signals_and_slots()
 }
 
 void MercuryClient::insert_into_jitter_buffer(MFTP_Header header,
-                                              QAudioBuffer audio, QImage video)
+                                              QByteArray audio, QImage video)
 {
   JitterEntry new_entry;
   new_entry.seq_num = header.seq_num;

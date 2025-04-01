@@ -20,7 +20,7 @@ struct NETLIB_EXPORT JitterEntry
   int16_t seq_num;
   int32_t timestamp;
   QImage video;
-  QAudioBuffer audio;
+  QByteArray audio;
 };
 
 class NETLIB_EXPORT MercuryClient : public QObject
@@ -111,7 +111,7 @@ public slots:
   Insert a new frame into the jitter buffer, using the MFTP header to evaluate
   where to put it.
   */
-  void insert_into_jitter_buffer(MFTP_Header header, QAudioBuffer audio,
+  void insert_into_jitter_buffer(MFTP_Header header, QByteArray audio,
                                  QImage video);
 
 signals:

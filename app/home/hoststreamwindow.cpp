@@ -23,6 +23,9 @@ HostStreamWindow::HostStreamWindow(QWidget *parent)
   connect(ui->tutorialButton, &QPushButton::clicked, this,
           &HostStreamWindow::tutorial_button_press);
 
+  connect(ui->publicStream, &QCheckBox::toggled, this,
+          &HostStreamWindow::public_stream_toggled);
+
   QString ip = Utils::instance().getIpAddress();
   ui->ipAddressButton->setText(ip);
 
@@ -53,8 +56,35 @@ void HostStreamWindow::on_hostButton_clicked()
   spw->raise();          // for MacOS
   spw->activateWindow(); // for Windows
 
+  // Add stream to stream browser if "Make Publicly Available" is checked
+  if (ui->publicStream->checkState() == 2)
+  {
+    // TODO: Add stream to stream browser
+  }
+
   connect(spw, &StreamPreviewWindow::closed, this,
           &HostStreamWindow::open_stream_window);
+}
+
+void HostStreamWindow::public_stream_toggled()
+{
+  // If user tries to toggle public stream but has a password set, uncheck the
+  // box
+  if (ui->publicStream->checkState() == 2 &&
+      ui->passwordLineEdit->text().toStdString().length() > 0)
+  {
+    ToastNotification::showToast(
+        this, "Can't publicize password protected stream!", 2000);
+    ui->publicStream->setChecked(false);
+  }
+  else if (ui->publicStream->checkState() == 2)
+  {
+    ui->passwordLineEdit->setEnabled(false);
+  }
+  else
+  {
+    ui->passwordLineEdit->setEnabled(true);
+  }
 }
 
 void HostStreamWindow::on_ipAddressButton_clicked()

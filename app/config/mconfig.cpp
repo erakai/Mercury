@@ -29,7 +29,7 @@ void mercury::curl_default_config()
 {
 
   const QString &url = "https://raw.githubusercontent.com/erakai/Mercury/"
-                          "main/config/DefaultClientSettings.ini";
+                       "main/config/DefaultClientSettings.ini";
   const QString &outputFilename = "config/MercuryClientSettings.ini";
 
   mercury::download_file(url, outputFilename);

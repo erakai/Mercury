@@ -1,7 +1,7 @@
 #include "mconfig.hpp"
+#include "filedownloader.hpp"
 
 #include <fstream>
-#include <iostream>
 #include <QSettings>
 #include <sys/stat.h>
 
@@ -28,36 +28,13 @@ size_t WriteCallback(void *ptr, size_t size, size_t nmemb, void *userdata)
 void mercury::curl_default_config()
 {
 
-  const std::string url = "https://raw.githubusercontent.com/erakai/Mercury/"
+  const QString &url = "https://raw.githubusercontent.com/erakai/Mercury/"
                           "main/config/DefaultClientSettings.ini";
-  const std::string outputFilename = "config/MercuryClientSettings.ini";
+  const QString &outputFilename = "config/MercuryClientSettings.ini";
 
-  // CURL *curl = curl_easy_init();
-  // if (!curl)
-  // {
-  //   std::cerr << "Error: curl_easy_init() failed\n";
-  // }
+  mercury::download_file(url, outputFilename);
 
-  // std::ofstream outFile(outputFilename, std::ios::binary);
-  // if (!outFile)
-  // {
-  //   std::cerr << "Error: Could not open file for writing\n";
-  //   curl_easy_cleanup(curl);
-  // }
-
-  // curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-  // curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-  // curl_easy_setopt(curl, CURLOPT_WRITEDATA, &outFile);
-
-  // CURLcode res = curl_easy_perform(curl);
-  // if (res != CURLE_OK)
-  // {
-  //   std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res)
-  //             << '\n';
-  // }
-
-  // outFile.close();
-  // curl_easy_cleanup(curl);
+  return;
 }
 
 bool mercury::get_dark_mode(QSettings &settings)

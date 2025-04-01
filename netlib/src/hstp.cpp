@@ -521,7 +521,7 @@ void HstpProcessor::handle_chat(HANDLER_PARAMS)
 
 void HstpProcessor::handle_annotation(HANDLER_PARAMS)
 {
-  qDebug() << "HstpProcessor handling annotations";
+  // qDebug() << "HstpProcessor handling annotations";
 
   if (!opt.data || opt.len == 0)
   {

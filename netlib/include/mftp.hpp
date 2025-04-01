@@ -11,7 +11,7 @@
 #include <memory>
 #include <vector>
 
-#define MAX_FRAMES_TO_REASSEMBLE 2
+#define MAX_FRAMES_TO_REASSEMBLE 4
 #define SOURCE_NAME_LEN 12
 
 constexpr uint8_t MFTP_VERSION = 1;
@@ -94,5 +94,5 @@ Host-side functionality.
 NETLIB_EXPORT bool send_datagram(std::shared_ptr<QUdpSocket> sock,
                                  std::vector<QHostAddress> dest_ip,
                                  std::vector<int> dest_port,
-                                 MFTP_Header &header, QImage video_image,
+                                 MFTP_Header &header, QByteArray &video_image,
                                  QAudioBuffer audio);

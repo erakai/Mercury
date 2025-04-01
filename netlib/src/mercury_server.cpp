@@ -255,7 +255,7 @@ void MercuryServer::forward_chat_message(int sender_id, std::string alias,
 void MercuryServer::forward_annotations(int sender_id,
                                         HSTP_Annotation annotation)
 {
-  qDebug() << "MercuryServer forwarding annotations";
+  // qDebug() << "MercuryServer forwarding annotations";
   for (auto &[id, client] : clients)
   {
     if (id != sender_id)

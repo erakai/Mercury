@@ -14,7 +14,6 @@ StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
     : QMainWindow(parent), mode(MercuryMode::HOST), alias(alias),
       servh(host_data)
 {
-  set_up();
 }
 
 StreamWindow::StreamWindow(std::string alias,
@@ -23,15 +22,12 @@ StreamWindow::StreamWindow(std::string alias,
     : QMainWindow(parent), mode(MercuryMode::CLIENT), alias(alias),
       servc(client_data)
 {
-  set_up();
 }
 
-void StreamWindow::set_up()
+bool StreamWindow::set_up()
 {
   setWindowTitle("Mercury");
   setAttribute(Qt::WA_DeleteOnClose);
-
-  this->showMaximized(); // Sets Window size to max
 
   initialize_primary_ui_widgets();
   configure_menu_and_tool_bar();
@@ -93,6 +89,15 @@ void StreamWindow::set_up()
        frameGeometry().center());
 
   connect_signals_and_slots();
+
+  if (is_client() && servc->client->hstp_sock()->waitForDisconnected(1000))
+  {
+    qCritical("Client disconnected by host, likely due to incorrect password.");
+    return false;
+  }
+
+  this->showMaximized(); // Sets Window size to max
+  return true;
 }
 
 void StreamWindow::configure_menu_and_tool_bar()
@@ -362,13 +367,13 @@ void StreamWindow::send_annotation(HSTP_Annotation annotation)
 {
   if (is_host())
   {
-    qDebug() << "Sending annotation as host";
+    // qDebug() << "Sending annotation as host";
     servh->server->forward_annotations(-1, annotation);
   }
 
   if (is_client())
   {
-    qDebug() << "Sending annotation as client";
+    // qDebug() << "Sending annotation as client";
     servc->client->send_annotations(annotation);
   }
 }
@@ -450,7 +455,7 @@ void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
   }
   else
   {
-    for (int i = 1; i < annotation.points.size(); i++)
+    for (int i = 1; i < (int) annotation.points.size(); i++)
     {
       QPoint q(annotation.points[i].x, annotation.points[i].y);
       QPoint p(annotation.points[i - 1].x, annotation.points[i - 1].y);

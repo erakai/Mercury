@@ -31,6 +31,8 @@ public:
   StreamWindow(string alias, shared_ptr<ClientService> client_data,
                QWidget *parent = nullptr);
 
+  bool set_up();
+
   bool is_host() { return mode == MercuryMode::HOST; }
   bool is_client() { return mode == MercuryMode::CLIENT; }
 
@@ -84,7 +86,6 @@ private:
   /*
   Helper functions for setting the ui up.
   */
-  void set_up();
   void configure_menu_and_tool_bar();
   void connect_signals_and_slots();
   void initialize_primary_ui_widgets();

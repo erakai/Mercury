@@ -15,6 +15,7 @@ PaintToolWidget::PaintToolWidget(QWidget *parent) : QWidget(parent)
   QLabel *brushSizeLabel = new QLabel("Brush Size:");
   m_brushSizeEdit = new QLineEdit;
   m_brushSizeEdit->setText("3");
+  m_brushSizeEdit->setFixedWidth(90);
   m_brushSizeEdit->setValidator(new QIntValidator(1, 100, this));
 
   // Create a small circular label to serve as a color indicator.
@@ -71,6 +72,7 @@ PaintToolWidget::PaintToolWidget(QWidget *parent) : QWidget(parent)
   mainLayout->addWidget(m_colorButton);
   mainLayout->addWidget(brushButton);
   mainLayout->addWidget(m_eraseButton);
+  mainLayout->addStretch();
 
   setLayout(mainLayout);
 }

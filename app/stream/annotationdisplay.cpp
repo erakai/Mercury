@@ -33,7 +33,7 @@ AnnotationDisplay::AnnotationDisplay(QWidget *parent) : QWidget(parent)
 void AnnotationDisplay::addLine(const QPoint &start, const QPoint &end,
                                 QColor color, int thickness)
 {
-  qDebug() << "Drawing line persistently from" << start << "to" << end;
+  // qDebug() << "Drawing line persistently from" << start << "to" << end;
 
   QPainter painter(&m_pixmap);
   QPen pen(color);

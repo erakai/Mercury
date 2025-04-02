@@ -52,6 +52,17 @@ include(ExternalProject)
 set(FFMPEG_SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/ffmpeg)
 set(FFMPEG_INSTALL_DIR ${CMAKE_BINARY_DIR}/external/ffmpeg/install)
 
+# Ensure FFmpeg submodule is initialized
+execute_process(
+    COMMAND git submodule update --init --recursive
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    RESULT_VARIABLE GIT_SUBMODULE_RESULT
+)
+
+if (NOT GIT_SUBMODULE_RESULT EQUAL "0")
+    message(FATAL_ERROR "Failed to initialize Git submodules. Make sure Git is installed.")
+endif()
+
 # Ensure FFmpeg is built
 ExternalProject_Add(ffmpeg
     SOURCE_DIR ${FFMPEG_SOURCE_DIR}

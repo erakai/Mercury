@@ -16,6 +16,8 @@ public:
   void setViewerCount(int count);
   void setStreamTitle(const QString &stream_title);
   void setStreamStartTime(uint32_t timestamp);
+  void setReactionsEnabledLabel(bool enabled);
+  void setAnnotationsEnabledLabel(bool enabled);
   void setHostName(const QString &host_name);
   std::string getStreamTitle();
   uint32_t getStreamStartTime();
@@ -44,8 +46,9 @@ private:
   QLabel *stream_start_time_label;
   QLabel *stream_duration_label;
   QTimer *seconds_timer;
-  QLabel *info_label2;
-  QLabel *info_label3;
+  QLabel *extra_info_viewer_count_label;
+  QLabel *annotations_enabled_label;
+  QLabel *reactions_enabled_label;
 };
 
 #endif // STREAMINFO_H

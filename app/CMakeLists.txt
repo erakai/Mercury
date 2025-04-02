@@ -32,6 +32,8 @@ qt_add_executable(mercury
         stream/annotationdisplay.hpp
         stream/painttoolwidget.cpp
         stream/painttoolwidget.hpp
+        stream/reactionpanel.cpp
+        stream/reactionpanel.hpp
 )
 
 # Qt set up

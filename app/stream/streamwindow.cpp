@@ -199,7 +199,6 @@ void StreamWindow::connect_signals_and_slots()
 
 void StreamWindow::initialize_primary_ui_widgets()
 {
-  qDebug() << ("about to initialize ui widgets");
   main_layout = new QGridLayout();
 
   display = new QWidget(this);
@@ -228,8 +227,6 @@ void StreamWindow::initialize_primary_ui_widgets()
   annotation_display->installEventFilter(this);
 
   stream_info = new StreamInfo(this, "Host\'s Stream", "Host");
-
-  qDebug() << ("about to goto is_host section");
 
 
   if (is_host() && servh->stream_name.size() > 0)
@@ -424,7 +421,8 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   Client &client = servh->server->get_client(id);
   client.handler.init_msg(alias.c_str());
   client.handler.add_option_stream_title(stream_info->getStreamTitle().c_str());
-  client.handler.add_option_stream_start_time(stream_info->getStreamStartTime());
+  client.handler.add_option_stream_start_time(
+      stream_info->getStreamStartTime());
   client.handler.add_option_viewer_count(servh->viewer_count);
   client.handler.add_option_fps(FPS);
   client.handler.output_msg_to_socket(client.hstp_sock);

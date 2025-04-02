@@ -4,6 +4,8 @@
 #include "settingswindow.h"
 #include "utils.h"
 
+#include <iostream>
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
   // Make this class use a ui file (optional). To see examples of classes
@@ -16,6 +18,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 void MainWindow::updateSettingsButton(const QString &alias)
 {
   ui.settingsButton->setText(alias);
+}
+
+void MainWindow::on_streamBrowserButton_clicked()
+{
+  std::cout << "stream browser opening!" << std::endl;
 }
 
 void MainWindow::on_settingsButton_clicked()

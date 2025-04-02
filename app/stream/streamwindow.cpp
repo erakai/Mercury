@@ -10,6 +10,7 @@
 #include <QtDebug>
 #include <QMouseEvent>
 #include <QAudioSink>
+#include <ios>
 
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
                            QWidget *parent)
@@ -263,7 +264,7 @@ void StreamWindow::stream_fully_initialized()
 
   // start recording audio of host
   if (is_host())
-    AudioManager::instance().start_recording(10000);
+    AudioManager::instance().start_recording(3000);
 }
 
 void StreamWindow::closeEvent(QCloseEvent *event)
@@ -287,6 +288,8 @@ void StreamWindow::shut_down_window()
   if (is_client())
     servc->client->disconnect();
 
+  stream_display->stop_playback();
+
   close();
 }
 
@@ -301,10 +304,8 @@ bool StreamWindow::provide_next_frame(QImage &next_video,
         VideoManager::instance().GetVideoImage(img);
 
     // acquire audio frame from desktop
-    // int audio_msec = 1000 / FPS;
-    // int audio_msec = qMin(100, 1000 / FPS + 50);
-    QByteArray audio_array =
-        AudioManager::instance().get_lastmsec(1000.0 / FPS);
+    int audio_msec = 1000 / FPS;
+    QByteArray audio_array = AudioManager::instance().get_lastmsec(audio_msec);
     if (status == VideoManager::VideoImageStatus::SUCCESS)
     {
       servh->server->send_frame("desktop", audio_array, QVideoFrame(img));

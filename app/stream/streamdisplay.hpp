@@ -36,6 +36,9 @@ public:
   // Begins drawing and requesting frames
   void begin_playback();
 
+  // Close everything
+  void stop_playback();
+
 public slots:
   // Called FPS times a second
   void acquire_next_frame();

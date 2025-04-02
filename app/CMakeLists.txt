@@ -49,6 +49,9 @@ target_link_libraries(mercury PRIVATE netlib)
 add_dependencies(mercury assets)
 add_dependencies(mercury config)
 
+# Ensure FFmpeg is built before the main project
+add_dependencies(mercury ffmpeg)
+
 # Install to destination
 include(GNUInstallDirs)
 install(TARGETS mercury

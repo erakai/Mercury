@@ -25,7 +25,7 @@ bool AudioManager::start_recording(qint32 buffer_size_ms)
   _audio_bytearray.clear();
   _audio_bytearray.reserve(max_buffer_size_bytes);
 
-  _buffer_device.open(QIODevice::ReadWrite | QIODevice::Truncate);
+  _buffer_device.open(QIODevice::ReadWrite);
 
   // Create QAudioSource instance
   _audio_source = new QAudioSource(*_audio_device, _format, this);
@@ -50,8 +50,8 @@ void AudioManager::stop_recording()
 {
   if (!_is_recording)
     return;
-  _buffer_device.close();
   _audio_source->stop();
+  _buffer_device.close();
   _is_recording = false;
 }
 
@@ -79,8 +79,6 @@ QByteArray AudioManager::get_lastmsec(int n_ms)
     return {};
   }
 
-  qDebug() << QDateTime::currentMSecsSinceEpoch() << n_ms;
-
   int bytes_per_ms = (_format.sampleRate() * _format.channelCount() *
                       _format.bytesPerSample()) /
                      1000;
@@ -96,6 +94,9 @@ QByteArray AudioManager::get_lastmsec(int n_ms)
 void AudioManager::on_audio_data_ready()
 {
   if (!_audio_source)
+    return;
+
+  if (!_buffer_device.isOpen())
     return;
 
   QByteArray audio_data = _buffer_device.readAll(); // Read from QAudioSource

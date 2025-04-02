@@ -7,8 +7,6 @@ StreamDisplay::StreamDisplay(
     QWidget *parent, function<bool(QImage &, QByteArray &)> get_next_frame)
     : QWidget(parent), get_next_frame(get_next_frame)
 {
-  // TODO: Add Audio
-
   current_fps = FPS;
   fps_timer = new QTimer(this);
   connect(fps_timer, &QTimer::timeout, this,
@@ -74,6 +72,13 @@ void StreamDisplay::begin_playback()
   fps_timer->start(1000 / FPS);
 }
 
+void StreamDisplay::stop_playback()
+{
+  video_player->stop();
+  audio_sink->stop();
+  audio_buffer->close();
+}
+
 void StreamDisplay::set_new_fps(int new_fps)
 {
   if (new_fps != current_fps)
@@ -103,7 +108,7 @@ void StreamDisplay::acquire_next_frame()
       qCritical("Invalid VideoFrame received.");
     }
 
-    if (audio_buffer)
+    if (audio_buffer->isOpen() && audio_buffer->isWritable())
     {
       QMutexLocker locker(&audio_mutex);
       audio_buffer->write(next_audio_frame);

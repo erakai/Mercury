@@ -333,8 +333,22 @@ int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
     dest_ports.push_back(client.mftp_port);
   }
 
-  send_datagram(mftp_sock, dest_addr, dest_ports, header, video.toImage(),
-                audio);
+  // Compress image
+  QImage video_image = video.toImage();
+
+  QByteArray video_bytes;
+  QBuffer video_buffer(&video_bytes);
+  video_buffer.open(QIODevice::WriteOnly);
+
+  int compression_amount = 100 - (100 * compression);
+  if (compression == 0)
+    compression_amount = -1;
+
+  if (!video_image.save(&video_buffer, "JPG", compression_amount))
+    qCritical("Unable to serialize QImage.");
+  video_buffer.close();
+
+  send_datagram(mftp_sock, dest_addr, dest_ports, header, video_bytes, audio);
 
   return client_sent_to_count;
 }

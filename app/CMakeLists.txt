@@ -36,6 +36,8 @@ qt_add_executable(mercury
         stream/reactionpanel.hpp
         stream/ReactionDisplay.cpp
         stream/reactiondisplay.hpp
+        config/filedownloader.hpp
+        config/filedownloader.cpp
 )
 
 # Qt set up

@@ -116,20 +116,49 @@ ViewerListTab::ViewerListTab(string my_alias_str, QWidget *parent)
   viewer_list->setPalette(list_palette);
 }
 
-void ViewerListTab::viewer_joined(string alias)
+void ViewerListTab::viewer_joined(int id, string alias)
 {
-  QListWidgetItem *new_item = new QListWidgetItem(alias.c_str());
+  // Create a new list item and store the alias as its text.
+  QListWidgetItem *new_item = new QListWidgetItem();
+  new_item->setText(QString::fromStdString(alias));
+
+  // Create a custom widget to hold the label and the checkbox.
+  QWidget *item_widget = new QWidget();
+  QHBoxLayout *layout = new QHBoxLayout(item_widget);
+  layout->setContentsMargins(0, 0, 0, 0); // Remove margins for a cleaner look
+
+  // Create the label displaying the alias.
+  QLabel *label = new QLabel(QString::fromStdString(alias));
+  // Create the checkbox that will appear to the right of the label.
+  QCheckBox *checkBox = new QCheckBox();
+  checkBox->setChecked(true);
+
+  // Add the label, a stretch (to push the checkbox to the right), and the
+  // checkbox to the layout.
+  layout->addWidget(label);
+  layout->addStretch();
+  layout->addWidget(checkBox);
+
+  // Add the new item to the list and assign the custom widget to it.
   viewer_list->addItem(new_item);
+  viewer_list->setItemWidget(new_item, item_widget);
   items.push_back(new_item);
 
+  // Connect the checkbox toggled signal to emit our custom signal with the
+  // viewer's alias.
+  connect(checkBox, &QCheckBox::toggled, this,
+          [this, id](bool checked) { emit viewer_checked(id, checked); });
+
+  // Update the viewers label.
   label_list->setText(QString("Viewers (%1):").arg(items.size()));
 }
 
-void ViewerListTab::viewer_left(string alias)
+void ViewerListTab::viewer_left(int id, string alias)
 {
   for (int i = 0; i < (int) items.size(); i++)
   {
     QListWidgetItem *item = items[i];
+    // Identify the item by its stored text.
     if (item->text() == QString::fromStdString(alias))
     {
       int row = viewer_list->row(item);

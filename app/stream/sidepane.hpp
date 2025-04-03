@@ -9,6 +9,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QCheckBox>
 #include <QSettings>
 #include <QTabWidget>
 #include <QtCore/qtmetamacros.h>
@@ -49,8 +50,12 @@ class ViewerListTab : public QWidget
 public:
   ViewerListTab(string host_alias, QWidget *parent = nullptr);
 
-  void viewer_joined(string alias);
-  void viewer_left(string alias);
+  void viewer_joined(int id, string alias);
+  void viewer_left(int id, string alias);
+
+signals:
+  // New signal emitted when a viewer's checkbox is toggled.
+  void viewer_checked(const int id, bool checked);
 
 private:
   QListWidget *viewer_list;
@@ -83,7 +88,6 @@ public:
     return client_performance;
   }
 
-private:
   ChatTab *chat_tab;
   ViewerListTab *viewer_list;
   ServerPerformanceTab *server_performance;

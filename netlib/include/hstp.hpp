@@ -365,7 +365,8 @@ signals:
   /*
    * Emits when a reaction permission is set
    */
-  void received_reaction_permission(const char alias[ALIAS_SIZE], uint32_t permission);
+  void received_reaction_permission(const char alias[ALIAS_SIZE],
+                                    uint32_t permission);
 
   /*
    * Emitted whenever a new fps is received

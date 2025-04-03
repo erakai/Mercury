@@ -85,6 +85,16 @@ public:
   int get_udp_port() { return udp_port; }
   Client &get_client(int id) { return clients[id]; }
   std::string get_alias() { return host_alias; }
+  void set_compression(float comp)
+  {
+    if (comp < 0 || comp > 1)
+    {
+      qDebug("Compression set outside bound: %f", comp);
+      return;
+    }
+    compression = comp;
+  }
+  bool get_compression() { return compression; }
 
   /*
   Sends a message to every client.
@@ -203,4 +213,7 @@ private:
 
   // Frame counter
   uint32_t frame_seq_num = 1;
+
+  // Compression level - bounded [0 least, 1 most]
+  float compression = 0;
 };

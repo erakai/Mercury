@@ -1,4 +1,5 @@
 #include "sidepane.hpp"
+#include <QtWidgets/qlistwidget.h>
 
 SidePane::SidePane(QWidget *parent) : QTabWidget(parent)
 {
@@ -35,29 +36,27 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
     : QWidget(parent), displayName(displayName)
 {
   QPalette pal = QPalette();
-  pal.setColor(QPalette::Window, Qt::gray);
-  setAutoFillBackground(true);
   setPalette(pal);
 
   QVBoxLayout *layout = new QVBoxLayout(this);
   chatBox = new QListWidget(this);
 
   QPalette chatBoxPalette = chatBox->palette();
-  chatBoxPalette.setColor(QPalette::Base, Qt::white);
-  chatBoxPalette.setColor(QPalette::Text, Qt::black);
+  chatBoxPalette.setColor(QPalette::Base, QColor(64, 68, 69));
+  chatBoxPalette.setColor(QPalette::Text, QColor(221, 231, 235));
   chatBox->setPalette(chatBoxPalette);
 
   chatBox->setSelectionMode(QAbstractItemView::NoSelection);
   chatBox->setFocusPolicy(Qt::NoFocus);
   chatBox->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  chatBox->setEnabled(false);
+  chatBox->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
   layout->addWidget(chatBox);
 
   QHBoxLayout *inputLayout = new QHBoxLayout();
 
   messageInput = new QLineEdit(this);
   QPalette inputPalette = messageInput->palette();
-  inputPalette.setColor(QPalette::Base, Qt::white);
+  inputPalette.setColor(QPalette::Base, QColor(197, 197, 197));
   inputPalette.setColor(QPalette::Text, Qt::black);
   messageInput->setPalette(inputPalette);
 
@@ -81,7 +80,9 @@ void ChatTab::new_chat_message(ChatMessage msg)
 {
   QString messageToRender =
       QString::fromStdString(msg.sender + ":\n" + msg.message + "\n");
+
   chatBox->addItem(new QListWidgetItem(messageToRender));
+  chatBox->scrollToBottom();
 }
 
 void ChatTab::render_and_send_message(std::string msgContent)
@@ -110,8 +111,8 @@ ViewerListTab::ViewerListTab(string my_alias_str, QWidget *parent)
   layout->addWidget(viewer_list);
 
   QPalette list_palette = viewer_list->palette();
-  list_palette.setColor(QPalette::Base, Qt::white);
-  list_palette.setColor(QPalette::Text, Qt::black);
+  list_palette.setColor(QPalette::Base, QColor(64, 68, 69));
+  list_palette.setColor(QPalette::Text, QColor(221, 231, 235));
   viewer_list->setPalette(list_palette);
 }
 

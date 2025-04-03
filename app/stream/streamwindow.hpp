@@ -2,6 +2,7 @@
 
 #include "annotationdisplay.hpp"
 #include "sidepane.hpp"
+#include "stream/painttoolwidget.hpp"
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
 #include "hstp.hpp"
@@ -105,6 +106,8 @@ private:
   StreamDisplay *stream_display;
   ReactionDisplay *reaction_display;
   AnnotationDisplay *annotation_display;
+  PaintToolWidget *paint_tool;
+
 
 
   StreamInfo *stream_info;

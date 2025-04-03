@@ -2,9 +2,11 @@
 #include "hoststreamwindow.h"
 #include "joinstreamwindow.h"
 #include "settingswindow.h"
+#include "streambrowser/streambrowser.h"
 #include "utils.h"
 #include "../api/mapi.hpp"
 
+#include <QJsonObject>
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
@@ -23,9 +25,34 @@ void MainWindow::updateSettingsButton(const QString &alias)
 
 void MainWindow::on_streamBrowserButton_clicked()
 {
-  std::cout << "stream browser opening!" << std::endl;
-  // TODO: open stream browser
-  mercury::fetch_public_streams();
+  QJsonArray publicStreamArray = mercury::fetch_public_streams();
+
+  QStringList streamNames;
+  QList<int> hostTCPs;
+  QStringList streamIPs;
+
+  for (const QJsonValue &stream : publicStreamArray)
+  {
+    if (!stream.isObject())
+      continue;
+
+    QJsonObject streamObject = stream.toObject();
+    QString streamName = streamObject["streamName"].toString();
+    int hostTCP = streamObject["hostTCP"].toInt();
+    QString streamIP = streamObject["streamIP"].toString();
+
+    streamNames.append(streamName);
+    hostTCPs.append(hostTCP);
+    streamIPs.append(streamIP);
+  }
+
+  StreamBrowser *streamBrowser =
+      new StreamBrowser(this, streamNames, hostTCPs, streamIPs);
+  streamBrowser->setAttribute(Qt::WA_DeleteOnClose);
+  streamBrowser->setWindowTitle("Stream Browser");
+  streamBrowser->resize(1440, 900);
+  streamBrowser->setModal(false);
+  streamBrowser->open();
 }
 
 void MainWindow::on_settingsButton_clicked()

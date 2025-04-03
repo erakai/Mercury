@@ -51,8 +51,11 @@ void mercury::delete_public_stream(QString streamIP)
   request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
   QNetworkReply *reply = networkManager()->post(request, payload);
-  QObject::connect(reply, &QNetworkReply::finished,
-                   [reply]() { reply->deleteLater(); });
+  QEventLoop loop;
+  QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+  loop.exec();
+
+  reply->deleteLater();
 }
 
 QJsonArray mercury::fetch_public_streams()
@@ -67,13 +70,13 @@ QJsonArray mercury::fetch_public_streams()
   QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
   loop.exec();
 
-  QJsonArray result;
+  QJsonArray streamList;
 
   if (reply->error())
   {
     qDebug() << "Request failed:" << reply->errorString();
     reply->deleteLater();
-    return result;
+    return streamList;
   }
 
   QByteArray data = reply->readAll();
@@ -86,9 +89,9 @@ QJsonArray mercury::fetch_public_streams()
   }
   else
   {
-    result = doc.array();
+    streamList = doc.array();
   }
 
   reply->deleteLater();
-  return result;
+  return streamList;
 }

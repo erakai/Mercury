@@ -1,4 +1,6 @@
 #include "streamwindow.hpp"
+#include "../api/mapi.hpp"
+#include "../home/utils.h"
 #include "config/mconfig.hpp"
 #include "hstp.hpp"
 #include "singleton/videomanager.h"
@@ -273,7 +275,10 @@ void StreamWindow::closeEvent(QCloseEvent *event)
 void StreamWindow::shut_down_window()
 {
   if (is_host())
+  {
+    mercury::delete_public_stream(Utils::instance().getIpAddress());
     servh->server->close_server();
+  }
 
   if (is_client())
     servc->client->disconnect();

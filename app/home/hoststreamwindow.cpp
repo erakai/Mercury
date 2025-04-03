@@ -3,6 +3,7 @@
 #include "stream/streamwindow.hpp"
 #include "toastnotification.h"
 #include "ui_hoststreamwindow.h"
+#include "api/mapi.hpp"
 #include "utils.h"
 
 #include <QtLogging>
@@ -59,7 +60,9 @@ void HostStreamWindow::on_hostButton_clicked()
   // Add stream to stream browser if "Make Publicly Available" is checked
   if (ui->publicStream->checkState() == 2)
   {
-    // TODO: Add stream to stream browser
+    mercury::add_public_stream(ui->streamNameLineEdit->text(),
+                               ui->tcpPortLineEdit->text().toInt(),
+                               ui->ipAddressButton->text());
   }
 
   connect(spw, &StreamPreviewWindow::closed, this,

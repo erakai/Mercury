@@ -103,6 +103,18 @@ bool MercuryClient::send_annotations(const HSTP_Annotation &annotation)
   return true;
 }
 
+bool MercuryClient::send_reaction(uint32_t reaction)
+{
+  m_hstp_handler.init_msg(m_alias.c_str());
+  m_hstp_handler.add_option_reaction(reaction);
+  if (!m_hstp_handler.output_msg_to_socket(m_hstp_sock))
+  {
+    qCritical("Failed to send annotations to socket");
+    return false;
+  }
+  return true;
+}
+
 void MercuryClient::process_received_hstp_messages()
 {
   if (m_hstp_sock && m_hstp_sock->state() == QAbstractSocket::ConnectedState)

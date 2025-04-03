@@ -140,6 +140,18 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   extra_info_sidebar_animation->setDuration(300);
 }
 
+void StreamInfo::initializeControlPanel()
+{
+  StreamControlPanel *stream_control_panel = new StreamControlPanel(this);
+  main_layout->insertWidget(2, stream_control_panel);
+  stream_control_panel->stackUnder(extra_info_sidebar);
+
+  // connect buttons
+  stream_control_panel->setReactionsEnabledCheckBox(reactions_enabled);
+  connect(stream_control_panel, &StreamControlPanel::reactionsEnabledChanged,
+          this, &StreamInfo::handleReactionsEnabledChanged);
+}
+
 void StreamInfo::toggleExtraInfoSidebar()
 {
   int sidebarWidth = extra_info_sidebar->width();

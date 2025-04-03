@@ -1,6 +1,7 @@
 #ifndef STREAMINFO_H
 #define STREAMINFO_H
 #include "reactionpanel.hpp"
+#include "streamcontrolpanel.hpp"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -24,9 +25,11 @@ public:
   void setHostName(const QString &host_name);
   std::string getStreamTitle();
   uint32_t getStreamStartTime();
+  void initializeControlPanel();
 
 signals:
   void renderAndSendReaction(ReactionPanel::Reaction reaction);
+  void reactionsEnabledChanged(bool enabled);
 
 private slots:
   void updateStreamDuration();
@@ -36,10 +39,11 @@ private slots:
     {
       emit renderAndSendReaction(reaction);
     }
-    else
-    {
-      qDebug() << "not emitting reaction,  because host disabled reactions";
-    }
+  }
+  void handleReactionsEnabledChanged(bool enabled)
+  {
+    qDebug() << "reached stream info reactionsEnabledChanged --- " << enabled;
+    emit reactionsEnabledChanged(enabled);
   }
 
 private:
@@ -57,6 +61,7 @@ private:
   QLabel *host_name_label;
 
   bool reactions_enabled;
+  // StreamControlPanel *stream_control_panel;
 
   // Only relevant if this is a client - displays itself when poor connection
   QLabel *unstable_network_indicator;

@@ -164,6 +164,11 @@ void StreamWindow::connect_signals_and_slots()
             [=, this](const char alias[ALIAS_SIZE], uint32_t viewers)
             { this->viewer_count_updated(viewers); });
 
+  if (is_host())
+    connect(stream_info, &StreamInfo::reactionsEnabledChanged, this,
+            [=, this](bool enabled)
+            { this->reaction_permission_changed(enabled); });
+
   // connect reaction sent from stream info
   connect(stream_info, &StreamInfo::renderAndSendReaction, this,
           [=, this](ReactionPanel::Reaction reaction)
@@ -192,6 +197,12 @@ void StreamWindow::connect_signals_and_slots()
               this->stream_name_changed(std::string(alias),
                                         std::string(stream_title));
             });
+
+  if (is_client()) // set reactions enable/disable
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_reaction_permission, this,
+            [=, this](const char alias[ALIAS_SIZE], uint32_t enabled)
+            { this->reaction_permission_changed(enabled); });
 
   // connect stream start time for client
   if (is_client())
@@ -265,6 +276,8 @@ void StreamWindow::initialize_primary_ui_widgets()
     stream_info->setViewerCount(servh->viewer_count);
     stream_info->setHostName(alias.c_str());
     stream_info->setStreamStartTime(servh->start_timestamp);
+    stream_info->setReactionsEnabled(servh->reactions_enabled);
+    stream_info->initializeControlPanel();
   }
 }
 
@@ -446,6 +459,25 @@ void StreamWindow::stream_start_time_changed(uint32_t timestamp)
   }
 }
 
+void StreamWindow::reaction_permission_changed(uint32_t enabled)
+{
+  // if (is_client())
+  // {
+  //   qDebug() << "reaction perm changed, it is now"
+  //            << static_cast<bool>(enabled);
+  // }
+  if (is_host())
+  {
+    servh->reactions_enabled = enabled;
+    HstpHandler temp_handler;
+    temp_handler.init_msg(alias.c_str());
+    temp_handler.add_option_reaction_permission(enabled);
+    std::shared_ptr<QByteArray> bytes = temp_handler.output_msg();
+    servh->server->send_hstp_message_to_all_clients(*bytes);
+  }
+  stream_info->setReactionsEnabled(enabled);
+}
+
 void StreamWindow::new_chat_message(string alias, string msg)
 {
   side_pane->get_chat_tab()->new_chat_message({alias, msg});
@@ -470,6 +502,9 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
       stream_info->getStreamStartTime());
   client.handler.add_option_viewer_count(servh->viewer_count);
   client.handler.add_option_fps(FPS);
+  // qDebug() << "viewer connected setting reaction permisson to: "
+  //          << servh->reactions_enabled;
+  client.handler.add_option_reaction_permission(servh->reactions_enabled);
   client.handler.output_msg_to_socket(client.hstp_sock);
 }
 

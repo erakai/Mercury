@@ -140,6 +140,18 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   extra_info_sidebar_animation->setDuration(300);
 }
 
+void StreamInfo::initializeControlPanel()
+{
+  StreamControlPanel *stream_control_panel = new StreamControlPanel(this);
+  main_layout->insertWidget(2, stream_control_panel);
+  stream_control_panel->stackUnder(extra_info_sidebar);
+
+  // connect buttons
+  stream_control_panel->setReactionsEnabledCheckBox(reactions_enabled);
+  connect(stream_control_panel, &StreamControlPanel::reactionsEnabledChanged,
+          this, &StreamInfo::handleReactionsEnabledChanged);
+}
+
 void StreamInfo::toggleExtraInfoSidebar()
 {
   int sidebarWidth = extra_info_sidebar->width();
@@ -222,6 +234,13 @@ void StreamInfo::setStreamStartTime(uint32_t timestamp)
   stream_start_time = new QDateTime(QDateTime::fromSecsSinceEpoch(timestamp));
   QString formattedDt = stream_start_time->toString("h:mm AP, MMMM d, yyyy");
   stream_start_time_label->setText("Stream Start: " + formattedDt);
+}
+
+void StreamInfo::setReactionsEnabled(bool enabled)
+{
+  // enable / disable reaction panel
+  reactions_enabled = enabled;
+  setReactionsEnabledLabel(enabled);
 }
 
 void StreamInfo::setReactionsEnabledLabel(bool enabled)

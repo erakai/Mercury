@@ -5,8 +5,8 @@
 #include <QtWidgets/qgridlayout.h>
 
 const std::vector<std::string> ReactionPanel::reactionStringList = {
-    "thumbsup", "heart", "laugh",      "surprised", "fire",
-    "sob",      "angry", "thumbsdown", "skull"};
+    "thumbsup", "heart",      "laugh", "surprised", "fire",   "sob",
+    "angry",    "thumbsdown", "skull", "eggplant",  "tomato", "corn"};
 
 ReactionPanel::ReactionPanel(QWidget *parent)
 {

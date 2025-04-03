@@ -44,39 +44,6 @@ qt_standard_project_setup()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-## FFmpeg -----
-
-include(ExternalProject)
-
-# Define FFmpeg source and install directories
-set(FFMPEG_SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/ffmpeg)
-set(FFMPEG_INSTALL_DIR ${CMAKE_BINARY_DIR}/external/ffmpeg/install)
-
-# Ensure FFmpeg submodule is initialized
-execute_process(
-    COMMAND git submodule update --init --recursive
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    RESULT_VARIABLE GIT_SUBMODULE_RESULT
-)
-
-if (NOT GIT_SUBMODULE_RESULT EQUAL "0")
-    message(FATAL_ERROR "Failed to initialize Git submodules. Make sure Git is installed.")
-endif()
-
-# Ensure FFmpeg is built
-ExternalProject_Add(ffmpeg
-    SOURCE_DIR ${FFMPEG_SOURCE_DIR}
-    CONFIGURE_COMMAND ${FFMPEG_SOURCE_DIR}/configure --prefix=${FFMPEG_INSTALL_DIR} --disable-programs --disable-doc --disable-ffplay
-    BUILD_COMMAND make -j$(nproc)
-    INSTALL_COMMAND make install
-    BUILD_IN_SOURCE 1
-)
-
-# Set FFmpeg binary path
-set(FFMPEG_EXECUTABLE ${FFMPEG_INSTALL_DIR}/bin/ffmpeg)
-
-## FFmpeg -----
-
 # GTest keeps throwing annoying deprecration warnings that don't apply to us
 set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 

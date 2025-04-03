@@ -6,11 +6,12 @@
 #include "windowlistmodel.h"
 #include "audioinputlistmodel.h"
 #include "../singleton/videomanager.h"
+#include "../api/mapi.hpp"
+#include "../home/utils.h"
 
 #include <QMediaCaptureSession>
 #include <QScreenCapture>
 #include <QVideoWidget>
-
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -104,10 +105,16 @@ StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
   updateActive(SourceType::Screen, true);
 }
 
+bool streamStarted = false;
+
 StreamPreviewWindow::~StreamPreviewWindow() = default;
 
 void StreamPreviewWindow::closeEvent(QCloseEvent *event)
 {
+  if (!streamStarted)
+  {
+    mercury::delete_public_stream(Utils::instance().getIpAddress());
+  }
   emit closed();
   QWidget::closeEvent(event);
 }
@@ -197,6 +204,7 @@ void StreamPreviewWindow::onScreenCaptureErrorChanged()
 
 void StreamPreviewWindow::onStartStopButtonClicked()
 {
+  streamStarted = true;
   VideoManager::instance().setMediaCaptureSession(*mediaCaptureSession);
   close();
 }

@@ -24,6 +24,7 @@ private slots:
   void on_ipAddressButton_clicked();
   void on_cancelButton_clicked();
   void tutorial_button_press();
+  void public_stream_toggled();
 
 private:
   Ui::HostStreamWindow *ui;

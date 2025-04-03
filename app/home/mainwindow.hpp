@@ -17,6 +17,8 @@ public:
   MainWindow(QWidget *parent = nullptr);
 
 private slots:
+  void on_streamBrowserButton_clicked();
+
   void on_settingsButton_clicked();
 
   void on_hostButton_clicked();

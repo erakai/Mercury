@@ -59,7 +59,7 @@ bool StreamWindow::set_up()
   main_layout->addWidget(paint_tool, 0, 0);
   main_layout->addWidget(videoAnnotationContainer, 1, 0);
   main_layout->addWidget(side_pane, 0, 1, 3, 1);
-  main_layout->addWidget(stream_info, 1, 0);
+  main_layout->addWidget(stream_info, 2, 0);
 
   /*
   |---------------------------|-------------|
@@ -270,7 +270,6 @@ void StreamWindow::stream_fully_initialized()
 {
   qInfo("Beginning stream playback.");
   stream_display->begin_playback();
-  reaction_display->addReaction(ReactionPanel::Reaction::ThumbsUp);
 }
 
 void StreamWindow::closeEvent(QCloseEvent *event)

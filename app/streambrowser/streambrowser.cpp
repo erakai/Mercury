@@ -1,4 +1,9 @@
 #include "streambrowser.h"
+#include "../home/toastnotification.h"
+#include "../stream/streamservice.hpp"
+#include "../stream/streamwindow.hpp"
+#include "../home/utils.h"
+#include "../api/mapi.hpp"
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -8,6 +13,7 @@
 #include <QHBoxLayout>
 #include <QScrollArea>
 #include <QEvent>
+#include <QHostAddress>
 
 StreamBrowser::StreamBrowser(QWidget *parent, QStringList streamNames,
                              QList<int> hostTCPs, QStringList streamIPs)
@@ -32,7 +38,29 @@ bool StreamBrowser::eventFilter(QObject *watched, QEvent *event)
     QWidget *clickedTile = qobject_cast<QWidget *>(watched);
     if (clickedTile)
     {
-      // TODO: add connection
+      quint16 hostTcpPort = clickedTile->property("hostTCP").toInt();
+      quint16 clientUdpPort = Utils::instance().getDefaultClientUdpPort();
+      std::string alias = Utils::instance().getDisplayName().toStdString();
+      QHostAddress address(clickedTile->property("streamIP").toString());
+      std::shared_ptr<ClientService> serv =
+          std::make_shared<ClientService>(alias);
+
+      if (!serv->client->establish_connection(address, hostTcpPort,
+                                              clientUdpPort, nullptr))
+      {
+        ToastNotification::showToast(this, "Stream has ended.", 4000);
+        mercury::delete_public_stream(
+            clickedTile->property("streamIP").toString());
+        this->close();
+        return true;
+      }
+
+      StreamWindow *w = new StreamWindow(alias, serv);
+      if (w->set_up())
+      {
+        parentWidget()->hide();
+        this->close();
+      }
       return true;
     }
   }
@@ -66,7 +94,15 @@ QWidget *StreamBrowser::createUI()
   for (int i = 0; i < streamIPs.length(); ++i)
   {
     QWidget *tile = new QWidget();
-    tile->setStyleSheet("background-color: #444444; border-radius: 4px;");
+    tile->setStyleSheet(R"(
+  QWidget {
+    background-color: #444444;
+    border-radius: 4px;
+  }
+  QWidget:hover {
+    background-color: #2e2e2e;  /* darker on hover */
+  }
+)");
     tile->setFixedSize(308, 202);
 
     QLabel *liveBadge = new QLabel("LIVE", tile);

@@ -82,6 +82,7 @@ public slots:
 
   void onAnnotationCheckbox(int id, bool checked);
   void onAnnotationStatusChanged(bool checked);
+  void onClearButtonClicked();
 
   // These next two are host-only
   void viewer_disconnected(int id, std::string alias);

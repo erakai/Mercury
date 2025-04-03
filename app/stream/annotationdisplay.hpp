@@ -16,6 +16,8 @@ public:
   void addLine(const QPoint &start, const QPoint &end, QColor color = Qt::red,
                int thickness = 2);
 
+  void clear();
+
   bool canAnnotate = true;
 
 protected:

@@ -55,6 +55,12 @@ void AnnotationDisplay::addLine(const QPoint &start, const QPoint &end,
   update();
 }
 
+void AnnotationDisplay::clear()
+{
+  m_pixmap.fill(Qt::transparent);
+  update();
+}
+
 void AnnotationDisplay::paintEvent(QPaintEvent *event)
 {
   QPainter painter(this);

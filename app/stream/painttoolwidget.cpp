@@ -76,3 +76,18 @@ PaintToolWidget::PaintToolWidget(QWidget *parent) : QWidget(parent)
 
   setLayout(mainLayout);
 }
+
+void PaintToolWidget::addClearButton()
+{
+  // Create the clear button.
+  QPushButton *clearButton = new QPushButton("Clear", this);
+
+  // Add the clear button to the existing layout so that it appears on the
+  // right.
+  layout()->addWidget(clearButton);
+
+  // Connect the clear button's clicked signal to emit the clearButtonClicked
+  // signal.
+  connect(clearButton, &QPushButton::clicked, this,
+          [this]() { emit clearButtonClicked(); });
+}

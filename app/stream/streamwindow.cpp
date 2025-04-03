@@ -129,6 +129,21 @@ void StreamWindow::connect_signals_and_slots()
     connect(servh->server.get(), &MercuryServer::annotation_received, this,
             &StreamWindow::new_annotation);
 
+  // connect annotation clear button
+  if (is_host())
+  {
+    paint_tool->addClearButton();
+    connect(paint_tool, &PaintToolWidget::clearButtonClicked, this,
+            &StreamWindow::onClearButtonClicked);
+  }
+
+  if (is_client())
+  {
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_clear_annotations, this,
+            [=, this]() { annotation_display->clear(); });
+  }
+
   if (is_client())
     connect(servc->client->hstp_processor().get(),
             &HstpProcessor::received_annotation, this,
@@ -598,4 +613,13 @@ void StreamWindow::onAnnotationStatusChanged(bool checked)
   ToastNotification::showToast(
       this, checked ? "Annotations Enabled" : "Annotations Disabled", 1000,
       ToastType::NOTICE);
+}
+
+void StreamWindow::onClearButtonClicked()
+{
+  if (is_client())
+    return;
+
+  annotation_display->clear();
+  servh->server->clear_annotations();
 }

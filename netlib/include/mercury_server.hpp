@@ -150,6 +150,7 @@ public slots:
                             std::string message);
 
   void forward_annotations(int sender_id, HSTP_Annotation annotation);
+  void forward_reaction(int sender_id, uint32_t reaction);
 
 signals:
   /*
@@ -176,6 +177,12 @@ signals:
   client.
    */
   void annotation_received(std::string alias, HSTP_Annotation annotation);
+
+  /*
+  This signal will be emitted anytime an reaction is received, from any
+  client.
+   */
+  void reaction_received(std::string alias, uint32_t reaction);
 
 private:
   /*

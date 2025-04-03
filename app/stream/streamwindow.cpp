@@ -1,4 +1,6 @@
 #include "streamwindow.hpp"
+#include "../api/mapi.hpp"
+#include "../home/utils.h"
 #include "config/mconfig.hpp"
 #include "hstp.hpp"
 #include "singleton/videomanager.h"
@@ -36,6 +38,7 @@ bool StreamWindow::set_up()
   configure_menu_and_tool_bar();
 
   display->setLayout(main_layout);
+  display->setStyleSheet("background-color: #3C4143;");
   setCentralWidget(display);
 
   // Create a container widget to stack the stream display and the annotation
@@ -44,8 +47,9 @@ bool StreamWindow::set_up()
   QGridLayout *containerLayout = new QGridLayout(videoAnnotationContainer);
   containerLayout->setContentsMargins(0, 0, 0, 0);
   containerLayout->setSpacing(0);
-  // Add both widgets in the same cell.
+  // Add all widgets in the same cell.
   containerLayout->addWidget(stream_display, 0, 0);
+  containerLayout->addWidget(reaction_display, 0, 0);
   containerLayout->addWidget(annotation_display, 0, 0);
 
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -54,22 +58,13 @@ bool StreamWindow::set_up()
 
   annotation_display->raise();
 
+
   // Create the PaintToolWidget and add it at the top of the display.
   paint_tool = new PaintToolWidget(this);
   main_layout->addWidget(paint_tool, 0, 0);
   main_layout->addWidget(videoAnnotationContainer, 1, 0);
   main_layout->addWidget(side_pane, 0, 1, 3, 1);
-  main_layout->addLayout(below_stream_layout, 2, 0);
-
-  below_stream_layout->addWidget(stream_title, 0, 0);
-  below_stream_layout->addWidget(host_name, 1, 0);
-  below_stream_layout->addWidget(viewer_count, 0, 2);
-
-  // TODO: Chris when you beautify us up add this widget wherever is best for
-  // you
-  if (is_client())
-    below_stream_layout->addWidget(unstable_network_indicator, 2, 2,
-                                   Qt::AlignCenter);
+  main_layout->addWidget(stream_info, 2, 0);
 
   /*
   |---------------------------|-------------|
@@ -172,6 +167,25 @@ void StreamWindow::connect_signals_and_slots()
             [=, this](const char alias[ALIAS_SIZE], uint32_t viewers)
             { this->viewer_count_updated(viewers); });
 
+  // connect reaction sent from stream info
+  connect(stream_info, &StreamInfo::renderAndSendReaction, this,
+          [=, this](ReactionPanel::Reaction reaction)
+          {
+            reaction_display->addReaction(reaction);
+            this->send_reaction(reaction);
+          });
+
+  // connect host to receive reactions
+  if (is_host())
+    connect(servh->server.get(), &MercuryServer::reaction_received, this,
+            &StreamWindow::new_reaction);
+
+  // connect reaction received by client (to then display for client)
+  if (is_client())
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_reaction, this,
+            &StreamWindow::new_reaction);
+
   // connect stream title for client
   if (is_client())
     connect(servc->client->hstp_processor().get(),
@@ -181,6 +195,13 @@ void StreamWindow::connect_signals_and_slots()
               this->stream_name_changed(std::string(alias),
                                         std::string(stream_title));
             });
+
+  // connect stream start time for client
+  if (is_client())
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_stream_start_time, this,
+            [=, this](const char alias[ALIAS_SIZE], uint32_t timestamp)
+            { this->stream_start_time_changed(timestamp); });
 
   // connect new fps for client
   if (is_client())
@@ -202,9 +223,8 @@ void StreamWindow::connect_signals_and_slots()
             this,
             [=, this](bool new_status)
             {
-              unstable_network_indicator->setVisible(!new_status);
-              unstable_network_indicator->setToolTip(
-                  servc->client->get_connection_reason().c_str());
+              stream_info->setUnstableNetworkIndicator(
+                  !new_status, servc->client->get_connection_reason());
             });
 }
 
@@ -233,33 +253,21 @@ void StreamWindow::initialize_primary_ui_widgets()
   stream_display = new StreamDisplay(this, frame_func);
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-  if (is_client())
-  {
-    unstable_network_indicator = new QLabel;
-    QPixmap pix("assets/unstable-indicator.png");
-    QIcon ico(pix);
-    unstable_network_indicator->setPixmap(ico.pixmap({48, 48}));
-    unstable_network_indicator->setVisible(false);
-  }
+  reaction_display = new ReactionDisplay(this);
 
   annotation_display = new AnnotationDisplay(this);
   annotation_display->installEventFilter(this);
 
-  below_stream_layout = new QGridLayout();
+  stream_info = new StreamInfo(this, "Host\'s Stream", "Host");
 
-  stream_title = new QLabel("Stream Title", this);
   if (is_host() && servh->stream_name.size() > 0)
-    stream_title->setText(servh->stream_name.c_str());
+    stream_info->setStreamTitle(servh->stream_name.c_str());
   if (is_host())
-    viewer_count = new QLabel(
-        std::format("Viewers: {}", servh->viewer_count).c_str(), this);
-  else
-    viewer_count = new QLabel("Viewers: 1", this);
-
-  if (is_host())
-    host_name = new QLabel(std::format("Host: {}", alias).c_str(), this);
-  if (is_client())
-    host_name = new QLabel(std::format("Host: {}", "Host").c_str(), this);
+  {
+    stream_info->setViewerCount(servh->viewer_count);
+    stream_info->setHostName(alias.c_str());
+    stream_info->setStreamStartTime(servh->start_timestamp);
+  }
 }
 
 void StreamWindow::stream_fully_initialized()
@@ -288,7 +296,10 @@ void StreamWindow::shut_down_window()
     AudioManager::instance().stop_recording();
 
   if (is_host())
+  {
+    mercury::delete_public_stream(Utils::instance().getIpAddress());
     servh->server->close_server();
+  }
 
   if (is_client())
     servc->client->disconnect();
@@ -354,6 +365,15 @@ void StreamWindow::send_chat_message(string message)
     servc->client->send_chat_message(message);
 }
 
+void StreamWindow::send_reaction(ReactionPanel::Reaction reaction)
+{
+  qDebug() << "reaction received in streamwindow.cpp";
+  if (is_host())
+    servh->server->forward_reaction(-1, static_cast<uint32_t>(reaction));
+  if (is_client())
+    servc->client->send_reaction(static_cast<uint32_t>(reaction));
+}
+
 void StreamWindow::send_annotation(HSTP_Annotation annotation)
 {
   if (is_host())
@@ -371,7 +391,7 @@ void StreamWindow::send_annotation(HSTP_Annotation annotation)
 
 void StreamWindow::viewer_count_updated(int new_count)
 {
-  viewer_count->setText(("Viewers: " + std::to_string(new_count)).c_str());
+  stream_info->setViewerCount(new_count);
 
   // This slot is called whenever a viewer connects/disconnects for the host,
   // who then must propagate it to the clients
@@ -387,7 +407,7 @@ void StreamWindow::viewer_count_updated(int new_count)
 
 void StreamWindow::stream_name_changed(string host_alias, string new_name)
 {
-  stream_title->setText(new_name.c_str());
+  stream_info->setStreamTitle((new_name).c_str());
 
   if (is_host() && servh->viewer_count > 0)
   {
@@ -400,13 +420,27 @@ void StreamWindow::stream_name_changed(string host_alias, string new_name)
 
   if (is_client())
   {
-    host_name->setText(std::format("Host: {}", host_alias).c_str());
+    stream_info->setHostName(host_alias.c_str());
+  }
+}
+
+void StreamWindow::stream_start_time_changed(uint32_t timestamp)
+{
+  // timestamp is in seconds since epoch
+  if (is_client())
+  {
+    stream_info->setStreamStartTime(timestamp);
   }
 }
 
 void StreamWindow::new_chat_message(string alias, string msg)
 {
   side_pane->get_chat_tab()->new_chat_message({alias, msg});
+}
+
+void StreamWindow::new_reaction(string alias, uint32_t reaction)
+{
+  reaction_display->addReaction(static_cast<ReactionPanel::Reaction>(reaction));
 }
 
 void StreamWindow::viewer_connected(int id, std::string _alias)
@@ -418,8 +452,9 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
 
   Client &client = servh->server->get_client(id);
   client.handler.init_msg(alias.c_str());
-  client.handler.add_option_stream_title(
-      stream_title->text().toStdString().c_str());
+  client.handler.add_option_stream_title(stream_info->getStreamTitle().c_str());
+  client.handler.add_option_stream_start_time(
+      stream_info->getStreamStartTime());
   client.handler.add_option_viewer_count(servh->viewer_count);
   client.handler.add_option_fps(FPS);
   client.handler.output_msg_to_socket(client.hstp_sock);

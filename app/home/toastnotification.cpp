@@ -41,7 +41,7 @@ ToastNotification::ToastNotification(QWidget *parent) : QLabel(parent)
                 "font-weight: bold;"
                 "padding: 10px;"
                 "border-radius: 10px;");
-  setFixedSize(250, 50);
+  setFixedSize(300, 50);
   setAttribute(Qt::WA_TransparentForMouseEvents);
 }
 

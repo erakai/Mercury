@@ -11,6 +11,7 @@ qt_add_executable(mercury
   stream/sidepane.cpp stream/sidepane.hpp
   stream/streamdisplay.cpp stream/streamdisplay.hpp
   stream/performancetab.cpp
+  stream/streaminfo.cpp stream/streaminfo.hpp
   home/main.cpp
   home/mainwindow.cpp home/mainwindow.hpp home/mainwindow.ui
   home/settingswindow.h home/settingswindow.cpp home/settingswindow.ui
@@ -32,8 +33,14 @@ qt_add_executable(mercury
         stream/annotationdisplay.hpp
         stream/painttoolwidget.cpp
         stream/painttoolwidget.hpp
+        stream/reactionpanel.cpp
+        stream/reactionpanel.hpp
+        stream/ReactionDisplay.cpp
+        stream/reactiondisplay.hpp
         config/filedownloader.hpp
         config/filedownloader.cpp
+        api/mapi.hpp api/mapi.cpp
+        streambrowser/streambrowser.h streambrowser/streambrowser.cpp
 )
 
 # Qt set up

@@ -1,5 +1,6 @@
 #include "streamwindow.hpp"
 #include "config/mconfig.hpp"
+#include "home/toastnotification.h"
 #include "hstp.hpp"
 #include "singleton/videomanager.h"
 #include <QApplication>
@@ -180,6 +181,12 @@ void StreamWindow::connect_signals_and_slots()
             &HstpProcessor::received_reaction, this,
             &StreamWindow::new_reaction);
 
+  // connect reaction status disable/enable
+  if (is_client())
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_enable_annotations, this,
+            &StreamWindow::onAnnotationStatusChanged);
+
   // connect stream title for client
   if (is_client())
     connect(servc->client->hstp_processor().get(),
@@ -236,6 +243,8 @@ void StreamWindow::initialize_primary_ui_widgets()
   {
     side_pane->initialize_viewer_list_tab(alias);
     side_pane->initialize_server_performance_tab(servh->server);
+    connect(side_pane->viewer_list, &ViewerListTab::viewer_checked, this,
+            &StreamWindow::onAnnotationCheckbox);
   }
 
   if (is_client())
@@ -456,7 +465,7 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   servh->viewer_count++;
   viewer_count_updated(servh->viewer_count);
 
-  side_pane->get_viewer_list_tab()->viewer_joined(_alias);
+  side_pane->get_viewer_list_tab()->viewer_joined(id, _alias);
 
   Client &client = servh->server->get_client(id);
   client.handler.init_msg(alias.c_str());
@@ -473,7 +482,7 @@ void StreamWindow::viewer_disconnected(int id, std::string _alias)
   servh->viewer_count--;
   viewer_count_updated(servh->viewer_count);
 
-  side_pane->get_viewer_list_tab()->viewer_left(_alias);
+  side_pane->get_viewer_list_tab()->viewer_left(id, _alias);
 }
 
 void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
@@ -572,4 +581,21 @@ void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
                                   currentColor.green(), currentColor.blue(),
                                   thickness));
   points.clear();
+}
+
+void StreamWindow::onAnnotationCheckbox(int id, bool checked)
+{
+  if (is_client())
+    return;
+
+  servh->server->enable_annotations(id, checked);
+}
+
+void StreamWindow::onAnnotationStatusChanged(bool checked)
+{
+  annotation_display->canAnnotate = checked;
+
+  ToastNotification::showToast(
+      this, checked ? "Annotations Enabled" : "Annotations Disabled", 1000,
+      ToastType::NOTICE);
 }

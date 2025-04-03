@@ -80,6 +80,9 @@ public slots:
   void onAnnotationDisplayMouseMoved(QMouseEvent *event);
   void onAnnotationDisplayMouseReleased(QMouseEvent *event);
 
+  void onAnnotationCheckbox(int id, bool checked);
+  void onAnnotationStatusChanged(bool checked);
+
   // These next two are host-only
   void viewer_disconnected(int id, std::string alias);
   // This is called after a client is validated

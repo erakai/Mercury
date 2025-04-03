@@ -16,6 +16,8 @@ public:
   void addLine(const QPoint &start, const QPoint &end, QColor color = Qt::red,
                int thickness = 2);
 
+  bool canAnnotate = true;
+
 protected:
   void paintEvent(QPaintEvent *event) override;
   void resizeEvent(QResizeEvent *event) override;

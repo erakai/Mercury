@@ -30,6 +30,8 @@ void AnnotationDisplay::addLine(const QPoint &start, const QPoint &end,
                                 QColor color, int thickness)
 {
   // qDebug() << "Drawing line persistently from" << start << "to" << end;
+  if (!canAnnotate)
+    return;
 
   QPainter painter(&m_pixmap);
   QPen pen(color);

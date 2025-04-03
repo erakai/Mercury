@@ -5,9 +5,8 @@
 #include <QtWidgets/qgridlayout.h>
 
 const std::vector<std::string> ReactionPanel::reactionStringList = {
-  "thumbsup", "heart", "laugh", "surprised", "fire",
-  "sob", "angry", "thumbsdown", "skull"
-};
+    "thumbsup", "heart", "laugh",      "surprised", "fire",
+    "sob",      "angry", "thumbsdown", "skull"};
 
 ReactionPanel::ReactionPanel(QWidget *parent)
 {
@@ -34,8 +33,8 @@ ReactionPanel::ReactionPanel(QWidget *parent)
       auto *reaction_button = new QPushButton(parent);
       // reaction_button->setStyleSheet("");
       auto reaction = static_cast<Reaction>(index);
-      QString filename = QString("assets/reactions/%1")
-                      .arg(getReactionAssetName(reaction));
+      QString filename =
+          QString("assets/reactions/%1").arg(getReactionAssetName(reaction));
       QPixmap pix(filename);
       reaction_button->setIcon(QIcon(pix));
       reaction_button->setIconSize(QSize(24, 24));
@@ -53,10 +52,12 @@ ReactionPanel::ReactionPanel(QWidget *parent)
           "    background-color: #555555;" // Even lighter when pressed
           "}");
       reaction_button_grid->addWidget(reaction_button, i, j);
-      connect(reaction_button, &QPushButton::clicked, this, [this, reaction]() {
-        qDebug() << "reaction clicked, emitting reaction";
-        emit reactionClicked(reaction);
-      });
+      connect(reaction_button, &QPushButton::clicked, this,
+              [this, reaction]()
+              {
+                qDebug() << "reaction clicked, emitting reaction";
+                emit reactionClicked(reaction);
+              });
 
       index++;
     }
@@ -78,5 +79,8 @@ doneAddingButtons:
 
 QString ReactionPanel::getReactionAssetName(Reaction reaction)
 {
-  return "reaction_" + QString::fromStdString(reactionStringList.at(static_cast<int>(reaction))) + ".png";
+  return "reaction_" +
+         QString::fromStdString(
+             reactionStringList.at(static_cast<int>(reaction))) +
+         ".png";
 }

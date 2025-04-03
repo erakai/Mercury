@@ -33,7 +33,8 @@ private slots:
   void updateStreamDuration();
   void handleReactionPanelButtonPressed(ReactionPanel::Reaction reaction)
   {
-    qDebug()  << "in handleReactionPanelButtonPresseed, about to emit sendReaction";
+    qDebug()
+        << "in handleReactionPanelButtonPresseed, about to emit sendReaction";
     emit renderAndSendReaction(reaction);
   }
 

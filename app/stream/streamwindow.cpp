@@ -157,12 +157,12 @@ void StreamWindow::connect_signals_and_slots()
             { this->viewer_count_updated(viewers); });
 
   // connect reaction sent from stream info
-  connect (stream_info, &StreamInfo::renderAndSendReaction, this,
-            [=, this](ReactionPanel::Reaction reaction)
-            {
-              reaction_display->addReaction(reaction);
-              this->send_reaction(reaction);
-            });
+  connect(stream_info, &StreamInfo::renderAndSendReaction, this,
+          [=, this](ReactionPanel::Reaction reaction)
+          {
+            reaction_display->addReaction(reaction);
+            this->send_reaction(reaction);
+          });
 
   // connect host to receive reactions
   if (is_host())

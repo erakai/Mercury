@@ -39,6 +39,4 @@ private:
   static const std::vector<std::string> reactionStringList;
 };
 
-
-
 #endif // REACTIONPANEL_H

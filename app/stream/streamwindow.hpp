@@ -106,7 +106,6 @@ private:
   ReactionDisplay *reaction_display;
   AnnotationDisplay *annotation_display;
 
-
   StreamInfo *stream_info;
 
   QMenu *stream_menu;

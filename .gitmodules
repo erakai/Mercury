@@ -1,0 +1,3 @@
+[submodule "mercuryapi"]
+	path = mercuryapi
+	url = https://github.com/krislwk/MercuryAPI

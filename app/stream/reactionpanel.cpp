@@ -17,7 +17,7 @@ ReactionPanel::ReactionPanel(QWidget *parent)
       "    border-radius: 12px;"       // Rounded corners
       "    padding: 10px;"             // Internal spacing
       "}");
-  auto *reaction_button_grid = new QGridLayout(parent);
+  auto *reaction_button_grid = new QGridLayout;
 
   int index = 0;
   int cols = 4;
@@ -53,11 +53,7 @@ ReactionPanel::ReactionPanel(QWidget *parent)
           "}");
       reaction_button_grid->addWidget(reaction_button, i, j);
       connect(reaction_button, &QPushButton::clicked, this,
-              [this, reaction]()
-              {
-                qDebug() << "reaction clicked, emitting reaction";
-                emit reactionClicked(reaction);
-              });
+              [this, reaction]() { emit reactionClicked(reaction); });
 
       index++;
     }

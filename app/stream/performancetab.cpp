@@ -12,10 +12,10 @@ ServerPerformanceTab::ServerPerformanceTab(shared_ptr<MercuryServer> server,
   fps_label = new QLabel(QString("Frames Per Second: %1").arg(FPS));
   fps_slider = new QSlider(Qt::Horizontal);
   fps_slider->setTickPosition(QSlider::TicksBothSides);
-  fps_slider->setSingleStep(1);
-  fps_slider->setPageStep(1);
+  fps_slider->setSingleStep(2);
+  fps_slider->setPageStep(2);
   fps_slider->setMinimum(1);
-  fps_slider->setMaximum(12);
+  fps_slider->setMaximum(24);
   fps_slider->setValue(FPS);
   connect(fps_slider, &QAbstractSlider::sliderReleased, this,
           &ServerPerformanceTab::on_fps_slider_release);
@@ -191,8 +191,12 @@ void ServerPerformanceTab::on_compression_slider_release()
     }
   }
 
-  compression_label->setText(
-      QString("Frame Compression: %1%").arg(compression_slider->value()));
+  if (compression_slider->value() != 0)
+    compression_label->setText(
+        QString("Frame Compression: %1%").arg(compression_slider->value()));
+  else
+    compression_label->setText(QString("Frame Compression: Default"));
+
   server->set_compression(compression_slider->value() * 0.01);
 }
 

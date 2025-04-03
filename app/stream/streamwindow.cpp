@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
+#include <QtCore/qnamespace.h>
 #include <QtDebug>
 #include <QMouseEvent>
 #include <QAudioSink>
@@ -54,7 +55,6 @@ bool StreamWindow::set_up()
                                     QSizePolicy::Expanding);
 
   annotation_display->raise();
-
 
   // Create the PaintToolWidget and add it at the top of the display.
   paint_tool = new PaintToolWidget(this);
@@ -381,7 +381,6 @@ void StreamWindow::send_chat_message(string message)
 
 void StreamWindow::send_reaction(ReactionPanel::Reaction reaction)
 {
-  qDebug() << "reaction received in streamwindow.cpp";
   if (is_host())
     servh->server->forward_reaction(-1, static_cast<uint32_t>(reaction));
   if (is_client())

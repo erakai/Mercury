@@ -21,10 +21,6 @@ AnnotationDisplay::AnnotationDisplay(QWidget *parent) : QWidget(parent)
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   mainLayout->setContentsMargins(0, 0, 0, 0);
 
-  // Create the PaintToolWidget and add it at the top of the display.
-  paint_tool_widget = new PaintToolWidget(this);
-  mainLayout->addWidget(paint_tool_widget, 0, Qt::AlignTop);
-
   // Add a stretch to push remaining content (your drawing) to fill the rest of
   // the area.
   mainLayout->addStretch();

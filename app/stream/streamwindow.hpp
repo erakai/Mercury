@@ -2,6 +2,7 @@
 
 #include "annotationdisplay.hpp"
 #include "sidepane.hpp"
+#include "stream/painttoolwidget.hpp"
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
 #include "hstp.hpp"
@@ -98,6 +99,7 @@ private:
   SidePane *side_pane;
   StreamDisplay *stream_display;
   AnnotationDisplay *annotation_display;
+  PaintToolWidget *paint_tool;
   QGridLayout *below_stream_layout;
 
   // Only relevant if this is a client - displays itself when poor connection

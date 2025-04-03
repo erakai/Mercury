@@ -54,9 +54,12 @@ bool StreamWindow::set_up()
 
   annotation_display->raise();
 
-  main_layout->addWidget(videoAnnotationContainer, 0, 0);
-  main_layout->addWidget(side_pane, 0, 1, 2, 1);
-  main_layout->addLayout(below_stream_layout, 1, 0);
+  // Create the PaintToolWidget and add it at the top of the display.
+  paint_tool = new PaintToolWidget(this);
+  main_layout->addWidget(paint_tool, 0, 0);
+  main_layout->addWidget(videoAnnotationContainer, 1, 0);
+  main_layout->addWidget(side_pane, 0, 1, 3, 1);
+  main_layout->addLayout(below_stream_layout, 2, 0);
 
   below_stream_layout->addWidget(stream_title, 0, 0);
   below_stream_layout->addWidget(host_name, 1, 0);
@@ -81,8 +84,10 @@ bool StreamWindow::set_up()
   |-20% info------------------|-------------|
   */
 
-  main_layout->setRowStretch(0, 80);
-  main_layout->setRowStretch(1, 20);
+  const int height_of_paint_bar = 1;
+  main_layout->setRowStretch(0, height_of_paint_bar);
+  main_layout->setRowStretch(1, 80 - height_of_paint_bar);
+  main_layout->setRowStretch(2, 20);
 
   main_layout->setColumnStretch(0, 75);
   main_layout->setColumnStretch(1, 25);
@@ -491,7 +496,7 @@ void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
 {
   QPoint pos = event->pos();
 
-  PaintToolWidget *toolWidget = annotation_display->paint_tool_widget;
+  PaintToolWidget *toolWidget = paint_tool;
   QColor currentColor = toolWidget->selectedColor();
   int thickness = toolWidget->brushSize();
 
@@ -510,7 +515,7 @@ void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
 {
   Q_UNUSED(event);
 
-  PaintToolWidget *toolWidget = annotation_display->paint_tool_widget;
+  PaintToolWidget *toolWidget = paint_tool;
   QColor currentColor = toolWidget->selectedColor();
   int thickness = toolWidget->brushSize();
 

@@ -28,22 +28,11 @@ void acquire_mftp_socket(std::shared_ptr<QUdpSocket> sock, int port)
 bool send_datagram(std::shared_ptr<QUdpSocket> sock,
                    std::vector<QHostAddress> dest_ip,
                    std::vector<int> dest_port, MFTP_Header &header,
-                   QImage video_image, QByteArray &audio)
+                   QByteArray &video_bytes, QByteArray &audio)
 {
   QByteArray payload_array;
 
-  // Serialize to payload
-  QByteArray video_bytes;
-  QBuffer video_buffer(&video_bytes);
-  video_buffer.open(QIODevice::WriteOnly);
-  if (!video_image.save(&video_buffer, "JPG"))
-  {
-    qCritical("Unable to serialize QImage.");
-    return false;
-  }
-  video_buffer.close();
-
-  QByteArray audio_bytes = audio;
+  QByteArray audio_bytes = QByteArray(audio);
   payload_array.append(audio_bytes);
   payload_array.append(video_bytes);
 

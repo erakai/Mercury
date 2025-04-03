@@ -2,9 +2,12 @@
 
 #include "annotationdisplay.hpp"
 #include "sidepane.hpp"
+#include "stream/painttoolwidget.hpp"
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
 #include "hstp.hpp"
+#include "reactiondisplay.hpp"
+#include "streaminfo.hpp"
 #include <QAudioBuffer>
 #include <QFile>
 #include <QGridLayout>
@@ -54,6 +57,7 @@ public slots:
 
   // Sends a chat message out
   void send_chat_message(string message);
+  void send_reaction(ReactionPanel::Reaction reaction);
 
   // Sends an annotation out
   void send_annotation(HSTP_Annotation annotation);
@@ -65,7 +69,9 @@ public slots:
 
   void viewer_count_updated(int new_count);
   void stream_name_changed(string host_alias, string new_name);
+  void stream_start_time_changed(uint32_t timestamp);
   void new_chat_message(string alias, string msg);
+  void new_reaction(string alias, uint32_t reaction);
   // void new_viewer_joined(Client client); // update participant_display_list
   // in side_pane
   void new_annotation(string alias, HSTP_Annotation annotation);
@@ -98,15 +104,12 @@ private:
   QGridLayout *main_layout;
   SidePane *side_pane;
   StreamDisplay *stream_display;
+  ReactionDisplay *reaction_display;
   AnnotationDisplay *annotation_display;
-  QGridLayout *below_stream_layout;
+  PaintToolWidget *paint_tool;
 
-  // Only relevant if this is a client - displays itself when poor connection
-  QLabel *unstable_network_indicator;
 
-  QLabel *stream_title;
-  QLabel *host_name;
-  QLabel *viewer_count;
+  StreamInfo *stream_info;
 
   QMenu *stream_menu;
   QAction *stop_or_leave_stream_action;

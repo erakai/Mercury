@@ -100,6 +100,7 @@ public slots:
    * annotations.
    */
   bool send_annotations(const HSTP_Annotation &annotation);
+  bool send_reaction(uint32_t reaction);
 
   /*
    * Connected to the readyRead signal of QTcpSocket. Will process the given

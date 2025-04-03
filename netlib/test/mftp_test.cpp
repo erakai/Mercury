@@ -77,8 +77,16 @@ TEST_F(MftpTest, SendAndProcessBasic)
 
   // Send and receive
   auto before_send = std::chrono::system_clock::now();
+
+  QByteArray video_bytes;
+  QBuffer video_buffer(&video_bytes);
+  video_buffer.open(QIODevice::WriteOnly);
+  if (!sent_image.save(&video_buffer, "JPG"))
+    qCritical("Unable to serialize QImage.");
+  video_buffer.close();
+
   ASSERT_TRUE(send_datagram(sock1, {QHostAddress::LocalHost},
-                            {sock2->localPort()}, sent_header, sent_image,
+                            {sock2->localPort()}, sent_header, video_bytes,
                             sent_audio));
   auto after_send = std::chrono::system_clock::now();
   auto send_time = std::chrono::duration_cast<std::chrono::milliseconds>(

@@ -40,6 +40,7 @@ public slots:
 
   void on_fps_slider_update(int value);
   void on_fps_slider_release();
+  void on_compression_slider_release();
   void on_request_slider_update(int value);
 
 private:
@@ -58,6 +59,8 @@ private:
   QSlider *fps_slider;
   QLabel *request_frequency_label;
   QSlider *request_frequency_slider;
+  QLabel *compression_label;
+  QSlider *compression_slider;
 };
 
 class ClientPerformanceTab : public QWidget

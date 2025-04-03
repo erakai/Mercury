@@ -1,7 +1,5 @@
 #pragma once
 
-#include "painttoolwidget.hpp"
-
 #include <QWidget>
 #include <QPixmap>
 #include <QColor>
@@ -17,8 +15,6 @@ public:
   // thickness.
   void addLine(const QPoint &start, const QPoint &end, QColor color = Qt::red,
                int thickness = 2);
-
-  PaintToolWidget *paint_tool_widget;
 
 protected:
   void paintEvent(QPaintEvent *event) override;

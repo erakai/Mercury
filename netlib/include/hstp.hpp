@@ -1,6 +1,7 @@
 #pragma once
 
 #include "netlib_global.h"
+
 #include <QHostAddress>
 #include <QTcpSocket>
 #include <QtCore/qhashfunctions.h>
@@ -227,6 +228,7 @@ public:
   bool add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
                        const char *chat_msg);
   bool add_option_annotation(const HSTP_Annotation &annotation);
+  bool add_option_reaction(uint32_t reaction);
   bool add_option_stream_title(const char *stream_title)
   {
     return add_option_generic_string(3, stream_title);
@@ -234,6 +236,10 @@ public:
   bool add_option_viewer_count(uint32_t viewers)
   {
     return add_option_generic_uint32(4, viewers);
+  }
+  bool add_option_stream_start_time(uint32_t start_timestamp)
+  {
+    return add_option_generic_uint32(10, start_timestamp);
   }
 
   bool add_option_fps(uint32_t fps)
@@ -343,6 +349,17 @@ signals:
   void received_viewer_count(const char alias[ALIAS_SIZE], uint32_t viewers);
 
   /*
+   * Emits when a user joins to the new user
+   */
+  void received_stream_start_time(const char alias[ALIAS_SIZE],
+                                  uint32_t timestamp);
+
+  /*
+   * Emits when a reaction is received
+   */
+  void received_reaction(const char alias[ALIAS_SIZE], uint32_t reaction);
+
+  /*
    * Emitted whenever a new fps is received
    */
   void received_fps(const char alias[ALIAS_SIZE], uint32_t fps);
@@ -393,6 +410,14 @@ private:
   void handle_viewer_count(HANDLER_PARAMS) // 4
   {
     handle_uint32(alias, opt, &HstpProcessor::received_viewer_count);
+  }
+  void handle_stream_start_time(HANDLER_PARAMS)
+  {
+    handle_uint32(alias, opt, &HstpProcessor::received_stream_start_time);
+  }
+  void handle_reaction(HANDLER_PARAMS)
+  {
+    handle_uint32(alias, opt, &HstpProcessor::received_reaction);
   }
 
   void handle_annotation(HANDLER_PARAMS); // 5

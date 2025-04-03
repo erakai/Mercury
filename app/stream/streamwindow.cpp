@@ -55,7 +55,6 @@ bool StreamWindow::set_up()
 
   annotation_display->raise();
 
-
   // Create the PaintToolWidget and add it at the top of the display.
   paint_tool = new PaintToolWidget(this);
   main_layout->addWidget(paint_tool, 0, 0);
@@ -195,11 +194,9 @@ void StreamWindow::connect_signals_and_slots()
 
   if (is_client()) // set reactions enable/disable
     connect(servc->client->hstp_processor().get(),
-      &HstpProcessor::received_reaction_permission, this,
-      [=, this](const char alias[ALIAS_SIZE], uint32_t enabled)
-      {
-        this->reaction_permission_changed(enabled);
-      });
+            &HstpProcessor::received_reaction_permission, this,
+            [=, this](const char alias[ALIAS_SIZE], uint32_t enabled)
+            { this->reaction_permission_changed(enabled); });
 
   // connect stream start time for client
   if (is_client())
@@ -460,7 +457,8 @@ void StreamWindow::reaction_permission_changed(uint32_t enabled)
 {
   if (is_client())
   {
-    qDebug() << "reaction perm changed, it is now" << static_cast<bool>(enabled);
+    qDebug() << "reaction perm changed, it is now"
+             << static_cast<bool>(enabled);
     stream_info->setReactionsEnabled(enabled);
   }
 }
@@ -489,7 +487,8 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
       stream_info->getStreamStartTime());
   client.handler.add_option_viewer_count(servh->viewer_count);
   client.handler.add_option_fps(FPS);
-  qDebug() << "viewer connected setting reaction permisson to: " << servh->reactions_enabled;
+  qDebug() << "viewer connected setting reaction permisson to: "
+           << servh->reactions_enabled;
   client.handler.add_option_reaction_permission(servh->reactions_enabled);
   client.handler.output_msg_to_socket(client.hstp_sock);
 }

@@ -35,7 +35,8 @@ private slots:
     if (reactions_enabled)
     {
       emit renderAndSendReaction(reaction);
-    } else
+    }
+    else
     {
       qDebug() << "not emitting reaction,  because host disabled reactions";
     }

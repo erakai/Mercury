@@ -22,6 +22,7 @@ public:
   int viewer_count = 0;
   std::string stream_name;
   uint32_t start_timestamp = 0;
+  bool reactions_enabled = false;
 };
 
 class ClientService

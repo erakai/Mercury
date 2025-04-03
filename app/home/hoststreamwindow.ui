@@ -49,6 +49,10 @@ QLabel[header=true] {
 
 QDialog#HostStreamWindow {
 	background-color: rgb(11, 17, 20);
+}
+
+QCheckBox {
+	color: rgb(223, 234, 237);
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -181,6 +185,26 @@ QDialog#HostStreamWindow {
           <widget class="QLineEdit" name="passwordLineEdit"/>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="reactionsEnabledCheckBox">
+         <property name="text">
+          <string>Reactions Enabled</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="publicStream">
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
+         <property name="text">
+          <string>Make Publicly Available</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

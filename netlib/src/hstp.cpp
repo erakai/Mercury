@@ -129,7 +129,7 @@ bool HstpHandler::add_option_clear_annotations()
   }
 
   Option opt;
-  opt.type = 12;
+  opt.type = 13;
   opt.len = 0;
   m_hdr->options.push_back(opt);
   return true;
@@ -144,7 +144,7 @@ bool HstpHandler::add_option_enable_annotations(bool enabled)
   }
 
   Option opt;
-  opt.type = 13;
+  opt.type = 14;
   opt.len = 1;
   opt.data = std::shared_ptr<char[]>(new char[opt.len]);
 
@@ -476,10 +476,13 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
     case 11: // reaction
       handle_reaction(hdr_ptr->sender_alias, opt);
       break;
-    case 12:
-      handle_clear_annotations(hdr_ptr->sender_alias, opt);
+    case 12: // reaction permission
+      handle_reaction_permission(hdr_ptr->sender_alias, opt);
       break;
     case 13:
+      handle_clear_annotations(hdr_ptr->sender_alias, opt);
+      break;
+    case 14:
       handle_enable_annotations(hdr_ptr->sender_alias, opt);
       break;
     default:

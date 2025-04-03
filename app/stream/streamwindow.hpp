@@ -108,7 +108,6 @@ private:
   AnnotationDisplay *annotation_display;
   PaintToolWidget *paint_tool;
 
-
   StreamInfo *stream_info;
 
   QMenu *stream_menu;

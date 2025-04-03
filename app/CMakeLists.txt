@@ -42,6 +42,8 @@ qt_add_executable(mercury
         streambrowser/streambrowser.h streambrowser/streambrowser.cpp
         stream/streamcontrolpanel.cpp
         stream/streamcontrolpanel.hpp
+        stream/streamdisplaycontrols.cpp
+        stream/streamdisplaycontrols.hpp
 )
 
 # Qt set up

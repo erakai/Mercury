@@ -41,7 +41,7 @@ bool StreamWindow::set_up()
 
   // Create a container widget to stack the stream display and the annotation
   // display.
-  QWidget *videoAnnotationContainer = new QWidget(this);
+  videoAnnotationContainer = new QWidget(this);
   QGridLayout *containerLayout = new QGridLayout(videoAnnotationContainer);
   containerLayout->setContentsMargins(0, 0, 0, 0);
   containerLayout->setSpacing(0);
@@ -49,12 +49,11 @@ bool StreamWindow::set_up()
   containerLayout->addWidget(stream_display, 0, 0);
   containerLayout->addWidget(reaction_display, 0, 0);
   containerLayout->addWidget(annotation_display, 0, 0);
+  containerLayout->addWidget(stream_display_controls, 0, 0, Qt::AlignBottom);
 
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   annotation_display->setSizePolicy(QSizePolicy::Expanding,
                                     QSizePolicy::Expanding);
-
-  annotation_display->raise();
 
   // Create the PaintToolWidget and add it at the top of the display.
   paint_tool = new PaintToolWidget(this);
@@ -76,13 +75,7 @@ bool StreamWindow::set_up()
   |-20% info------------------|-------------|
   */
 
-  const int height_of_paint_bar = 1;
-  main_layout->setRowStretch(0, height_of_paint_bar);
-  main_layout->setRowStretch(1, 80 - height_of_paint_bar);
-  main_layout->setRowStretch(2, 20);
-
-  main_layout->setColumnStretch(0, 75);
-  main_layout->setColumnStretch(1, 25);
+  this->setStreamDisplayMode(0);
 
   // Center this window
   move(QGuiApplication::screens().at(0)->geometry().center() -
@@ -100,6 +93,51 @@ bool StreamWindow::set_up()
   return true;
 }
 
+void StreamWindow::setStreamDisplayMode(int layout)
+{
+  // 0 default, 1 fullscreen, 2 chat minimized??
+  if (layout == 0) // default
+  {
+    const int height_of_paint_bar = 1;
+    main_layout->setRowStretch(0, height_of_paint_bar);
+    main_layout->setRowStretch(1, 80 - height_of_paint_bar);
+    main_layout->setRowStretch(2, 20);
+    main_layout->setColumnStretch(0, 75);
+    main_layout->setColumnStretch(1, 25);
+    paint_tool->show();
+    side_pane->show();
+    stream_info->show();
+  }
+  else if (layout == 1) // fullscreen
+  {
+    paint_tool->hide();
+    side_pane->hide();
+    stream_info->hide();
+    main_layout->setRowStretch(0, 0);
+    main_layout->setRowStretch(1, 100);
+    main_layout->setRowStretch(2, 0);
+    main_layout->setColumnStretch(0, 100);
+    main_layout->setColumnStretch(1, 0);
+    videoAnnotationContainer->showFullScreen();
+  }
+  else
+  {
+    qDebug() << "other layouts to be implemented";
+  }
+}
+
+void StreamWindow::keyPressEvent(QKeyEvent *event)
+{
+  if (event->key() == Qt::Key_Escape)
+  {
+    setStreamDisplayMode(0);
+  }
+  else if (event->key() == Qt::Key_F)
+  {
+    setStreamDisplayMode(1);
+  }
+}
+
 void StreamWindow::configure_menu_and_tool_bar()
 {
   stream_menu = menuBar()->addMenu(tr("&Stream"));
@@ -115,6 +153,15 @@ void StreamWindow::connect_signals_and_slots()
 {
   connect(stop_or_leave_stream_action, &QAction::triggered, this,
           &StreamWindow::shut_down_window);
+
+  // toggle fullscreen
+  connect(stream_display_controls,
+          &StreamDisplayControls::fullScreenButtonPressed, this,
+          [this]()
+          {
+            streamDisplayMode = streamDisplayMode == 1 ? 0 : 1;
+            this->setStreamDisplayMode(streamDisplayMode);
+          });
 
   // connect socket disconnected to this window closing
   if (is_client())
@@ -266,6 +313,8 @@ void StreamWindow::initialize_primary_ui_widgets()
 
   annotation_display = new AnnotationDisplay(this);
   annotation_display->installEventFilter(this);
+
+  stream_display_controls = new StreamDisplayControls(this);
 
   stream_info = new StreamInfo(this, "Host\'s Stream", "Host");
 

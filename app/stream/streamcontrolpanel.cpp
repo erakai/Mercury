@@ -14,7 +14,7 @@ StreamControlPanel::StreamControlPanel(QWidget *parent)
       "}");
 
   // create control button layout
-  auto *control_button_grid = new QVBoxLayout(parent);
+  auto *control_button_grid = new QVBoxLayout();
   control_button_grid->setSpacing(10);
   panel_container->setLayout(control_button_grid);
 
@@ -25,15 +25,15 @@ StreamControlPanel::StreamControlPanel(QWidget *parent)
   control_button_grid->addWidget(reactions_enabled_check_box);
 
   // connect reaction control to send signal
-  connect(
-      reactions_enabled_check_box, &QCheckBox::checkStateChanged, this,
-      [this]
-      {
-        bool enabled = reactions_enabled_check_box->checkState() == 2;
-        qDebug() << "received reaction control in stream control panel ---- "
-                 << enabled;
-        emit reactionsEnabledChanged(enabled);
-      });
+  connect(reactions_enabled_check_box, &QCheckBox::checkStateChanged, this,
+          [this]
+          {
+            bool enabled = reactions_enabled_check_box->checkState() == 2;
+            // qDebug() << "received reaction control in stream control panel
+            // ---- "
+            //          << enabled;
+            emit reactionsEnabledChanged(enabled);
+          });
 
   // connect(reaction_button, &QPushButton::clicked, this,
   //             [this, reaction]()

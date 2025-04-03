@@ -25,7 +25,7 @@ void MainWindow::on_streamBrowserButton_clicked()
 {
   std::cout << "stream browser opening!" << std::endl;
   // TODO: open stream browser
-  mercury::delete_public_stream("example ip");
+  mercury::fetch_public_streams();
 }
 
 void MainWindow::on_settingsButton_clicked()

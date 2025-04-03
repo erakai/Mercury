@@ -6,7 +6,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QUrl>
-#include <iostream>
+#include <QEventLoop>
 
 QString BASE_URL = "http://localhost:8000";
 
@@ -55,7 +55,40 @@ void mercury::delete_public_stream(QString streamIP)
                    [reply]() { reply->deleteLater(); });
 }
 
-void mercury::fetch_public_streams()
+QJsonArray mercury::fetch_public_streams()
 {
-  // TODO: implement
+  QUrl url(BASE_URL + "/fetchstreams");
+  QNetworkRequest request(url);
+
+  QNetworkReply *reply = networkManager()->get(request);
+
+  QEventLoop loop;
+
+  QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+  loop.exec();
+
+  QJsonArray result;
+
+  if (reply->error())
+  {
+    qDebug() << "Request failed:" << reply->errorString();
+    reply->deleteLater();
+    return result;
+  }
+
+  QByteArray data = reply->readAll();
+  QJsonParseError parseError;
+  QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+
+  if (parseError.error != QJsonParseError::NoError || !doc.isArray())
+  {
+    qDebug() << "JSON parse error:" << parseError.errorString();
+  }
+  else
+  {
+    result = doc.array();
+  }
+
+  reply->deleteLater();
+  return result;
 }

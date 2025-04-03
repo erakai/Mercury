@@ -7,6 +7,7 @@
 #include "streamservice.hpp"
 #include "hstp.hpp"
 #include "reactiondisplay.hpp"
+#include "streamdisplaycontrols.hpp"
 #include "streaminfo.hpp"
 #include <QAudioBuffer>
 #include <QFile>
@@ -55,6 +56,9 @@ public slots:
   // Called to close the stream (if hosting) or leave (if client)
   void shut_down_window();
 
+  // called when streamdisplaycontrols emits signal to change display mode
+  void setStreamDisplayMode(int layout);
+
   // Sends a chat message out
   void send_chat_message(string message);
 
@@ -94,6 +98,7 @@ public slots:
 
 protected:
   bool eventFilter(QObject *watched, QEvent *event) override;
+  void keyPressEvent(QKeyEvent *event) override;
 
 private:
   /*
@@ -113,7 +118,10 @@ private:
   StreamDisplay *stream_display;
   ReactionDisplay *reaction_display;
   AnnotationDisplay *annotation_display;
+  QWidget *videoAnnotationContainer;
+  StreamDisplayControls *stream_display_controls;
   PaintToolWidget *paint_tool;
+  int streamDisplayMode = 0; // 0 def, 1 fullscreen, 2 tbh (no chat maybe)
 
   StreamInfo *stream_info;
 

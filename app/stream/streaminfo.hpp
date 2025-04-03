@@ -42,7 +42,8 @@ private slots:
   }
   void handleReactionsEnabledChanged(bool enabled)
   {
-    qDebug() << "reached stream info reactionsEnabledChanged --- " << enabled;
+    // qDebug() << "reached stream info reactionsEnabledChanged --- " <<
+    // enabled;
     emit reactionsEnabledChanged(enabled);
   }
 

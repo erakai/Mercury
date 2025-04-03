@@ -6,17 +6,15 @@
 #define REACTIONDISPLAY_H
 #include "reactionpanel.hpp"
 
-class ReactionDisplay : public QWidget {
+class ReactionDisplay : public QWidget
+{
 public:
-  explicit ReactionDisplay(QWidget* parent = nullptr);
+  explicit ReactionDisplay(QWidget *parent = nullptr);
   void addReaction(ReactionPanel::Reaction reaction);
 signals:
 
 private:
   void displayReaction(ReactionPanel::Reaction reaction);
-
 };
 
-
-
-#endif //REACTIONDISPLAY_H
+#endif // REACTIONDISPLAY_H

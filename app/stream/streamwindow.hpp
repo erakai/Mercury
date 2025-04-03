@@ -109,7 +109,6 @@ private:
   PaintToolWidget *paint_tool;
 
 
-
   StreamInfo *stream_info;
 
   QMenu *stream_menu;

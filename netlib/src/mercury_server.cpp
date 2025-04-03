@@ -187,13 +187,12 @@ void MercuryServer::validate_client(int id, bool is_start, std::string alias,
       });
 
   // Also connect client reactions to replicate on host and other clients
-  connect(
-      new_client.processor.get(), &HstpProcessor::received_reaction, this,
-      [=, this](const char alias[ALIAS_SIZE], uint32_t reaction)
-      {
-        this->forward_reaction(new_client.id, reaction);
-        emit reaction_received(std::string(alias), reaction);
-      });
+  connect(new_client.processor.get(), &HstpProcessor::received_reaction, this,
+          [=, this](const char alias[ALIAS_SIZE], uint32_t reaction)
+          {
+            this->forward_reaction(new_client.id, reaction);
+            emit reaction_received(std::string(alias), reaction);
+          });
 
   emit client_connected(id, std::string(alias));
 }
@@ -278,7 +277,7 @@ void MercuryServer::forward_annotations(int sender_id,
 
 void MercuryServer::forward_reaction(int sender_id, uint32_t reaction)
 {
-  for (auto &[id, client]: clients)
+  for (auto &[id, client] : clients)
   {
     if (id != sender_id)
     {

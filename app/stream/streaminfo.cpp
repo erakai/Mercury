@@ -82,7 +82,8 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   main_layout->addStretch();
   main_layout->addWidget(reaction_panel);
   main_layout->setContentsMargins(10, 10, 40, 10);
-  connect(reaction_panel, &ReactionPanel::reactionClicked, this, &StreamInfo::handleReactionPanelButtonPressed);
+  connect(reaction_panel, &ReactionPanel::reactionClicked, this,
+          &StreamInfo::handleReactionPanelButtonPressed);
   // reaction_panel->stackUnder(extra_info_sidebar);
   extra_info_sidebar->raise();
 

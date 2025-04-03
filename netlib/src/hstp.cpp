@@ -442,6 +442,9 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
     case 11: // reaction
       handle_reaction(hdr_ptr->sender_alias, opt);
       break;
+    case 12: // reaction permission
+      handle_reaction_permission(hdr_ptr->sender_alias, opt);
+      break;
     default:
       handle_default(hdr_ptr->sender_alias, opt);
     }

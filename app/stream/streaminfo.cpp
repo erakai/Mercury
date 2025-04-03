@@ -224,6 +224,13 @@ void StreamInfo::setStreamStartTime(uint32_t timestamp)
   stream_start_time_label->setText("Stream Start: " + formattedDt);
 }
 
+void StreamInfo::setReactionsEnabled(bool enabled)
+{
+  // enable / disable reaction panel
+  reactions_enabled = enabled;
+  setReactionsEnabledLabel(enabled);
+}
+
 void StreamInfo::setReactionsEnabledLabel(bool enabled)
 {
   reactions_enabled_label->setText(QString("Reactions: ") +

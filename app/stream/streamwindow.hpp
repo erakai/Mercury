@@ -57,6 +57,8 @@ public slots:
 
   // Sends a chat message out
   void send_chat_message(string message);
+
+  // Sends a reaction out
   void send_reaction(ReactionPanel::Reaction reaction);
 
   // Sends an annotation out
@@ -70,6 +72,7 @@ public slots:
   void viewer_count_updated(int new_count);
   void stream_name_changed(string host_alias, string new_name);
   void stream_start_time_changed(uint32_t timestamp);
+  void reaction_permission_changed(uint32_t enabled);
   void new_chat_message(string alias, string msg);
   void new_reaction(string alias, uint32_t reaction);
   // void new_viewer_joined(Client client); // update participant_display_list

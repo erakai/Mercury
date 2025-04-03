@@ -20,7 +20,10 @@ public:
     Sob,
     Angry,
     ThumbsDown,
-    Skull
+    Skull,
+    Eggplant,
+    Tomato,
+    Corn
   };
 
   ReactionPanel(QWidget *parent);
@@ -34,7 +37,8 @@ private:
   std::vector<Reaction> reactionList = {
       Reaction::ThumbsUp,  Reaction::Heart,      Reaction::Laugh,
       Reaction::Surprised, Reaction::Fire,       Reaction::Sob,
-      Reaction::Angry,     Reaction::ThumbsDown, Reaction::Skull};
+      Reaction::Angry,     Reaction::ThumbsDown, Reaction::Skull,
+      Reaction::Eggplant, Reaction::Tomato, Reaction::Corn};
 
   static const std::vector<std::string> reactionStringList;
 };

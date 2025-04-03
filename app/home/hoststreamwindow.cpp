@@ -130,6 +130,7 @@ void HostStreamWindow::open_stream_window()
       std::make_shared<HostService>(alias, tcpPort, udpPort, hashedPassword);
   serv->stream_name = ui->streamNameLineEdit->text().toStdString();
   serv->start_timestamp = QDateTime::currentSecsSinceEpoch();
+  serv->reactions_enabled = ui->reactionsEnabledCheckBox->checkState() == 2;
   serv->server->start_server();
   // This sets itself to delete on close, so no memory leak (I think)
   StreamWindow *w = new StreamWindow(alias, serv);

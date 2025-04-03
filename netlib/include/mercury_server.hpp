@@ -174,7 +174,6 @@ signals:
    */
   void reaction_received(std::string alias, uint32_t reaction);
 
-
 private:
   /*
   Private method to help set up the signals/slots of the server.

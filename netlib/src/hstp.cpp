@@ -1,4 +1,5 @@
 #include "hstp.hpp"
+
 #include <QtCore/qendian.h>
 #include <QtCore/qstringview.h>
 #include <cstdint>
@@ -113,6 +114,27 @@ bool HstpHandler::add_option_annotation(const HSTP_Annotation &annotation)
             sizeof(annotation.red) + sizeof(annotation.green) +
             sizeof(annotation.blue) + sizeof(annotation.thickness);
   opt.data = annotation.serialize();
+
+  m_hdr->options.push_back(opt);
+
+  return true;
+}
+
+bool HstpHandler::add_option_reaction(uint32_t reaction)
+{
+  if (get_status() != MSG_STATUS::IN_PROGRESS)
+  {
+    qCritical("Unable to add option, uninitalized message.");
+    return false;
+  }
+
+  Option opt;
+  opt.type = 11;
+  opt.len = sizeof(uint32_t);
+  opt.data = std::shared_ptr<char[]>(new char[opt.len]);
+
+  uint32_t net_int = qToBigEndian((uint32_t) reaction);
+  std::memcpy(opt.data.get(), &net_int, sizeof(uint32_t));
 
   m_hdr->options.push_back(opt);
 
@@ -416,6 +438,9 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
       break;
     case 10: // stream start time
       handle_stream_start_time(hdr_ptr->sender_alias, opt);
+      break;
+    case 11: // reaction
+      handle_reaction(hdr_ptr->sender_alias, opt);
       break;
     default:
       handle_default(hdr_ptr->sender_alias, opt);

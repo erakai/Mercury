@@ -228,6 +228,7 @@ public:
   bool add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
                        const char *chat_msg);
   bool add_option_annotation(const HSTP_Annotation &annotation);
+  bool add_option_reaction(uint32_t reaction);
   bool add_option_stream_title(const char *stream_title)
   {
     return add_option_generic_string(3, stream_title);
@@ -354,6 +355,11 @@ signals:
                                   uint32_t timestamp);
 
   /*
+   * Emits when a reaction is received
+   */
+  void received_reaction(const char alias[ALIAS_SIZE], uint32_t reaction);
+
+  /*
    * Emitted whenever a new fps is received
    */
   void received_fps(const char alias[ALIAS_SIZE], uint32_t fps);
@@ -408,6 +414,10 @@ private:
   void handle_stream_start_time(HANDLER_PARAMS)
   {
     handle_uint32(alias, opt, &HstpProcessor::received_stream_start_time);
+  }
+  void handle_reaction(HANDLER_PARAMS)
+  {
+    handle_uint32(alias, opt, &HstpProcessor::received_reaction);
   }
 
   void handle_annotation(HANDLER_PARAMS); // 5

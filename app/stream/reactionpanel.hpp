@@ -8,6 +8,7 @@
 
 class ReactionPanel : public QWidget
 {
+  Q_OBJECT
 public:
   enum class Reaction
   {
@@ -24,16 +25,20 @@ public:
 
   ReactionPanel(QWidget *parent);
 
+  static QString getReactionAssetName(Reaction reaction);
+
+signals:
+  void reactionClicked(Reaction reaction);
+
 private:
   std::vector<Reaction> reactionList = {
-      Reaction::ThumbsUp,  Reaction::Heart,   Reaction::Laugh,
-      Reaction::Surprised, Reaction::Fire,    Reaction::Sob,
+      Reaction::ThumbsUp,  Reaction::Heart,      Reaction::Laugh,
+      Reaction::Surprised, Reaction::Fire,       Reaction::Sob,
       Reaction::Angry,     Reaction::ThumbsDown, Reaction::Skull};
 
-  const std::vector<std::string> reactionStringList = {
-      "thumbsup", "heart", "laugh",   "surprised", "fire",
-      "sob",      "angry", "thumbsdown", "skull"};
-
+  static const std::vector<std::string> reactionStringList;
 };
+
+
 
 #endif // REACTIONPANEL_H

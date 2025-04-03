@@ -42,8 +42,9 @@ bool StreamWindow::set_up()
   QGridLayout *containerLayout = new QGridLayout(videoAnnotationContainer);
   containerLayout->setContentsMargins(0, 0, 0, 0);
   containerLayout->setSpacing(0);
-  // Add both widgets in the same cell.
+  // Add all widgets in the same cell.
   containerLayout->addWidget(stream_display, 0, 0);
+  containerLayout->addWidget(reaction_display, 0, 0);
   containerLayout->addWidget(annotation_display, 0, 0);
 
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -155,6 +156,25 @@ void StreamWindow::connect_signals_and_slots()
             [=, this](const char alias[ALIAS_SIZE], uint32_t viewers)
             { this->viewer_count_updated(viewers); });
 
+  // connect reaction sent from stream info
+  connect (stream_info, &StreamInfo::renderAndSendReaction, this,
+            [=, this](ReactionPanel::Reaction reaction)
+            {
+              reaction_display->addReaction(reaction);
+              this->send_reaction(reaction);
+            });
+
+  // connect host to receive reactions
+  if (is_host())
+    connect(servh->server.get(), &MercuryServer::reaction_received, this,
+            &StreamWindow::new_reaction);
+
+  // connect reaction received by client (to then display for client)
+  if (is_client())
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_reaction, this,
+            &StreamWindow::new_reaction);
+
   // connect stream title for client
   if (is_client())
     connect(servc->client->hstp_processor().get(),
@@ -223,11 +243,12 @@ void StreamWindow::initialize_primary_ui_widgets()
   stream_display = new StreamDisplay(this, video_func, audio_func);
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+  reaction_display = new ReactionDisplay(this);
+
   annotation_display = new AnnotationDisplay(this);
   annotation_display->installEventFilter(this);
 
   stream_info = new StreamInfo(this, "Host\'s Stream", "Host");
-
 
   if (is_host() && servh->stream_name.size() > 0)
     stream_info->setStreamTitle(servh->stream_name.c_str());
@@ -243,6 +264,7 @@ void StreamWindow::stream_fully_initialized()
 {
   qInfo("Beginning stream playback.");
   stream_display->begin_playback();
+  reaction_display->addReaction(ReactionPanel::Reaction::ThumbsUp);
 }
 
 void StreamWindow::closeEvent(QCloseEvent *event)
@@ -347,6 +369,15 @@ void StreamWindow::send_chat_message(string message)
     servc->client->send_chat_message(message);
 }
 
+void StreamWindow::send_reaction(ReactionPanel::Reaction reaction)
+{
+  qDebug() << "reaction received in streamwindow.cpp";
+  if (is_host())
+    servh->server->forward_reaction(-1, static_cast<uint32_t>(reaction));
+  if (is_client())
+    servc->client->send_reaction(static_cast<uint32_t>(reaction));
+}
+
 void StreamWindow::send_annotation(HSTP_Annotation annotation)
 {
   if (is_host())
@@ -409,6 +440,11 @@ void StreamWindow::stream_start_time_changed(uint32_t timestamp)
 void StreamWindow::new_chat_message(string alias, string msg)
 {
   side_pane->get_chat_tab()->new_chat_message({alias, msg});
+}
+
+void StreamWindow::new_reaction(string alias, uint32_t reaction)
+{
+  reaction_display->addReaction(static_cast<ReactionPanel::Reaction>(reaction));
 }
 
 void StreamWindow::viewer_connected(int id, std::string _alias)

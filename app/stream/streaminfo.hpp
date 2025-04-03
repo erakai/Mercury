@@ -1,5 +1,7 @@
 #ifndef STREAMINFO_H
 #define STREAMINFO_H
+#include "reactionpanel.hpp"
+
 #include <QGridLayout>
 #include <QLabel>
 #include <QPropertyAnimation>
@@ -7,6 +9,8 @@
 
 class StreamInfo : public QWidget
 {
+  Q_OBJECT;
+
 public:
   StreamInfo(QWidget *parent, const QString &stream_title,
              const QString &host_name);
@@ -22,8 +26,16 @@ public:
   std::string getStreamTitle();
   uint32_t getStreamStartTime();
 
+signals:
+  void renderAndSendReaction(ReactionPanel::Reaction reaction);
+
 private slots:
   void updateStreamDuration();
+  void handleReactionPanelButtonPressed(ReactionPanel::Reaction reaction)
+  {
+    qDebug()  << "in handleReactionPanelButtonPresseed, about to emit sendReaction";
+    emit renderAndSendReaction(reaction);
+  }
 
 private:
   // void setupLayout();

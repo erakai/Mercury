@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
+#include <QtCore/qnamespace.h>
 #include <QtDebug>
 #include <QMouseEvent>
 #include <QAudioSink>

@@ -123,7 +123,7 @@ void HostStreamWindow::open_stream_window()
     hasher.addData(password);
 
     hashedPassword = hasher.result();
-    qDebug() << hashedPassword.toStdString();
+    // qDebug() << hashedPassword.toStdString();
   }
 
   std::shared_ptr<HostService> serv =

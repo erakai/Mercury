@@ -1,4 +1,5 @@
 #include "streamdisplay.hpp"
+#include <QtCore/qnamespace.h>
 #include <QtMultimedia/qaudiosink.h>
 #include "config/mconfig.hpp"
 
@@ -34,6 +35,10 @@ StreamDisplay::StreamDisplay(QWidget *parent,
   // Instead of a QVideoWidget, create a QGraphicsView and scene.
   graphics_view = new QGraphicsView(this);
   graphics_scene = new QGraphicsScene(this);
+
+  graphics_view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  graphics_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
   graphics_view->setScene(graphics_scene);
 
   // Create the QGraphicsVideoItem and add it to the scene.

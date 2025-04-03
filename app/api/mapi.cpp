@@ -19,8 +19,6 @@ QNetworkAccessManager *networkManager()
 void mercury::add_public_stream(QString streamName, int hostTCP,
                                 QString streamIP)
 {
-  std::cout << "Adding public stream" << std::endl;
-
   QUrl requestURL(BASE_URL + "/addstream");
 
   QJsonObject json;
@@ -41,7 +39,20 @@ void mercury::add_public_stream(QString streamName, int hostTCP,
 
 void mercury::delete_public_stream(QString streamIP)
 {
-  // TODO: implement
+  QUrl requestURL(BASE_URL + "/deletestream");
+
+  QJsonObject json;
+  json["streamIP"] = streamIP;
+
+  QJsonDocument doc(json);
+  QByteArray payload = doc.toJson();
+
+  QNetworkRequest request(requestURL);
+  request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+  QNetworkReply *reply = networkManager()->post(request, payload);
+  QObject::connect(reply, &QNetworkReply::finished,
+                   [reply]() { reply->deleteLater(); });
 }
 
 void mercury::fetch_public_streams()

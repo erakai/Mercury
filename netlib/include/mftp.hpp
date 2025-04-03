@@ -93,5 +93,5 @@ Host-side functionality.
 NETLIB_EXPORT bool send_datagram(std::shared_ptr<QUdpSocket> sock,
                                  std::vector<QHostAddress> dest_ip,
                                  std::vector<int> dest_port,
-                                 MFTP_Header &header, QImage video_image,
+                                 MFTP_Header &header, QByteArray &video_image,
                                  QByteArray &audio);

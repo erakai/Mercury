@@ -120,6 +120,40 @@ bool HstpHandler::add_option_annotation(const HSTP_Annotation &annotation)
   return true;
 }
 
+bool HstpHandler::add_option_clear_annotations()
+{
+  if (get_status() != MSG_STATUS::IN_PROGRESS)
+  {
+    qCritical("Unable to add option, uninitalized message.");
+    return false;
+  }
+
+  Option opt;
+  opt.type = 12;
+  opt.len = 0;
+  m_hdr->options.push_back(opt);
+  return true;
+}
+
+bool HstpHandler::add_option_enable_annotations(bool enabled)
+{
+  if (get_status() != MSG_STATUS::IN_PROGRESS)
+  {
+    qCritical("Unable to add option, uninitalized message.");
+    return false;
+  }
+
+  Option opt;
+  opt.type = 13;
+  opt.len = 1;
+  opt.data = std::shared_ptr<char[]>(new char[opt.len]);
+
+  char *ptr = opt.data.get();
+  std::memcpy(ptr, &enabled, sizeof(bool));
+  m_hdr->options.push_back(opt);
+  return true;
+}
+
 bool HstpHandler::add_option_reaction(uint32_t reaction)
 {
   if (get_status() != MSG_STATUS::IN_PROGRESS)
@@ -442,6 +476,12 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
     case 11: // reaction
       handle_reaction(hdr_ptr->sender_alias, opt);
       break;
+    case 12:
+      handle_clear_annotations(hdr_ptr->sender_alias, opt);
+      break;
+    case 13:
+      handle_enable_annotations(hdr_ptr->sender_alias, opt);
+      break;
     default:
       handle_default(hdr_ptr->sender_alias, opt);
     }
@@ -561,6 +601,25 @@ void HstpProcessor::handle_annotation(HANDLER_PARAMS)
   HSTP_Annotation annotation(opt.data);
 
   emit received_annotation(alias, annotation);
+}
+
+void HstpProcessor::handle_clear_annotations(HANDLER_PARAMS)
+{
+  emit received_clear_annotations();
+}
+
+void HstpProcessor::handle_enable_annotations(HANDLER_PARAMS)
+{
+  if (!opt.data || opt.len == 0)
+  {
+    qCritical("Something went wrong with handling enable_annotations");
+    return;
+  }
+
+  bool enabled;
+  std::memcpy(&enabled, opt.data.get(), sizeof(bool));
+
+  emit received_enable_annotations(enabled);
 }
 
 void HstpProcessor::handle_performance_request(HANDLER_PARAMS)

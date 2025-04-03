@@ -127,3 +127,18 @@ Options
     - float loss (as a percent - lower is better)
     - float fps (true frames display per second recent average) (float = 4 bytes)
 
+(ID: 12) Clear Annotations
+
+  Only sent by the host. Clears all annotations on each clients' and the host's screen.
+
+  Len: 0
+  Data: nothing
+
+(ID: 13) Enable Annotations
+
+  Only sent by the host. Enables or disables annotations for a given client.
+
+  Len: 1
+  Data:
+    - bool enabled
+

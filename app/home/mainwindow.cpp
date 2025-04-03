@@ -3,6 +3,7 @@
 #include "joinstreamwindow.h"
 #include "settingswindow.h"
 #include "utils.h"
+#include "../api/mapi.hpp"
 
 #include <iostream>
 
@@ -23,6 +24,8 @@ void MainWindow::updateSettingsButton(const QString &alias)
 void MainWindow::on_streamBrowserButton_clicked()
 {
   std::cout << "stream browser opening!" << std::endl;
+  // TODO: open stream browser
+  mercury::add_public_stream("Example Stream", 132312, "example ip");
 }
 
 void MainWindow::on_settingsButton_clicked()

@@ -33,6 +33,7 @@ qt_add_executable(mercury
         stream/painttoolwidget.hpp
         config/filedownloader.hpp
         config/filedownloader.cpp
+        api/mapi.hpp api/mapi.cpp
 )
 
 # Qt set up

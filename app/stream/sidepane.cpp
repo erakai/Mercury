@@ -1,5 +1,6 @@
 #include "sidepane.hpp"
 #include <QtWidgets/qlistwidget.h>
+#include <QMouseEvent>
 
 SidePane::SidePane(QWidget *parent) : QTabWidget(parent)
 {
@@ -55,10 +56,24 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
   QHBoxLayout *inputLayout = new QHBoxLayout();
 
   messageInput = new QLineEdit(this);
-  QPalette inputPalette = messageInput->palette();
-  inputPalette.setColor(QPalette::Base, QColor(197, 197, 197));
-  inputPalette.setColor(QPalette::Text, Qt::black);
-  messageInput->setPalette(inputPalette);
+  messageInput->setPlaceholderText("Send a message");
+  messageInput->setStyleSheet(R"(
+  QLineEdit {
+    border: 1px solid;
+    border-radius: 5px;
+    background-color: rgb(34, 34, 34);
+    color: white;
+    height: 30px;
+  }
+
+  QLineEdit:focus {
+    border: 1px solid rgb(54, 120, 156)
+  }
+)");
+  // QPalette inputPalette = messageInput->palette();
+  //  inputPalette.setColor(QPalette::Base, QColor(197, 197, 197));
+  //  inputPalette.setColor(QPalette::Text, Qt::white);
+  //  messageInput->setPalette(inputPalette);
 
   inputLayout->addWidget(messageInput);
 

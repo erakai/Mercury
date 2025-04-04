@@ -60,8 +60,6 @@ bool StreamWindow::set_up()
   annotation_display->setSizePolicy(QSizePolicy::Expanding,
                                     QSizePolicy::Expanding);
 
-  annotation_display->raise();
-
   // Create the PaintToolWidget and add it at the top of the display.
   paint_tool = new PaintToolWidget(this);
   main_layout->addWidget(paint_tool, 0, 0);

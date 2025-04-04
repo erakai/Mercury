@@ -41,6 +41,9 @@ private:
   QListWidget *chatBox;
   QLineEdit *messageInput;
   string displayName;
+
+protected:
+  bool eventFilter(QObject *watched, QEvent *event) override;
 };
 
 class ViewerListTab : public QWidget

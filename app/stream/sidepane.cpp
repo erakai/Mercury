@@ -1,6 +1,8 @@
 #include "sidepane.hpp"
 #include <QtWidgets/qlistwidget.h>
 #include <QMouseEvent>
+#include <iostream>
+#include <QApplication>
 
 SidePane::SidePane(QWidget *parent) : QTabWidget(parent)
 {
@@ -43,7 +45,7 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
   chatBox = new QListWidget(this);
 
   QPalette chatBoxPalette = chatBox->palette();
-  chatBoxPalette.setColor(QPalette::Base, QColor(64, 68, 69));
+  chatBoxPalette.setColor(QPalette::Base, QColor(34, 34, 34));
   chatBoxPalette.setColor(QPalette::Text, QColor(221, 231, 235));
   chatBox->setPalette(chatBoxPalette);
 
@@ -64,24 +66,20 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
     background-color: rgb(34, 34, 34);
     color: white;
     height: 30px;
+    padding-left: 10px;
   }
 
   QLineEdit:focus {
     border: 1px solid rgb(54, 120, 156)
   }
 )");
-  // QPalette inputPalette = messageInput->palette();
-  //  inputPalette.setColor(QPalette::Base, QColor(197, 197, 197));
-  //  inputPalette.setColor(QPalette::Text, Qt::white);
-  //  messageInput->setPalette(inputPalette);
 
   inputLayout->addWidget(messageInput);
-
-  // QPushButton *sendButton = new QPushButton("Send", this);
-  // inputLayout->addWidget(sendButton);
-
   layout->addLayout(inputLayout);
   setLayout(layout);
+
+  connect(messageInput, &QLineEdit::editingFinished, this,
+          [this]() { messageInput->clearFocus(); });
 
   connect(messageInput, &QLineEdit::returnPressed, this,
           [this]()
@@ -89,6 +87,29 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
             render_and_send_message(
                 messageInput->text().trimmed().toStdString());
           });
+
+  qApp->installEventFilter(this);
+}
+
+bool ChatTab::eventFilter(QObject *watched, QEvent *event)
+{
+  if (event->type() == QEvent::MouseButtonPress)
+  {
+    if (messageInput && messageInput->hasFocus())
+    {
+      QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+      QPoint globalPos = mouseEvent->globalPosition().toPoint(); // Qt 6 version
+
+      QWidget *clickedWidget = QApplication::widgetAt(globalPos);
+
+      if (clickedWidget != messageInput)
+      {
+        messageInput->clearFocus();
+      }
+    }
+  }
+
+  return QWidget::eventFilter(watched, event);
 }
 
 void ChatTab::new_chat_message(ChatMessage msg)

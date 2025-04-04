@@ -1,8 +1,11 @@
 #include "streaminfo.hpp"
+#include "stream/mutestreambutton.hpp"
+#include "stream/volumecontrolwidget.hpp"
 #include "streamwindow.hpp"
 
 #include <QDateTime>
 #include <QPropertyAnimation>
+#include <cstring>
 #include <qevent.h>
 
 StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
@@ -53,6 +56,26 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   viewer_count_container->setSizePolicy(QSizePolicy::Fixed,
                                         QSizePolicy::Preferred);
   // viewer_count_layout->addStretch();
+
+  // < Mute/Volume Control ---
+  if (stream_window->is_client())
+  {
+    volume_control = new VolumeControlWidget(this);
+    basic_stream_info_layout->addWidget(volume_control);
+
+    connect(volume_control, &VolumeControlWidget::volume_changed, this,
+            [this](int volume) { emit volume_changed(volume); });
+  }
+
+  if (stream_window->is_host())
+  {
+    mute_stream_btn = new MuteStreamButton(this);
+    basic_stream_info_layout->addWidget(mute_stream_btn);
+
+    connect(mute_stream_btn, &MuteStreamButton::mute_status_changed, this,
+            [this](bool is_muted) { emit mute_status_changed(is_muted); });
+  }
+  // --- Mute/Volume Controli />
 
   basic_stream_info_layout->addWidget(stream_title_label);
   basic_stream_info_layout->addWidget(host_name_container);

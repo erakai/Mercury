@@ -1,6 +1,8 @@
 #ifndef STREAMINFO_H
 #define STREAMINFO_H
 #include "reactionpanel.hpp"
+#include "stream/mutestreambutton.hpp"
+#include "stream/volumecontrolwidget.hpp"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -29,6 +31,9 @@ public:
 signals:
   void renderAndSendReaction(ReactionPanel::Reaction reaction);
 
+  void volume_changed(int volume);         // only for clients
+  void mute_status_changed(bool is_muted); // only for hosts
+
 private slots:
   void updateStreamDuration();
   void handleReactionPanelButtonPressed(ReactionPanel::Reaction reaction)
@@ -44,6 +49,8 @@ private:
   bool isExtraInfoOpen;
   QHBoxLayout *main_layout;
   QVBoxLayout *basic_stream_info_layout;
+  VolumeControlWidget *volume_control;
+  MuteStreamButton *mute_stream_btn;
   QLabel *stream_title_label;
   QLabel *viewer_count_icon;
   QLabel *viewer_count_label;

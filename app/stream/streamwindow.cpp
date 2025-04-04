@@ -2,6 +2,7 @@
 #include "../api/mapi.hpp"
 #include "../home/utils.h"
 #include "config/mconfig.hpp"
+#include "home/toastnotification.h"
 #include "hstp.hpp"
 #include "singleton/videomanager.h"
 #include <QApplication>
@@ -9,6 +10,7 @@
 #include <QScreen>
 #include <QtCore/qlogging.h>
 #include <QtCore/qstringview.h>
+#include <QtCore/qtypes.h>
 #include <QtDebug>
 #include <QMouseEvent>
 #include <QAudioSink>
@@ -57,7 +59,6 @@ bool StreamWindow::set_up()
                                     QSizePolicy::Expanding);
 
   annotation_display->raise();
-
 
   // Create the PaintToolWidget and add it at the top of the display.
   paint_tool = new PaintToolWidget(this);
@@ -259,6 +260,11 @@ void StreamWindow::initialize_primary_ui_widgets()
   annotation_display->installEventFilter(this);
 
   stream_info = new StreamInfo(this, "Host\'s Stream", "Host");
+  connect(stream_info, &StreamInfo::volume_changed, this,
+          [this](int volume) { stream_display->set_volume(volume); });
+
+  connect(stream_info, &StreamInfo::mute_status_changed, this,
+          [this](bool is_muted) { has_host_muted_stream = is_muted; });
 
   if (is_host() && servh->stream_name.size() > 0)
     stream_info->setStreamTitle(servh->stream_name.c_str());
@@ -322,6 +328,20 @@ bool StreamWindow::provide_next_frame(QImage &next_video,
     // acquire audio frame from desktop
     int audio_msec = 1000 / FPS;
     QByteArray audio_array = AudioManager::instance().get_lastmsec(audio_msec);
+
+    if (has_host_muted_stream)
+    {
+      // tell the user to unmute?
+      if (AudioManager::is_audio_loud(audio_array) &&
+          QDateTime::currentMSecsSinceEpoch() - time_since_last_mutetoast >=
+              mutetoast_cooldown_ms)
+      {
+        ToastNotification::showToast(this, "You are currently muted!", 3000);
+        time_since_last_mutetoast = QDateTime::currentMSecsSinceEpoch();
+      }
+      audio_array = {};
+    }
+
     if (status == VideoManager::VideoImageStatus::SUCCESS)
     {
       servh->server->send_frame("desktop", audio_array, QVideoFrame(img));

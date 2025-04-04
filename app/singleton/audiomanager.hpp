@@ -27,6 +27,7 @@ public:
   void stop_recording();
 
   bool is_recording();
+  static bool is_audio_loud(QByteArray &audio, float threshold = 0.05);
 
   void set_audio_device(QAudioDevice &audio_device);
 
@@ -56,6 +57,11 @@ private:
   QBuffer _buffer_device;
   QMutex _mutex;
   QAudioDevice *_audio_device;
+
+  bool _has_system_audio;
+  QAudioSource *_system_source;
+  QByteArray _system_bytearray;
+  QAudioDevice *_system_device;
 };
 
 #endif // AUDIOMANAGER_H

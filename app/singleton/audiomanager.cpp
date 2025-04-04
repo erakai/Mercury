@@ -60,6 +60,36 @@ bool AudioManager::is_recording()
   return _is_recording;
 }
 
+bool AudioManager::is_audio_loud(QByteArray &audio_data, float threshold)
+{
+  if (audio_data.size() < 2)
+    return false; // Not enough data
+
+  size_t num_samples = audio_data.size() / 2;
+  double sum_squares = 0.0;
+
+  // Pointer to raw audio bytes
+  const int16_t *samples =
+      reinterpret_cast<const int16_t *>(audio_data.constData());
+
+  for (size_t i = 0; i < num_samples; i++)
+  {
+    int16_t sample = samples[i]; // Read 16-bit signed sample
+
+    // Normalize to [-1, 1]
+    double normalized_sample = sample / 32768.0;
+
+    // Accumulate squared sample values
+    sum_squares += normalized_sample * normalized_sample;
+  }
+
+  // Compute RMS
+  double rms = std::sqrt(sum_squares / num_samples);
+
+  // Compare with threshold
+  return rms > threshold;
+}
+
 void AudioManager::set_audio_device(QAudioDevice &audio_device)
 {
   if (!audio_device.isFormatSupported(_format))

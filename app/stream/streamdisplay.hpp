@@ -1,6 +1,7 @@
 #pragma once
 
 #include "home/mainwindow.hpp"
+#include "volumecontrolwidget.hpp"
 
 #include <QAudioFormat>
 #include <QAudioOutput>
@@ -38,6 +39,8 @@ public:
 
   // Close everything
   void stop_playback();
+
+  void set_volume(int volume);
 
 public slots:
   // Called FPS times a second

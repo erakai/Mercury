@@ -2,6 +2,7 @@
 #include <QtCore/qbuffer.h>
 #include <QtMultimedia/qaudiosink.h>
 #include "config/mconfig.hpp"
+#include "stream/streamwindow.hpp"
 
 StreamDisplay::StreamDisplay(
     QWidget *parent, function<bool(QImage &, QByteArray &)> get_next_frame)
@@ -73,6 +74,12 @@ void StreamDisplay::stop_playback()
   video_player->stop();
   audio_sink->stop();
   audio_buffer->close();
+}
+
+void StreamDisplay::set_volume(int volume)
+{
+  if (audio_sink)
+    audio_sink->setVolume((qreal) volume / 100);
 }
 
 void StreamDisplay::set_new_fps(int new_fps)

@@ -12,9 +12,9 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
                        const QString &host_name)
 {
   StreamWindow *stream_window = qobject_cast<StreamWindow *>(parent);
-  main_layout = new QHBoxLayout(this);
+  main_layout = new QHBoxLayout;
   this->setLayout(main_layout);
-  basic_stream_info_layout = new QVBoxLayout();
+  basic_stream_info_layout = new QVBoxLayout;
 
   stream_title_label = new QLabel(stream_title, this);
   stream_title_label->setStyleSheet("    color: #f0f0f0;"  // Almost white text
@@ -27,7 +27,7 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   auto *host_name_container = new QWidget(this);
   host_name_container->setStyleSheet(
       "border-radius: 10px; background-color: #333333;");
-  auto *host_name_layout = new QHBoxLayout(host_name_container);
+  auto *host_name_layout = new QHBoxLayout;
   host_name_container->setLayout(host_name_layout);
   host_name_layout->addWidget(host_name_label);
   host_name_container->setSizePolicy(QSizePolicy::Fixed,
@@ -49,7 +49,7 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   auto *viewer_count_container = new QWidget(this);
   viewer_count_container->setStyleSheet(
       "border-radius: 10px; background-color: #333333;");
-  auto *viewer_count_layout = new QHBoxLayout(viewer_count_container);
+  auto *viewer_count_layout = new QHBoxLayout;
   viewer_count_container->setLayout(viewer_count_layout);
   viewer_count_layout->addWidget(viewer_count_icon);
   viewer_count_layout->addWidget(viewer_count_label);
@@ -163,6 +163,18 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   extra_info_sidebar_animation->setDuration(300);
 }
 
+void StreamInfo::initializeControlPanel()
+{
+  StreamControlPanel *stream_control_panel = new StreamControlPanel(this);
+  main_layout->insertWidget(2, stream_control_panel);
+  stream_control_panel->stackUnder(extra_info_sidebar);
+
+  // connect buttons
+  stream_control_panel->setReactionsEnabledCheckBox(reactions_enabled);
+  connect(stream_control_panel, &StreamControlPanel::reactionsEnabledChanged,
+          this, &StreamInfo::handleReactionsEnabledChanged);
+}
+
 void StreamInfo::toggleExtraInfoSidebar()
 {
   int sidebarWidth = extra_info_sidebar->width();
@@ -245,6 +257,13 @@ void StreamInfo::setStreamStartTime(uint32_t timestamp)
   stream_start_time = new QDateTime(QDateTime::fromSecsSinceEpoch(timestamp));
   QString formattedDt = stream_start_time->toString("h:mm AP, MMMM d, yyyy");
   stream_start_time_label->setText("Stream Start: " + formattedDt);
+}
+
+void StreamInfo::setReactionsEnabled(bool enabled)
+{
+  // enable / disable reaction panel
+  reactions_enabled = enabled;
+  setReactionsEnabledLabel(enabled);
 }
 
 void StreamInfo::setReactionsEnabledLabel(bool enabled)

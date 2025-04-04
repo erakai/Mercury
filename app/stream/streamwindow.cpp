@@ -11,6 +11,7 @@
 #include <QtCore/qlogging.h>
 #include <QtCore/qstringview.h>
 #include <QtCore/qtypes.h>
+#include <QtCore/qnamespace.h>
 #include <QtDebug>
 #include <QMouseEvent>
 #include <QAudioSink>
@@ -45,7 +46,7 @@ bool StreamWindow::set_up()
 
   // Create a container widget to stack the stream display and the annotation
   // display.
-  QWidget *videoAnnotationContainer = new QWidget(this);
+  videoAnnotationContainer = new QWidget(this);
   QGridLayout *containerLayout = new QGridLayout(videoAnnotationContainer);
   containerLayout->setContentsMargins(0, 0, 0, 0);
   containerLayout->setSpacing(0);
@@ -53,6 +54,7 @@ bool StreamWindow::set_up()
   containerLayout->addWidget(stream_display, 0, 0);
   containerLayout->addWidget(reaction_display, 0, 0);
   containerLayout->addWidget(annotation_display, 0, 0);
+  containerLayout->addWidget(stream_display_controls, 0, 0, Qt::AlignBottom);
 
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   annotation_display->setSizePolicy(QSizePolicy::Expanding,
@@ -80,13 +82,7 @@ bool StreamWindow::set_up()
   |-20% info------------------|-------------|
   */
 
-  const int height_of_paint_bar = 1;
-  main_layout->setRowStretch(0, height_of_paint_bar);
-  main_layout->setRowStretch(1, 80 - height_of_paint_bar);
-  main_layout->setRowStretch(2, 20);
-
-  main_layout->setColumnStretch(0, 75);
-  main_layout->setColumnStretch(1, 25);
+  this->setStreamDisplayMode(0);
 
   // Center this window
   move(QGuiApplication::screens().at(0)->geometry().center() -
@@ -102,6 +98,51 @@ bool StreamWindow::set_up()
 
   this->showMaximized(); // Sets Window size to max
   return true;
+}
+
+void StreamWindow::setStreamDisplayMode(int layout)
+{
+  // 0 default, 1 fullscreen, 2 chat minimized??
+  if (layout == 0) // default
+  {
+    const int height_of_paint_bar = 1;
+    main_layout->setRowStretch(0, height_of_paint_bar);
+    main_layout->setRowStretch(1, 80 - height_of_paint_bar);
+    main_layout->setRowStretch(2, 20);
+    main_layout->setColumnStretch(0, 75);
+    main_layout->setColumnStretch(1, 25);
+    paint_tool->show();
+    side_pane->show();
+    stream_info->show();
+  }
+  else if (layout == 1) // fullscreen
+  {
+    paint_tool->hide();
+    side_pane->hide();
+    stream_info->hide();
+    main_layout->setRowStretch(0, 0);
+    main_layout->setRowStretch(1, 100);
+    main_layout->setRowStretch(2, 0);
+    main_layout->setColumnStretch(0, 100);
+    main_layout->setColumnStretch(1, 0);
+    videoAnnotationContainer->showFullScreen();
+  }
+  else
+  {
+    qDebug() << "other layouts to be implemented";
+  }
+}
+
+void StreamWindow::keyPressEvent(QKeyEvent *event)
+{
+  if (event->key() == Qt::Key_Escape)
+  {
+    setStreamDisplayMode(0);
+  }
+  else if (event->key() == Qt::Key_F)
+  {
+    setStreamDisplayMode(1);
+  }
 }
 
 void StreamWindow::configure_menu_and_tool_bar()
@@ -120,6 +161,15 @@ void StreamWindow::connect_signals_and_slots()
   connect(stop_or_leave_stream_action, &QAction::triggered, this,
           &StreamWindow::shut_down_window);
 
+  // toggle fullscreen
+  connect(stream_display_controls,
+          &StreamDisplayControls::fullScreenButtonPressed, this,
+          [this]()
+          {
+            streamDisplayMode = streamDisplayMode == 1 ? 0 : 1;
+            this->setStreamDisplayMode(streamDisplayMode);
+          });
+
   // connect socket disconnected to this window closing
   if (is_client())
     connect(servc->client.get(), &MercuryClient::client_disconnected, this,
@@ -134,6 +184,21 @@ void StreamWindow::connect_signals_and_slots()
   if (is_host())
     connect(servh->server.get(), &MercuryServer::annotation_received, this,
             &StreamWindow::new_annotation);
+
+  // connect annotation clear button
+  if (is_host())
+  {
+    paint_tool->addClearButton();
+    connect(paint_tool, &PaintToolWidget::clearButtonClicked, this,
+            &StreamWindow::onClearButtonClicked);
+  }
+
+  if (is_client())
+  {
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_clear_annotations, this,
+            [=, this]() { annotation_display->clear(); });
+  }
 
   if (is_client())
     connect(servc->client->hstp_processor().get(),
@@ -168,6 +233,11 @@ void StreamWindow::connect_signals_and_slots()
             [=, this](const char alias[ALIAS_SIZE], uint32_t viewers)
             { this->viewer_count_updated(viewers); });
 
+  if (is_host())
+    connect(stream_info, &StreamInfo::reactionsEnabledChanged, this,
+            [=, this](bool enabled)
+            { this->reaction_permission_changed(enabled); });
+
   // connect reaction sent from stream info
   connect(stream_info, &StreamInfo::renderAndSendReaction, this,
           [=, this](ReactionPanel::Reaction reaction)
@@ -187,6 +257,12 @@ void StreamWindow::connect_signals_and_slots()
             &HstpProcessor::received_reaction, this,
             &StreamWindow::new_reaction);
 
+  // connect reaction status disable/enable
+  if (is_client())
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_enable_annotations, this,
+            &StreamWindow::onAnnotationStatusChanged);
+
   // connect stream title for client
   if (is_client())
     connect(servc->client->hstp_processor().get(),
@@ -196,6 +272,12 @@ void StreamWindow::connect_signals_and_slots()
               this->stream_name_changed(std::string(alias),
                                         std::string(stream_title));
             });
+
+  if (is_client()) // set reactions enable/disable
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_reaction_permission, this,
+            [=, this](const char alias[ALIAS_SIZE], uint32_t enabled)
+            { this->reaction_permission_changed(enabled); });
 
   // connect stream start time for client
   if (is_client())
@@ -243,6 +325,8 @@ void StreamWindow::initialize_primary_ui_widgets()
   {
     side_pane->initialize_viewer_list_tab(alias);
     side_pane->initialize_server_performance_tab(servh->server);
+    connect(side_pane->viewer_list, &ViewerListTab::viewer_checked, this,
+            &StreamWindow::onAnnotationCheckbox);
   }
 
   if (is_client())
@@ -259,6 +343,8 @@ void StreamWindow::initialize_primary_ui_widgets()
   annotation_display = new AnnotationDisplay(this);
   annotation_display->installEventFilter(this);
 
+  stream_display_controls = new StreamDisplayControls(this);
+
   stream_info = new StreamInfo(this, "Host\'s Stream", "Host");
   connect(stream_info, &StreamInfo::volume_changed, this,
           [this](int volume) { stream_display->set_volume(volume); });
@@ -273,6 +359,8 @@ void StreamWindow::initialize_primary_ui_widgets()
     stream_info->setViewerCount(servh->viewer_count);
     stream_info->setHostName(alias.c_str());
     stream_info->setStreamStartTime(servh->start_timestamp);
+    stream_info->setReactionsEnabled(servh->reactions_enabled);
+    stream_info->initializeControlPanel();
   }
 }
 
@@ -387,7 +475,6 @@ void StreamWindow::send_chat_message(string message)
 
 void StreamWindow::send_reaction(ReactionPanel::Reaction reaction)
 {
-  qDebug() << "reaction received in streamwindow.cpp";
   if (is_host())
     servh->server->forward_reaction(-1, static_cast<uint32_t>(reaction));
   if (is_client())
@@ -453,6 +540,25 @@ void StreamWindow::stream_start_time_changed(uint32_t timestamp)
   }
 }
 
+void StreamWindow::reaction_permission_changed(uint32_t enabled)
+{
+  // if (is_client())
+  // {
+  //   qDebug() << "reaction perm changed, it is now"
+  //            << static_cast<bool>(enabled);
+  // }
+  if (is_host())
+  {
+    servh->reactions_enabled = enabled;
+    HstpHandler temp_handler;
+    temp_handler.init_msg(alias.c_str());
+    temp_handler.add_option_reaction_permission(enabled);
+    std::shared_ptr<QByteArray> bytes = temp_handler.output_msg();
+    servh->server->send_hstp_message_to_all_clients(*bytes);
+  }
+  stream_info->setReactionsEnabled(enabled);
+}
+
 void StreamWindow::new_chat_message(string alias, string msg)
 {
   side_pane->get_chat_tab()->new_chat_message({alias, msg});
@@ -468,7 +574,7 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   servh->viewer_count++;
   viewer_count_updated(servh->viewer_count);
 
-  side_pane->get_viewer_list_tab()->viewer_joined(_alias);
+  side_pane->get_viewer_list_tab()->viewer_joined(id, _alias);
 
   Client &client = servh->server->get_client(id);
   client.handler.init_msg(alias.c_str());
@@ -477,6 +583,9 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
       stream_info->getStreamStartTime());
   client.handler.add_option_viewer_count(servh->viewer_count);
   client.handler.add_option_fps(FPS);
+  // qDebug() << "viewer connected setting reaction permisson to: "
+  //          << servh->reactions_enabled;
+  client.handler.add_option_reaction_permission(servh->reactions_enabled);
   client.handler.output_msg_to_socket(client.hstp_sock);
 }
 
@@ -485,7 +594,7 @@ void StreamWindow::viewer_disconnected(int id, std::string _alias)
   servh->viewer_count--;
   viewer_count_updated(servh->viewer_count);
 
-  side_pane->get_viewer_list_tab()->viewer_left(_alias);
+  side_pane->get_viewer_list_tab()->viewer_left(id, _alias);
 }
 
 void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
@@ -584,4 +693,30 @@ void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
                                   currentColor.green(), currentColor.blue(),
                                   thickness));
   points.clear();
+}
+
+void StreamWindow::onAnnotationCheckbox(int id, bool checked)
+{
+  if (is_client())
+    return;
+
+  servh->server->enable_annotations(id, checked);
+}
+
+void StreamWindow::onAnnotationStatusChanged(bool checked)
+{
+  annotation_display->canAnnotate = checked;
+
+  ToastNotification::showToast(
+      this, checked ? "Annotations Enabled" : "Annotations Disabled", 1000,
+      ToastType::NOTICE);
+}
+
+void StreamWindow::onClearButtonClicked()
+{
+  if (is_client())
+    return;
+
+  annotation_display->clear();
+  servh->server->clear_annotations();
 }

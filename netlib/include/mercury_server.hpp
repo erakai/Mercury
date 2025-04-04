@@ -32,6 +32,9 @@ struct NETLIB_EXPORT Client
   HstpHandler handler;
   std::shared_ptr<HstpProcessor> processor; // must be pointer
   std::shared_ptr<QTcpSocket> hstp_sock;
+
+  // Whether or not we allow annotations
+  bool annotationsEnabled = true;
 };
 
 class NETLIB_EXPORT MercuryServer : public QTcpServer
@@ -151,6 +154,8 @@ public slots:
 
   void forward_annotations(int sender_id, HSTP_Annotation annotation);
   void forward_reaction(int sender_id, uint32_t reaction);
+  void enable_annotations(int client_id, bool enabled);
+  void clear_annotations();
 
 signals:
   /*

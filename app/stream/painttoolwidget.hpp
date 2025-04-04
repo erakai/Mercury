@@ -19,6 +19,10 @@ public:
   QColor selectedColor() const { return m_selectedColor; }
   int brushSize() const { return m_brushSizeEdit->text().toInt(); }
   bool isEraseMode() const { return m_eraseButton->isChecked(); }
+  void addClearButton();
+
+signals:
+  void clearButtonClicked();
 
 private:
   QColor m_selectedColor;

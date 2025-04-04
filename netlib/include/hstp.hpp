@@ -241,11 +241,17 @@ public:
   {
     return add_option_generic_uint32(10, start_timestamp);
   }
-
   bool add_option_fps(uint32_t fps)
   {
     return add_option_generic_uint32(7, fps);
   }
+  bool add_option_reaction_permission(uint32_t permission)
+  {
+    return add_option_generic_uint32(12, permission);
+  }
+
+  bool add_option_clear_annotations();
+  bool add_option_enable_annotations(bool enabled);
 
   bool add_option_performance_request(uint64_t time);
   bool add_option_performance_metrics(uint16_t latency, uint32_t throughput,
@@ -360,6 +366,12 @@ signals:
   void received_reaction(const char alias[ALIAS_SIZE], uint32_t reaction);
 
   /*
+   * Emits when a reaction permission is set
+   */
+  void received_reaction_permission(const char alias[ALIAS_SIZE],
+                                    uint32_t permission);
+
+  /*
    * Emitted whenever a new fps is received
    */
   void received_fps(const char alias[ALIAS_SIZE], uint32_t fps);
@@ -376,6 +388,9 @@ signals:
   void received_performance_metrics(const char alias[ALIAS_SIZE],
                                     uint16_t latency, uint32_t throughput,
                                     float loss, float fps);
+
+  void received_clear_annotations();
+  void received_enable_annotations(bool enabled);
 
 private:
 #define HANDLER_PARAMS const char alias[ALIAS_SIZE], const Option &opt
@@ -411,13 +426,18 @@ private:
   {
     handle_uint32(alias, opt, &HstpProcessor::received_viewer_count);
   }
-  void handle_stream_start_time(HANDLER_PARAMS)
+  void handle_stream_start_time(HANDLER_PARAMS) // 10
   {
     handle_uint32(alias, opt, &HstpProcessor::received_stream_start_time);
   }
-  void handle_reaction(HANDLER_PARAMS)
+  void handle_reaction(HANDLER_PARAMS) // 11
   {
     handle_uint32(alias, opt, &HstpProcessor::received_reaction);
+  }
+
+  void handle_reaction_permission(HANDLER_PARAMS) // 12
+  {
+    handle_uint32(alias, opt, &HstpProcessor::received_reaction_permission);
   }
 
   void handle_annotation(HANDLER_PARAMS); // 5
@@ -427,4 +447,7 @@ private:
   }
   void handle_performance_request(HANDLER_PARAMS); // 8
   void handle_performance_metrics(HANDLER_PARAMS); // 9
+
+  void handle_clear_annotations(HANDLER_PARAMS);  // 12
+  void handle_enable_annotations(HANDLER_PARAMS); // 13
 };

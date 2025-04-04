@@ -178,13 +178,15 @@ void MercuryServer::validate_client(int id, bool is_start, std::string alias,
           });
 
   // Also connect client annotations for replication
-  connect(
-      new_client.processor.get(), &HstpProcessor::received_annotation, this,
-      [=, this](const char alias[ALIAS_SIZE], const HSTP_Annotation &annotation)
-      {
-        this->forward_annotations(new_client.id, annotation);
-        emit annotation_received(std::string(alias), annotation);
-      });
+  connect(new_client.processor.get(), &HstpProcessor::received_annotation, this,
+          [&new_client, this](const char alias[ALIAS_SIZE],
+                              const HSTP_Annotation &annotation)
+          {
+            if (!new_client.annotationsEnabled)
+              return;
+            this->forward_annotations(new_client.id, annotation);
+            emit annotation_received(std::string(alias), annotation);
+          });
 
   // Also connect client reactions to replicate on host and other clients
   connect(new_client.processor.get(), &HstpProcessor::received_reaction, this,
@@ -272,6 +274,32 @@ void MercuryServer::forward_annotations(int sender_id,
       client.handler.add_option_annotation(annotation);
       client.hstp_sock->write(*(client.handler.output_msg()));
     }
+  }
+}
+
+void MercuryServer::enable_annotations(int client_id, bool enabled)
+{
+
+  if (client_id < 0)
+  {
+    qCritical("Invalid client id.");
+    return;
+  }
+
+  Client &client = clients[client_id];
+  client.annotationsEnabled = enabled;
+  client.handler.init_msg(host_alias.c_str());
+  client.handler.add_option_enable_annotations(enabled);
+  client.hstp_sock->write(*(client.handler.output_msg()));
+}
+
+void MercuryServer::clear_annotations()
+{
+  for (auto &[id, client] : clients)
+  {
+    client.handler.init_msg(host_alias.c_str());
+    client.handler.add_option_clear_annotations();
+    client.hstp_sock->write(*(client.handler.output_msg()));
   }
 }
 

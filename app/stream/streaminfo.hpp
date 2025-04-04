@@ -1,8 +1,10 @@
 #ifndef STREAMINFO_H
 #define STREAMINFO_H
+
 #include "reactionpanel.hpp"
 #include "stream/mutestreambutton.hpp"
 #include "stream/volumecontrolwidget.hpp"
+#include "streamcontrolpanel.hpp"
 
 #include <QGridLayout>
 #include <QLabel>
@@ -22,14 +24,15 @@ public:
   void setViewerCount(int count);
   void setStreamTitle(const QString &stream_title);
   void setStreamStartTime(uint32_t timestamp);
-  void setReactionsEnabledLabel(bool enabled);
-  void setAnnotationsEnabledLabel(bool enabled);
+  void setReactionsEnabled(bool enabled);
   void setHostName(const QString &host_name);
   std::string getStreamTitle();
   uint32_t getStreamStartTime();
+  void initializeControlPanel();
 
 signals:
   void renderAndSendReaction(ReactionPanel::Reaction reaction);
+  void reactionsEnabledChanged(bool enabled);
 
   void volume_changed(int volume);         // only for clients
   void mute_status_changed(bool is_muted); // only for hosts
@@ -38,14 +41,24 @@ private slots:
   void updateStreamDuration();
   void handleReactionPanelButtonPressed(ReactionPanel::Reaction reaction)
   {
-    qDebug()
-        << "in handleReactionPanelButtonPresseed, about to emit sendReaction";
-    emit renderAndSendReaction(reaction);
+    if (reactions_enabled)
+    {
+      emit renderAndSendReaction(reaction);
+    }
+  }
+  void handleReactionsEnabledChanged(bool enabled)
+  {
+    // qDebug() << "reached stream info reactionsEnabledChanged --- " <<
+    // enabled;
+    emit reactionsEnabledChanged(enabled);
   }
 
 private:
   // void setupLayout();
   void toggleExtraInfoSidebar();
+  void setAnnotationsEnabledLabel(bool enabled);
+  void setReactionsEnabledLabel(bool enabled);
+
   bool isExtraInfoOpen;
   QHBoxLayout *main_layout;
   QVBoxLayout *basic_stream_info_layout;
@@ -55,6 +68,9 @@ private:
   QLabel *viewer_count_icon;
   QLabel *viewer_count_label;
   QLabel *host_name_label;
+
+  bool reactions_enabled;
+  // StreamControlPanel *stream_control_panel;
 
   // Only relevant if this is a client - displays itself when poor connection
   QLabel *unstable_network_indicator;

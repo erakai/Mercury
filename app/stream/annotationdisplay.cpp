@@ -30,6 +30,8 @@ void AnnotationDisplay::addLine(const QPoint &start, const QPoint &end,
                                 QColor color, int thickness)
 {
   // qDebug() << "Drawing line persistently from" << start << "to" << end;
+  if (!canAnnotate)
+    return;
 
   QPainter painter(&m_pixmap);
   QPen pen(color);
@@ -50,6 +52,12 @@ void AnnotationDisplay::addLine(const QPoint &start, const QPoint &end,
   painter.drawLine(start, end);
 
   // Request an update so that paintEvent is called.
+  update();
+}
+
+void AnnotationDisplay::clear()
+{
+  m_pixmap.fill(Qt::transparent);
   update();
 }
 

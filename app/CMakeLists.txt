@@ -43,6 +43,10 @@ qt_add_executable(mercury
         config/filedownloader.cpp
         api/mapi.hpp api/mapi.cpp
         streambrowser/streambrowser.h streambrowser/streambrowser.cpp
+        stream/streamcontrolpanel.cpp
+        stream/streamcontrolpanel.hpp
+        stream/streamdisplaycontrols.cpp
+        stream/streamdisplaycontrols.hpp
 )
 
 # Qt set up

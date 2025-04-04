@@ -7,6 +7,7 @@
 #include "streamservice.hpp"
 #include "hstp.hpp"
 #include "reactiondisplay.hpp"
+#include "streamdisplaycontrols.hpp"
 #include "streaminfo.hpp"
 #include <QAudioBuffer>
 #include <QFile>
@@ -55,8 +56,13 @@ public slots:
   // Called to close the stream (if hosting) or leave (if client)
   void shut_down_window();
 
+  // called when streamdisplaycontrols emits signal to change display mode
+  void setStreamDisplayMode(int layout);
+
   // Sends a chat message out
   void send_chat_message(string message);
+
+  // Sends a reaction out
   void send_reaction(ReactionPanel::Reaction reaction);
 
   // Sends an annotation out
@@ -70,6 +76,7 @@ public slots:
   void viewer_count_updated(int new_count);
   void stream_name_changed(string host_alias, string new_name);
   void stream_start_time_changed(uint32_t timestamp);
+  void reaction_permission_changed(uint32_t enabled);
   void new_chat_message(string alias, string msg);
   void new_reaction(string alias, uint32_t reaction);
   // void new_viewer_joined(Client client); // update participant_display_list
@@ -80,6 +87,10 @@ public slots:
   void onAnnotationDisplayMouseMoved(QMouseEvent *event);
   void onAnnotationDisplayMouseReleased(QMouseEvent *event);
 
+  void onAnnotationCheckbox(int id, bool checked);
+  void onAnnotationStatusChanged(bool checked);
+  void onClearButtonClicked();
+
   // These next two are host-only
   void viewer_disconnected(int id, std::string alias);
   // This is called after a client is validated
@@ -87,6 +98,7 @@ public slots:
 
 protected:
   bool eventFilter(QObject *watched, QEvent *event) override;
+  void keyPressEvent(QKeyEvent *event) override;
 
 private:
   /*
@@ -106,7 +118,10 @@ private:
   StreamDisplay *stream_display;
   ReactionDisplay *reaction_display;
   AnnotationDisplay *annotation_display;
+  QWidget *videoAnnotationContainer;
+  StreamDisplayControls *stream_display_controls;
   PaintToolWidget *paint_tool;
+  int streamDisplayMode = 0; // 0 def, 1 fullscreen, 2 tbh (no chat maybe)
 
   StreamInfo *stream_info;
   bool has_host_muted_stream = false;

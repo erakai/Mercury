@@ -29,13 +29,11 @@ public:
   std::string getStreamTitle();
   uint32_t getStreamStartTime();
   void initializeControlPanel();
+  StreamControlPanel *getStreamControlPanel() { return stream_control_panel; };
 
 signals:
   void renderAndSendReaction(ReactionPanel::Reaction reaction);
   void reactionsEnabledChanged(bool enabled);
-
-  void volume_changed(int volume);         // only for clients
-  void mute_status_changed(bool is_muted); // only for hosts
 
 private slots:
   void updateStreamDuration();
@@ -70,7 +68,7 @@ private:
   QLabel *host_name_label;
 
   bool reactions_enabled;
-  // StreamControlPanel *stream_control_panel;
+  StreamControlPanel *stream_control_panel;
 
   // Only relevant if this is a client - displays itself when poor connection
   QLabel *unstable_network_indicator;

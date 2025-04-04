@@ -168,6 +168,13 @@ void StreamWindow::connect_signals_and_slots()
             this->setStreamDisplayMode(streamDisplayMode);
           });
 
+  // change volume
+  if (is_client())
+  {
+    connect(stream_display_controls, &StreamDisplayControls::volume_changed,
+            this, [this](int volume) { stream_display->set_volume(volume); });
+  }
+
   // connect socket disconnected to this window closing
   if (is_client())
     connect(servc->client.get(), &MercuryClient::client_disconnected, this,
@@ -232,9 +239,14 @@ void StreamWindow::connect_signals_and_slots()
             { this->viewer_count_updated(viewers); });
 
   if (is_host())
+  {
     connect(stream_info, &StreamInfo::reactionsEnabledChanged, this,
             [=, this](bool enabled)
             { this->reaction_permission_changed(enabled); });
+    connect(stream_info->getStreamControlPanel(),
+            &StreamControlPanel::mute_status_changed, this,
+            [this](bool is_muted) { set_has_host_muted_stream(is_muted); });
+  }
 
   // connect reaction sent from stream info
   connect(stream_info, &StreamInfo::renderAndSendReaction, this,
@@ -344,11 +356,6 @@ void StreamWindow::initialize_primary_ui_widgets()
   stream_display_controls = new StreamDisplayControls(this);
 
   stream_info = new StreamInfo(this, "Host\'s Stream", "Host");
-  connect(stream_info, &StreamInfo::volume_changed, this,
-          [this](int volume) { stream_display->set_volume(volume); });
-
-  connect(stream_info, &StreamInfo::mute_status_changed, this,
-          [this](bool is_muted) { has_host_muted_stream = is_muted; });
 
   if (is_host() && servh->stream_name.size() > 0)
     stream_info->setStreamTitle(servh->stream_name.c_str());

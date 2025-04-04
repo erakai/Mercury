@@ -67,12 +67,13 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
 
 bool MercuryClient::disconnect()
 {
-  if (m_mftp_sock->isOpen())
+  if (m_mftp_sock != nullptr && m_mftp_sock->isOpen())
     m_mftp_sock->close();
   if (m_hstp_sock->isOpen())
   {
     qInfo("Gracefully shutting down...");
-    m_hstp_sock->close();
+    if (m_mftp_sock != nullptr)
+      m_hstp_sock->close();
   }
   return true;
 }

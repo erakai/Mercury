@@ -5,6 +5,9 @@
 
 StreamControlPanel::StreamControlPanel(QWidget *parent)
 {
+  // StreamWindow *stream_window = qobject_cast<StreamWindow
+  // *>(parent->parent());
+
   auto *panel_container = new QWidget(this);
   panel_container->setStyleSheet(
       "QWidget {"
@@ -41,6 +44,15 @@ StreamControlPanel::StreamControlPanel(QWidget *parent)
   //               qDebug() << "reaction clicked, emitting reaction";
   //               emit reactionClicked(reaction);
   //             });
+
+  if (true)
+  {
+    mute_stream_btn = new MuteStreamButton(this);
+    control_button_grid->addWidget(mute_stream_btn);
+
+    connect(mute_stream_btn, &MuteStreamButton::mute_status_changed, this,
+            [this](bool is_muted) { emit mute_status_changed(is_muted); });
+  }
 
   // create main layout in case we want to add other things
   auto *main_layout = new QVBoxLayout(this);

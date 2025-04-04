@@ -43,6 +43,11 @@ public:
 
   bool provide_next_frame(QImage &next_video, QByteArray &next_audio);
 
+  void set_has_host_muted_stream(bool is_muted)
+  {
+    has_host_muted_stream = is_muted;
+  }
+
   void closeEvent(QCloseEvent *event) override;
 
 public slots:

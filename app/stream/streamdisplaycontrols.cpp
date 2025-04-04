@@ -1,31 +1,48 @@
 #include "streamdisplaycontrols.hpp"
 
+#include "stream/streamwindow.hpp"
 #include <QMouseEvent>
 #include <QVBoxLayout>
 #include <QtCore/QEvent>
+#include <QtWidgets/qpushbutton.h>
 
 StreamDisplayControls::StreamDisplayControls(QWidget *parent)
 {
+  StreamWindow *stream_window = qobject_cast<StreamWindow *>(parent);
 
   fullscreenButton = new QPushButton(this);
-  fullscreenButton->setFixedSize(36, 36); // Adjust button size as needed
+  fullscreenButton->setFixedSize(48, 48); // Adjust button size as needed
   QPixmap pix("assets/fullscreen_button_icon.png");
   fullscreenButton->setIcon(QIcon(pix));
-  fullscreenButton->setIconSize(QSize(36, 36));
+  fullscreenButton->setIconSize(QSize(48, 48));
   fullscreenButton->setStyleSheet(
       "background-color: rgba(0, 0, 0, 0); border: none;");
 
-  // Layout to align button to bottom-right
-  QVBoxLayout *vLayout = new QVBoxLayout();
-  vLayout->addStretch(); // Push everything to the bottom
-  QHBoxLayout *hLayout = new QHBoxLayout();
-  hLayout->addStretch(); // Push button to the right
-  hLayout->addWidget(fullscreenButton);
-  vLayout->addLayout(hLayout);
-  setFixedHeight(fullscreenButton->height());
-  // setStyleSheet("border: 2px solid yellow;");
-  setContentsMargins(0, 0, 0, 48);
-  setLayout(vLayout);
+  QGridLayout *grid_layout = new QGridLayout(this);
+
+  grid_layout->addWidget(fullscreenButton, 1, 1,
+                         Qt::AlignRight | Qt::AlignBottom);
+
+  // Volume Control
+  if (stream_window->is_client())
+  {
+    QSpacerItem *spacer =
+        new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
+    grid_layout->addItem(spacer, 0, 0); // Spacer in the first row, first column
+
+    volume_control = new VolumeControlWidget(this);
+    connect(volume_control, &VolumeControlWidget::volume_changed, this,
+            [this](int volume) { emit volume_changed(volume); });
+    grid_layout->addWidget(volume_control, 1, 0,
+                           Qt::AlignRight | Qt::AlignBottom);
+  }
+
+  grid_layout->setColumnStretch(0, 1);
+  grid_layout->setColumnStretch(1, 0);
+  grid_layout->setRowStretch(0, 1);
+
+  setLayout(grid_layout);
 
   // Connect button signal
   connect(fullscreenButton, &QPushButton::clicked, this,

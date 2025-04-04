@@ -16,6 +16,7 @@
 #include <QMainWindow>
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qwidget.h>
+#include "singleton/audiomanager.hpp"
 
 using namespace std;
 
@@ -40,8 +41,12 @@ public:
   bool is_host() { return mode == MercuryMode::HOST; }
   bool is_client() { return mode == MercuryMode::CLIENT; }
 
-  bool provide_next_video_frame(QImage &next_video);
-  bool provide_next_audio_frame(QBuffer &next_audio);
+  bool provide_next_frame(QImage &next_video, QByteArray &next_audio);
+
+  void set_has_host_muted_stream(bool is_muted)
+  {
+    has_host_muted_stream = is_muted;
+  }
 
   void closeEvent(QCloseEvent *event) override;
 
@@ -124,6 +129,9 @@ private:
   int streamDisplayMode = 0; // 0 def, 1 fullscreen, 2 tbh (no chat maybe)
 
   StreamInfo *stream_info;
+  bool has_host_muted_stream = false;
+  qint64 time_since_last_mutetoast = 0;
+  const qint64 mutetoast_cooldown_ms = 10000;
 
   QMenu *stream_menu;
   QAction *stop_or_leave_stream_action;

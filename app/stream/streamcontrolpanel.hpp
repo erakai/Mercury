@@ -1,5 +1,6 @@
 #ifndef STREAMCONTROLPANEL_H
 #define STREAMCONTROLPANEL_H
+#include "stream/mutestreambutton.hpp"
 #include <QWidget>
 
 class QCheckBox;
@@ -13,6 +14,8 @@ public:
 
 signals:
   void reactionsEnabledChanged(bool enabled);
+
+  void mute_status_changed(bool is_muted);
 
 private:
   QCheckBox *reactions_enabled_check_box;
@@ -47,6 +50,8 @@ private:
         top: 2px;
     }
   )";
+
+  MuteStreamButton *mute_stream_btn;
 };
 
 #endif // STREAMCONTROLPANEL_H

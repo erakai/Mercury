@@ -316,7 +316,7 @@ void MercuryServer::forward_reaction(int sender_id, uint32_t reaction)
   }
 }
 
-int MercuryServer::send_frame(const char *source, QAudioBuffer audio,
+int MercuryServer::send_frame(const char *source, QByteArray &audio,
                               QVideoFrame video)
 {
   if (strlen(source) > 12)

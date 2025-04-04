@@ -8,10 +8,14 @@
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
+#include <QtCore/qlogging.h>
+#include <QtCore/qstringview.h>
+#include <QtCore/qtypes.h>
 #include <QtCore/qnamespace.h>
 #include <QtDebug>
 #include <QMouseEvent>
 #include <QAudioSink>
+#include <ios>
 
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
                            QWidget *parent)
@@ -164,6 +168,13 @@ void StreamWindow::connect_signals_and_slots()
             this->setStreamDisplayMode(streamDisplayMode);
           });
 
+  // change volume
+  if (is_client())
+  {
+    connect(stream_display_controls, &StreamDisplayControls::volume_changed,
+            this, [this](int volume) { stream_display->set_volume(volume); });
+  }
+
   // connect socket disconnected to this window closing
   if (is_client())
     connect(servc->client.get(), &MercuryClient::client_disconnected, this,
@@ -228,9 +239,14 @@ void StreamWindow::connect_signals_and_slots()
             { this->viewer_count_updated(viewers); });
 
   if (is_host())
+  {
     connect(stream_info, &StreamInfo::reactionsEnabledChanged, this,
             [=, this](bool enabled)
             { this->reaction_permission_changed(enabled); });
+    connect(stream_info->getStreamControlPanel(),
+            &StreamControlPanel::mute_status_changed, this,
+            [this](bool is_muted) { set_has_host_muted_stream(is_muted); });
+  }
 
   // connect reaction sent from stream info
   connect(stream_info, &StreamInfo::renderAndSendReaction, this,
@@ -326,11 +342,10 @@ void StreamWindow::initialize_primary_ui_widgets()
   if (is_client())
     side_pane->initialize_client_performance_tab(servc->client);
 
-  std::function<bool(QImage &)> video_func = std::bind(
-      &StreamWindow::provide_next_video_frame, this, std::placeholders::_1);
-  std::function<bool(QBuffer &)> audio_func = std::bind(
-      &StreamWindow::provide_next_audio_frame, this, std::placeholders::_1);
-  stream_display = new StreamDisplay(this, video_func, audio_func);
+  std::function<bool(QImage &, QByteArray &)> frame_func =
+      std::bind(&StreamWindow::provide_next_frame, this, std::placeholders::_1,
+                std::placeholders::_2);
+  stream_display = new StreamDisplay(this, frame_func);
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   reaction_display = new ReactionDisplay(this);
@@ -358,6 +373,10 @@ void StreamWindow::stream_fully_initialized()
 {
   qInfo("Beginning stream playback.");
   stream_display->begin_playback();
+
+  // start recording audio of host
+  if (is_host())
+    AudioManager::instance().start_recording(3000);
 }
 
 void StreamWindow::closeEvent(QCloseEvent *event)
@@ -371,6 +390,10 @@ void StreamWindow::closeEvent(QCloseEvent *event)
 
 void StreamWindow::shut_down_window()
 {
+  // stop recording audio of host
+  if (is_host())
+    AudioManager::instance().stop_recording();
+
   if (is_host())
   {
     mercury::delete_public_stream(Utils::instance().getIpAddress());
@@ -380,10 +403,13 @@ void StreamWindow::shut_down_window()
   if (is_client())
     servc->client->disconnect();
 
+  stream_display->stop_playback();
+
   close();
 }
 
-bool StreamWindow::provide_next_video_frame(QImage &next_video)
+bool StreamWindow::provide_next_frame(QImage &next_video,
+                                      QByteArray &next_audio)
 {
   if (is_host())
   {
@@ -391,9 +417,27 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
     QImage img;
     VideoManager::VideoImageStatus status =
         VideoManager::instance().GetVideoImage(img);
+
+    // acquire audio frame from desktop
+    int audio_msec = 1000 / FPS;
+    QByteArray audio_array = AudioManager::instance().get_lastmsec(audio_msec);
+
+    if (has_host_muted_stream)
+    {
+      // tell the user to unmute?
+      if (AudioManager::is_audio_loud(audio_array) &&
+          QDateTime::currentMSecsSinceEpoch() - time_since_last_mutetoast >=
+              mutetoast_cooldown_ms)
+      {
+        ToastNotification::showToast(this, "You are currently muted!", 3000);
+        time_since_last_mutetoast = QDateTime::currentMSecsSinceEpoch();
+      }
+      audio_array = {};
+    }
+
     if (status == VideoManager::VideoImageStatus::SUCCESS)
     {
-      servh->server->send_frame("desktop", QAudioBuffer(), QVideoFrame(img));
+      servh->server->send_frame("desktop", audio_array, QVideoFrame(img));
       next_video = img;
       return true;
     }
@@ -419,40 +463,9 @@ bool StreamWindow::provide_next_video_frame(QImage &next_video)
 
     servc->client->metrics().register_frame();
     next_video = jitter.video;
+    next_audio = jitter.audio;
     return true;
   }
-
-  return false;
-}
-
-bool StreamWindow::provide_next_audio_frame(QBuffer &next_audio)
-{
-  if (is_host())
-  {
-    // acquire audio frame from desktop
-  }
-  else
-  {
-    // acquire audio frame from jitter buffer
-  }
-
-  // TESTING!:
-  /*
-  QFile fart_file("assets/fart.mp3");
-  if (!fart_file.open(QIODevice::ReadOnly))
-  {
-    // Handle error opening file
-    qInfo("failed to load audio file");
-    return false;
-  }
-
-  QByteArray audio_byte_array = fart_file.readAll();
-  fart_file.close();
-  next_audio.open(QIODevice::WriteOnly);
-  next_audio.write(audio_byte_array);
-  next_audio.close();
-  return true;
-  */
 
   return false;
 }

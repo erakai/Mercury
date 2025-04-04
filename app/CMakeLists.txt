@@ -12,6 +12,8 @@ qt_add_executable(mercury
   stream/streamdisplay.cpp stream/streamdisplay.hpp
   stream/performancetab.cpp
   stream/streaminfo.cpp stream/streaminfo.hpp
+  stream/volumecontrolwidget.hpp  stream/volumecontrolwidget.cpp
+  stream/mutestreambutton.hpp     stream/mutestreambutton.cpp
   home/main.cpp
   home/mainwindow.cpp home/mainwindow.hpp home/mainwindow.ui
   home/settingswindow.h home/settingswindow.cpp home/settingswindow.ui
@@ -28,6 +30,7 @@ qt_add_executable(mercury
   streampreview/audioinputlistmodel.h streampreview/audioinputlistmodel.cpp
 
   singleton/videomanager.h singleton/videomanager.cpp
+  singleton/audiomanager.hpp singleton/audiomanager.cpp
         stream/annotationdisplay.cpp
         stream/annotationdisplay.hpp
         stream/painttoolwidget.cpp

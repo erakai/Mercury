@@ -1,6 +1,9 @@
 #ifndef STREAMINFO_H
 #define STREAMINFO_H
+
 #include "reactionpanel.hpp"
+#include "stream/mutestreambutton.hpp"
+#include "stream/volumecontrolwidget.hpp"
 #include "streamcontrolpanel.hpp"
 
 #include <QGridLayout>
@@ -26,6 +29,7 @@ public:
   std::string getStreamTitle();
   uint32_t getStreamStartTime();
   void initializeControlPanel();
+  StreamControlPanel *getStreamControlPanel() { return stream_control_panel; };
 
 signals:
   void renderAndSendReaction(ReactionPanel::Reaction reaction);
@@ -56,13 +60,15 @@ private:
   bool isExtraInfoOpen;
   QHBoxLayout *main_layout;
   QVBoxLayout *basic_stream_info_layout;
+  VolumeControlWidget *volume_control;
+  MuteStreamButton *mute_stream_btn;
   QLabel *stream_title_label;
   QLabel *viewer_count_icon;
   QLabel *viewer_count_label;
   QLabel *host_name_label;
 
   bool reactions_enabled;
-  // StreamControlPanel *stream_control_panel;
+  StreamControlPanel *stream_control_panel;
 
   // Only relevant if this is a client - displays itself when poor connection
   QLabel *unstable_network_indicator;

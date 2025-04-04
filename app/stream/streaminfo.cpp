@@ -1,8 +1,11 @@
-#include "streaminfo.hpp"
-#include "streamwindow.hpp"
+#include "stream/streaminfo.hpp"
+#include "stream/mutestreambutton.hpp"
+#include "stream/volumecontrolwidget.hpp"
+#include "stream/streamwindow.hpp"
 
 #include <QDateTime>
 #include <QPropertyAnimation>
+#include <cstring>
 #include <qevent.h>
 
 StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
@@ -142,7 +145,7 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
 
 void StreamInfo::initializeControlPanel()
 {
-  StreamControlPanel *stream_control_panel = new StreamControlPanel(this);
+  stream_control_panel = new StreamControlPanel(this);
   main_layout->insertWidget(2, stream_control_panel);
   stream_control_panel->stackUnder(extra_info_sidebar);
 

@@ -138,7 +138,7 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
 
   label->setText(richMessage);
   label->setWordWrap(true);
-  label->setStyleSheet("background-color: transparent;");
+  label->setStyleSheet("background-color: transparent; padding-left: 10px;");
 
   label->adjustSize();
   item->setSizeHint(label->sizeHint());

@@ -47,6 +47,8 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
   chatBox->setFocusPolicy(Qt::NoFocus);
   chatBox->setEditTriggers(QAbstractItemView::NoEditTriggers);
   chatBox->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  chatBox->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  chatBox->setWordWrap(true);
   chatBox->setStyleSheet(R"(
   QListWidget {
     background-color: rgb(34, 34, 34);
@@ -122,6 +124,7 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
 
   QString senderRawText = QString::fromStdString(msg.sender);
   QString messageRawText = QString::fromStdString(msg.message);
+  messageRawText.replace(QRegularExpression("([\\w\\d]{30})"), "\\1&#8203;");
 
   QString nameColor = "#4fc3f7";
   if (sender)
@@ -138,10 +141,11 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
 
   label->setText(richMessage);
   label->setWordWrap(true);
-  label->setStyleSheet("background-color: transparent; padding-left: 10px;");
-
-  label->adjustSize();
   item->setSizeHint(label->sizeHint());
+  label->setStyleSheet("background-color: transparent; padding-left: 10px;");
+  int maxWidth = chatBox->viewport()->width();
+  label->setMaximumWidth(maxWidth);
+  label->setAlignment(Qt::AlignTop);
   chatBox->setItemWidget(item, label);
 
   chatBox->scrollToBottom();

@@ -2,21 +2,15 @@
 #include <QtCore/qtmetamacros.h>
 
 MuteStreamButton::MuteStreamButton(QWidget *parent)
-    : QWidget(parent), _is_muted(false)
+    : QCheckBox("Stream Muted"), _is_muted(false)
 {
-  mute_button = new QPushButton("Mute Stream");
   muted_icon = QIcon::fromTheme("audio-volume-muted");
   unmuted_icon = QIcon::fromTheme("audio-volume-high");
-  ;
 
-  mute_button->setIcon(unmuted_icon);
-  mute_button->setIconSize(QSize(24, 24));
-  connect(mute_button, &QPushButton::clicked, this,
+  setIcon(unmuted_icon);
+  setIconSize(QSize(24, 24));
+  connect(this, &QCheckBox::checkStateChanged, this,
           &MuteStreamButton::toggle_mute);
-
-  auto *layout = new QHBoxLayout(this);
-  layout->addWidget(mute_button);
-  setLayout(layout);
 }
 
 bool MuteStreamButton::is_muted()
@@ -30,13 +24,11 @@ void MuteStreamButton::toggle_mute()
 
   if (_is_muted)
   {
-    mute_button->setText("Unmute Stream");
-    mute_button->setIcon(muted_icon);
+    setIcon(muted_icon);
   }
   else
   {
-    mute_button->setText("Mute Stream");
-    mute_button->setIcon(unmuted_icon);
+    setIcon(unmuted_icon);
   }
   emit mute_status_changed(_is_muted);
 }

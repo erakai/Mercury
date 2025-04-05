@@ -40,7 +40,6 @@ private:
         border: 2px solid #087AA0;
     }
     QCheckBox::indicator:checked::before {
-        content: "✔"; /* Checkmark */
         font-size: 14px;
         color: #f0f0f0;
         font-weight: bold;

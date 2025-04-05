@@ -1,6 +1,5 @@
 #include "stream/streaminfo.hpp"
-#include "stream/mutestreambutton.hpp"
-#include "stream/volumecontrolwidget.hpp"
+#include "home/toastnotification.h"
 #include "stream/streamwindow.hpp"
 
 #include <QDateTime>
@@ -81,7 +80,7 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   main_layout->addWidget(basic_stream_info_container);
 
   // reactions
-  ReactionPanel *reaction_panel = new ReactionPanel(this);
+  reaction_panel = new ReactionPanel(this);
   main_layout->addStretch();
   main_layout->addWidget(reaction_panel);
   main_layout->setContentsMargins(10, 10, 40, 10);
@@ -118,12 +117,6 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   extra_info_viewer_count_label->setSizePolicy(QSizePolicy::Preferred,
                                                QSizePolicy::Fixed);
 
-  annotations_enabled_label = new QLabel("Annotations: On", extra_info_sidebar);
-  annotations_enabled_label->setStyleSheet(
-      "color: #dddddd; font-size: 18px; padding: 0px;");
-  annotations_enabled_label->setSizePolicy(QSizePolicy::Preferred,
-                                           QSizePolicy::Fixed);
-
   reactions_enabled_label = new QLabel("Reactions: On", extra_info_sidebar);
   reactions_enabled_label->setStyleSheet(
       "color: #dddddd; font-size: 18px; padding: 0px;");
@@ -134,7 +127,6 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   extra_info_sidebar_layout->addWidget(stream_start_time_label);
   extra_info_sidebar_layout->addWidget(stream_duration_label);
   extra_info_sidebar_layout->addWidget(extra_info_viewer_count_label);
-  extra_info_sidebar_layout->addWidget(annotations_enabled_label);
   extra_info_sidebar_layout->addWidget(reactions_enabled_label);
   extra_info_sidebar_layout->addStretch(); // Push content to the top
 
@@ -244,18 +236,23 @@ void StreamInfo::setReactionsEnabled(bool enabled)
   // enable / disable reaction panel
   reactions_enabled = enabled;
   setReactionsEnabledLabel(enabled);
+
+  reaction_panel->setEnabled(enabled);
+  // If this is a client, also hide it
+  if (!stream_control_panel)
+  {
+    ToastNotification::showToast(this->parentWidget(),
+                                 enabled ? "Reactions Enabled"
+                                         : "Reactions Disabled",
+                                 1000, ToastType::NOTICE);
+    reaction_panel->setVisible(enabled);
+  }
 }
 
 void StreamInfo::setReactionsEnabledLabel(bool enabled)
 {
   reactions_enabled_label->setText(QString("Reactions: ") +
                                    (enabled ? "On" : "Off"));
-}
-
-void StreamInfo::setAnnotationsEnabledLabel(bool enabled)
-{
-  annotations_enabled_label->setText(QString("Annotations: ") +
-                                     (enabled ? "On" : "Off"));
 }
 
 void StreamInfo::updateStreamDuration()

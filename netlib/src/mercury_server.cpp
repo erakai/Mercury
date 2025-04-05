@@ -368,9 +368,12 @@ int MercuryServer::send_frame(const char *source, QByteArray &audio,
   QBuffer video_buffer(&video_bytes);
   video_buffer.open(QIODevice::WriteOnly);
 
-  int compression_amount = 100 - (100 * compression);
+  int compression_amount = 0;
+
   if (compression == 0)
     compression_amount = -1;
+  else
+    compression_amount = 100 - (100 * compression);
 
   if (!video_image.save(&video_buffer, "JPG", compression_amount))
     qCritical("Unable to serialize QImage.");

@@ -69,6 +69,7 @@ private:
 
   bool reactions_enabled;
   StreamControlPanel *stream_control_panel;
+  ReactionPanel *reaction_panel;
 
   // Only relevant if this is a client - displays itself when poor connection
   QLabel *unstable_network_indicator;
@@ -81,7 +82,6 @@ private:
   QLabel *stream_duration_label;
   QTimer *seconds_timer;
   QLabel *extra_info_viewer_count_label;
-  QLabel *annotations_enabled_label;
   QLabel *reactions_enabled_label;
 };
 

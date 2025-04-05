@@ -1,12 +1,13 @@
 #ifndef MUTE_BUTTON_WIDGET_H
 #define MUTE_BUTTON_WIDGET_H
 
+#include <QCheckBox>
 #include <QWidget>
 #include <QPushButton>
 #include <QIcon>
 #include <QHBoxLayout>
 
-class MuteStreamButton : public QWidget
+class MuteStreamButton : public QCheckBox
 {
   Q_OBJECT
 
@@ -22,7 +23,6 @@ private slots:
   void toggle_mute();
 
 private:
-  QPushButton *mute_button;
   bool _is_muted;
   QIcon muted_icon;
   QIcon unmuted_icon;

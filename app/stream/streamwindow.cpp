@@ -109,7 +109,7 @@ void StreamWindow::setStreamDisplayMode(int layout)
     main_layout->setRowStretch(2, 20);
     main_layout->setColumnStretch(0, 75);
     main_layout->setColumnStretch(1, 25);
-    paint_tool->show();
+    paint_tool->setVisible(annotation_display->canAnnotate);
     side_pane->show();
     stream_info->show();
   }
@@ -364,8 +364,8 @@ void StreamWindow::initialize_primary_ui_widgets()
     stream_info->setViewerCount(servh->viewer_count);
     stream_info->setHostName(alias.c_str());
     stream_info->setStreamStartTime(servh->start_timestamp);
-    stream_info->initializeControlPanel();
     stream_info->setReactionsEnabled(servh->reactions_enabled);
+    stream_info->initializeControlPanel();
   }
 }
 
@@ -382,8 +382,7 @@ void StreamWindow::stream_fully_initialized()
 void StreamWindow::closeEvent(QCloseEvent *event)
 {
   // Client already calls this from the disconnected signal on the socket
-  if (is_host())
-    shut_down_window();
+  shut_down_window();
 
   QWidget::closeEvent(event);
 }
@@ -404,7 +403,6 @@ void StreamWindow::shut_down_window()
     servc->client->disconnect();
 
   stream_display->stop_playback();
-
   close();
 }
 
@@ -711,7 +709,8 @@ void StreamWindow::onAnnotationCheckbox(int id, bool checked)
 void StreamWindow::onAnnotationStatusChanged(bool checked)
 {
   annotation_display->canAnnotate = checked;
-  paint_tool->setVisible(checked);
+  if (streamDisplayMode != 1)
+    paint_tool->setVisible(checked);
 
   ToastNotification::showToast(
       this, checked ? "Annotations Enabled" : "Annotations Disabled", 1000,

@@ -6,8 +6,9 @@
 
 int main(int argc, char **argv)
 {
-  qSetMessagePattern(
-      "%{time process} %{type} %{function}:%{line} - %{message}");
+  //  qSetMessagePattern(
+  //      "%{time process} %{type} %{function}:%{line} - %{message}");
+  qSetMessagePattern("%{time process} %{type} - %{message}");
 
   QApplication a(argc, argv);
   QCoreApplication::setApplicationName("Mercury");

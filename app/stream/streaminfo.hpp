@@ -57,6 +57,8 @@ private:
   void setAnnotationsEnabledLabel(bool enabled);
   void setReactionsEnabledLabel(bool enabled);
 
+  bool is_host = false;
+
   bool isExtraInfoOpen;
   QHBoxLayout *main_layout;
   QVBoxLayout *basic_stream_info_layout;
@@ -69,7 +71,9 @@ private:
 
   bool reactions_enabled;
   StreamControlPanel *stream_control_panel;
+
   ReactionPanel *reaction_panel;
+  bool initial_reaction_value_set = false;
 
   // Only relevant if this is a client - displays itself when poor connection
   QLabel *unstable_network_indicator;

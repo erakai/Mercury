@@ -11,6 +11,7 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
                        const QString &host_name)
 {
   StreamWindow *stream_window = qobject_cast<StreamWindow *>(parent);
+  is_host = stream_window->is_host();
   main_layout = new QHBoxLayout;
   this->setLayout(main_layout);
   basic_stream_info_layout = new QVBoxLayout;
@@ -238,8 +239,9 @@ void StreamInfo::setReactionsEnabled(bool enabled)
   setReactionsEnabledLabel(enabled);
 
   reaction_panel->setEnabled(enabled);
-  // If this is a client, also hide it
-  if (!stream_control_panel)
+
+  // If this is a client, also hide it (after the first time)
+  if (!is_host && initial_reaction_value_set)
   {
     ToastNotification::showToast(this->parentWidget(),
                                  enabled ? "Reactions Enabled"
@@ -247,6 +249,7 @@ void StreamInfo::setReactionsEnabled(bool enabled)
                                  1000, ToastType::NOTICE);
     reaction_panel->setVisible(enabled);
   }
+  initial_reaction_value_set = true;
 }
 
 void StreamInfo::setReactionsEnabledLabel(bool enabled)

@@ -32,10 +32,11 @@ public:
   MercuryClient(const std::string &alias) : m_alias(alias)
   {
     m_hstp_sock = std::make_shared<QTcpSocket>();
-    m_mftp_sock = std::make_shared<QUdpSocket>();
     m_hstp_processor_ptr = std::make_shared<HstpProcessor>();
     m_mftp_processor = std::make_shared<MFTPProcessor>();
-    connect_signals_and_slots();
+
+    // This is now in establish_connection
+    // connect_signals_and_slots();
   };
 
   /*
@@ -149,7 +150,7 @@ private:
   // implementation. Investigate: https://doc.qt.io/qt-6/qbuffer.html
   std::deque<JitterEntry> m_jitter_buffer;
 
-  std::shared_ptr<QUdpSocket> m_mftp_sock;
+  std::shared_ptr<QUdpSocket> m_mftp_sock = nullptr;
   std::shared_ptr<QTcpSocket> m_hstp_sock;
 
   std::string m_alias;

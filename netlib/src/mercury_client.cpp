@@ -31,10 +31,10 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
     qCritical("Invalid ports");
   }
 
+  m_mftp_sock = acquire_mftp_socket(mftp_port);
+  connect_signals_and_slots();
+
   m_hstp_sock->connectToHost(host, hstp_port);
-
-  acquire_mftp_socket(m_mftp_sock, mftp_port);
-
   if (!m_mftp_sock || !m_mftp_sock->isValid())
   {
     qCritical("Failed to acquire valid mftp socket");
@@ -67,13 +67,14 @@ bool MercuryClient::establish_connection(const QHostAddress &host,
 
 bool MercuryClient::disconnect()
 {
-  if (m_mftp_sock != nullptr && m_mftp_sock->isOpen())
+  if (m_mftp_sock && m_mftp_sock->isOpen())
+  {
     m_mftp_sock->close();
-  if (m_hstp_sock->isOpen())
+  }
+  if (m_hstp_sock && m_hstp_sock->isOpen())
   {
     qInfo("Gracefully shutting down...");
-    if (m_mftp_sock != nullptr)
-      m_hstp_sock->close();
+    m_hstp_sock->close();
   }
   return true;
 }

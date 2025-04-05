@@ -31,7 +31,7 @@ class ChatTab : public QWidget
 public:
   ChatTab(const string &displayName, QWidget *parent = nullptr);
 
-  void new_chat_message(ChatMessage msg);
+  void new_chat_message(ChatMessage msg, bool sender = false);
   void render_and_send_message(string msgContent);
 
 signals:

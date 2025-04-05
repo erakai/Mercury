@@ -1,7 +1,6 @@
 #include "sidepane.hpp"
 #include <QtWidgets/qlistwidget.h>
 #include <QMouseEvent>
-#include <iostream>
 #include <QApplication>
 
 SidePane::SidePane(QWidget *parent) : QTabWidget(parent)
@@ -44,15 +43,19 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
   QVBoxLayout *layout = new QVBoxLayout(this);
   chatBox = new QListWidget(this);
 
-  QPalette chatBoxPalette = chatBox->palette();
-  chatBoxPalette.setColor(QPalette::Base, QColor(34, 34, 34));
-  chatBoxPalette.setColor(QPalette::Text, QColor(221, 231, 235));
-  chatBox->setPalette(chatBoxPalette);
-
   chatBox->setSelectionMode(QAbstractItemView::NoSelection);
   chatBox->setFocusPolicy(Qt::NoFocus);
   chatBox->setEditTriggers(QAbstractItemView::NoEditTriggers);
   chatBox->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  chatBox->setStyleSheet(R"(
+  QListWidget {
+    background-color: rgb(34, 34, 34);
+    color: rgb(221, 231, 235);
+    border: 1px solid;
+    border-radius: 8px; /* 👈 Rounded corners */
+    padding: 4px;
+  }
+)");
   layout->addWidget(chatBox);
 
   QHBoxLayout *inputLayout = new QHBoxLayout();
@@ -78,9 +81,6 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
   layout->addLayout(inputLayout);
   setLayout(layout);
 
-  connect(messageInput, &QLineEdit::editingFinished, this,
-          [this]() { messageInput->clearFocus(); });
-
   connect(messageInput, &QLineEdit::returnPressed, this,
           [this]()
           {
@@ -98,7 +98,7 @@ bool ChatTab::eventFilter(QObject *watched, QEvent *event)
     if (messageInput && messageInput->hasFocus())
     {
       QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-      QPoint globalPos = mouseEvent->globalPosition().toPoint(); // Qt 6 version
+      QPoint globalPos = mouseEvent->globalPosition().toPoint();
 
       QWidget *clickedWidget = QApplication::widgetAt(globalPos);
 
@@ -112,12 +112,38 @@ bool ChatTab::eventFilter(QObject *watched, QEvent *event)
   return QWidget::eventFilter(watched, event);
 }
 
-void ChatTab::new_chat_message(ChatMessage msg)
+void ChatTab::new_chat_message(ChatMessage msg, bool sender)
 {
-  QString messageToRender =
-      QString::fromStdString(msg.sender + ":\n" + msg.message + "\n");
+  QListWidgetItem *item = new QListWidgetItem();
+  chatBox->addItem(item);
 
-  chatBox->addItem(new QListWidgetItem(messageToRender));
+  QLabel *label = new QLabel();
+  label->setTextFormat(Qt::RichText);
+
+  QString senderRawText = QString::fromStdString(msg.sender);
+  QString messageRawText = QString::fromStdString(msg.message);
+
+  QString nameColor = "#4fc3f7";
+  if (sender)
+  {
+    nameColor = "#d9a140";
+  }
+
+  QString richMessage = QString(R"(
+  <span style="color:%1; font-weight:bold;">%2: </span><span style="color:#ffffff;">%3</span>
+)")
+                            .arg(nameColor)
+                            .arg(senderRawText)
+                            .arg(messageRawText);
+
+  label->setText(richMessage);
+  label->setWordWrap(true);
+  label->setStyleSheet("background-color: transparent;");
+
+  label->adjustSize();
+  item->setSizeHint(label->sizeHint());
+  chatBox->setItemWidget(item, label);
+
   chatBox->scrollToBottom();
 }
 
@@ -127,7 +153,7 @@ void ChatTab::render_and_send_message(std::string msgContent)
     return;
 
   messageInput->clear();
-  new_chat_message({displayName, msgContent});
+  new_chat_message({displayName, msgContent}, true);
   emit send_chat_message(msgContent);
 }
 

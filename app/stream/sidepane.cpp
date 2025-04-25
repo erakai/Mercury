@@ -167,6 +167,7 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
 
   QString senderRawText = QString::fromStdString(msg.sender);
   QString messageRawText = QString::fromStdString(msg.message);
+  QString optionalLineBreak = (messageRawText.contains("\n")) ? "<br>" : "";
   messageRawText.replace("\n", "<br>");
   messageRawText.replace(QRegularExpression("([\\w\\d]{30})"), "\\1&#8203;");
 
@@ -176,10 +177,11 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
     nameColor = "#d9a140";
   }
 
-  QString richMessage = QString(R"(
-  <span style="color:%1; font-weight:bold;">%2: </span><span style="color:#ffffff;">%3</span>
+  QString richMessage =
+      QString(R"(
+  <span style="color:%1; font-weight:bold;">%2:%3 </span><span style="color:#ffffff;">%4</span>
   )")
-                            .arg(nameColor, senderRawText, messageRawText);
+          .arg(nameColor, senderRawText, optionalLineBreak, messageRawText);
 
   label->setText(richMessage);
   label->setWordWrap(true);

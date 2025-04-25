@@ -8,7 +8,7 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QPushButton>
-#include <QLineEdit>
+#include <QTextEdit>
 #include <QCheckBox>
 #include <QSettings>
 #include <QTabWidget>
@@ -39,7 +39,7 @@ signals:
 
 private:
   QListWidget *chatBox;
-  QLineEdit *messageInput;
+  QTextEdit *messageInput;
   string displayName;
 
 protected:

@@ -62,20 +62,25 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
 
   QHBoxLayout *inputLayout = new QHBoxLayout();
 
-  messageInput = new QLineEdit(this);
+  messageInput = new QTextEdit(this);
   messageInput->setPlaceholderText("Send a message");
+  messageInput->setAcceptRichText(false);
+  messageInput->setFixedHeight(35);
+  messageInput->setFocusPolicy(Qt::StrongFocus);
+  messageInput->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  messageInput->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
   messageInput->setStyleSheet(R"(
-  QLineEdit {
+  QTextEdit {
     border: 1px solid;
     border-radius: 5px;
     background-color: rgb(34, 34, 34);
     color: white;
-    height: 30px;
-    padding-left: 10px;
+    padding: 5px 10px; /* top/bottom padding helps with multiline readability */
+    font-size: 14px;
   }
 
-  QLineEdit:focus {
-    border: 1px solid rgb(54, 120, 156)
+  QTextEdit:focus {
+    border: 1px solid rgb(54, 120, 156);
   }
 )");
 
@@ -83,11 +88,14 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
   layout->addLayout(inputLayout);
   setLayout(layout);
 
-  connect(messageInput, &QLineEdit::returnPressed, this,
+  connect(messageInput, &QTextEdit::textChanged, this,
           [this]()
           {
-            render_and_send_message(
-                messageInput->text().trimmed().toStdString());
+            QTextDocument *doc = messageInput->document();
+            int docHeight = static_cast<int>(doc->size().height());
+
+            int newHeight = std::clamp(docHeight + 10, 30, 100);
+            messageInput->setFixedHeight(newHeight);
           });
 
   qApp->installEventFilter(this);
@@ -97,7 +105,11 @@ bool ChatTab::eventFilter(QObject *watched, QEvent *event)
 {
   if (event->type() == QEvent::MouseButtonPress)
   {
-    if (messageInput && messageInput->hasFocus())
+
+    bool mouseOverInput = messageInput->rect().contains(
+        messageInput->mapFromGlobal(QCursor::pos()));
+
+    if (messageInput && messageInput->hasFocus() && !mouseOverInput)
     {
       QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
       QPoint globalPos = mouseEvent->globalPosition().toPoint();
@@ -108,6 +120,11 @@ bool ChatTab::eventFilter(QObject *watched, QEvent *event)
       {
         messageInput->clearFocus();
       }
+    }
+
+    else if (messageInput && !messageInput->hasFocus() && mouseOverInput)
+    {
+      messageInput->setFocus();
     }
   }
 

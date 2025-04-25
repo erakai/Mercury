@@ -54,7 +54,7 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
     background-color: rgb(34, 34, 34);
     color: rgb(221, 231, 235);
     border: 1px solid;
-    border-radius: 8px; /* 👈 Rounded corners */
+    border-radius: 8px;
     padding: 4px;
   }
 )");
@@ -134,20 +134,24 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
 
   QString richMessage = QString(R"(
   <span style="color:%1; font-weight:bold;">%2: </span><span style="color:#ffffff;">%3</span>
-)")
-                            .arg(nameColor)
-                            .arg(senderRawText)
-                            .arg(messageRawText);
+  )")
+                            .arg(nameColor, senderRawText, messageRawText);
 
   label->setText(richMessage);
   label->setWordWrap(true);
-  item->setSizeHint(label->sizeHint());
-  label->setStyleSheet("background-color: transparent; padding-left: 10px;");
+  label->setStyleSheet(
+      "background-color: transparent; padding: 0px 10px 0px 10px;");
   int maxWidth = chatBox->viewport()->width();
   label->setMaximumWidth(maxWidth);
-  label->setAlignment(Qt::AlignTop);
-  chatBox->setItemWidget(item, label);
 
+  label->adjustSize();
+  const int minHeight = 30;
+  QSize labelSize = label->sizeHint();
+  if (labelSize.height() < minHeight)
+    labelSize.setHeight(minHeight);
+  item->setSizeHint(labelSize);
+
+  chatBox->setItemWidget(item, label);
   chatBox->scrollToBottom();
 }
 

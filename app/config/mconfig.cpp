@@ -2,6 +2,7 @@
 #include "filedownloader.hpp"
 
 #include <fstream>
+#include <QDir>
 #include <QSettings>
 #include <sys/stat.h>
 
@@ -31,6 +32,20 @@ void mercury::curl_default_config()
   const QString &url = "https://raw.githubusercontent.com/erakai/Mercury/"
                        "main/config/DefaultClientSettings.ini";
   const QString &outputFilename = "config/MercuryClientSettings.ini";
+
+  QDir dir("config");
+
+  if (!dir.exists())
+  {
+    if (dir.mkpath("."))
+    {
+      qInfo("Created config directory successfully.");
+    }
+    else
+    {
+      qFatal("Unable to create config directory.");
+    }
+  }
 
   mercury::download_file(url, outputFilename);
 

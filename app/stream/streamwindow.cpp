@@ -5,6 +5,7 @@
 #include "home/toastnotification.h"
 #include "hstp.hpp"
 #include "singleton/videomanager.h"
+#include "stream/qualitycontrolbutton.hpp"
 #include <QApplication>
 #include <QMenuBar>
 #include <QScreen>
@@ -15,7 +16,7 @@
 #include <QtDebug>
 #include <QMouseEvent>
 #include <QAudioSink>
-#include <ios>
+#include "singleton/audiomanager.hpp"
 
 StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
                            QWidget *parent)
@@ -173,6 +174,10 @@ void StreamWindow::connect_signals_and_slots()
   {
     connect(stream_display_controls, &StreamDisplayControls::volume_changed,
             this, [this](int volume) { stream_display->set_volume(volume); });
+
+    connect(stream_display_controls->quality_control,
+            &QualityControlButton::quality_changed, this,
+            &StreamWindow::onClientSideQualityChanged);
   }
 
   // connect socket disconnected to this window closing
@@ -459,6 +464,27 @@ bool StreamWindow::provide_next_frame(QImage &next_video,
       return false;
     }
 
+    if (client_side_stream_quality == QualityOption::Q240)
+    {
+      jitter.video = jitter.video.scaled(352, 240, Qt::KeepAspectRatio,
+                                         Qt::SmoothTransformation);
+    }
+    if (client_side_stream_quality == QualityOption::Q480)
+    {
+      jitter.video = jitter.video.scaled(720, 480, Qt::KeepAspectRatio,
+                                         Qt::SmoothTransformation);
+    }
+    if (client_side_stream_quality == QualityOption::Q720)
+    {
+      jitter.video = jitter.video.scaled(1280, 720, Qt::KeepAspectRatio,
+                                         Qt::SmoothTransformation);
+    }
+    if (client_side_stream_quality == QualityOption::Q1080)
+    {
+      jitter.video = jitter.video.scaled(1440, 1080, Qt::KeepAspectRatio,
+                                         Qt::SmoothTransformation);
+    }
+
     servc->client->metrics().register_frame();
     next_video = jitter.video;
     next_audio = jitter.audio;
@@ -466,6 +492,12 @@ bool StreamWindow::provide_next_frame(QImage &next_video,
   }
 
   return false;
+}
+
+void StreamWindow::onClientSideQualityChanged(QualityOption quality)
+{
+  client_side_stream_quality = quality;
+  qInfo("set to %d", quality);
 }
 
 void StreamWindow::send_chat_message(string message)

@@ -20,7 +20,7 @@ StreamDisplayControls::StreamDisplayControls(QWidget *parent)
 
   QGridLayout *grid_layout = new QGridLayout(this);
 
-  grid_layout->addWidget(fullscreenButton, 1, 1,
+  grid_layout->addWidget(fullscreenButton, 1, 2,
                          Qt::AlignRight | Qt::AlignBottom);
 
   // Volume Control
@@ -35,6 +35,10 @@ StreamDisplayControls::StreamDisplayControls(QWidget *parent)
     connect(volume_control, &VolumeControlWidget::volume_changed, this,
             [this](int volume) { emit volume_changed(volume); });
     grid_layout->addWidget(volume_control, 1, 0,
+                           Qt::AlignRight | Qt::AlignBottom);
+
+    quality_control = new QualityControlButton(this);
+    grid_layout->addWidget(quality_control, 1, 1,
                            Qt::AlignRight | Qt::AlignBottom);
   }
 

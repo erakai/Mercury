@@ -1,5 +1,6 @@
 #ifndef STREAMCONTROLPANEL_H
 #define STREAMCONTROLPANEL_H
+
 #include "stream/mutestreambutton.hpp"
 #include <QWidget>
 

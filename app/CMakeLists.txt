@@ -47,6 +47,7 @@ qt_add_executable(mercury
         stream/streamcontrolpanel.hpp
         stream/streamdisplaycontrols.cpp
         stream/streamdisplaycontrols.hpp
+        stream/qualitycontrolbutton.cpp
 )
 
 # Qt set up

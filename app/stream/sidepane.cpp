@@ -103,6 +103,7 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
 
 bool ChatTab::eventFilter(QObject *watched, QEvent *event)
 {
+  // Input box: FOCUS event block
   if (event->type() == QEvent::MouseButtonPress)
   {
 
@@ -128,6 +129,31 @@ bool ChatTab::eventFilter(QObject *watched, QEvent *event)
     }
   }
 
+  // Input box: enter and shift + enter event block
+  else if (watched == messageInput && event->type() == QEvent::KeyPress)
+  {
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+    if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
+    {
+      if (!(keyEvent->modifiers() & Qt::ShiftModifier))
+      {
+        render_and_send_message(
+            messageInput->toPlainText().trimmed().toStdString());
+        messageInput->clear();
+        messageInput->document()->setTextWidth(
+            messageInput->viewport()->width());
+        messageInput->setFixedHeight(35);
+        return true;
+      }
+
+      // Else if Shift+Enter: allow inserting a newline
+    }
+  }
+
+  else if (event->type() == QEvent::Wheel)
+  { /* do nothing (disable scroll wheel) */
+  }
+
   return QWidget::eventFilter(watched, event);
 }
 
@@ -141,6 +167,7 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
 
   QString senderRawText = QString::fromStdString(msg.sender);
   QString messageRawText = QString::fromStdString(msg.message);
+  messageRawText.replace("\n", "<br>");
   messageRawText.replace(QRegularExpression("([\\w\\d]{30})"), "\\1&#8203;");
 
   QString nameColor = "#4fc3f7";

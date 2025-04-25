@@ -17,7 +17,6 @@
 #include <QMainWindow>
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qwidget.h>
-#include "singleton/audiomanager.hpp"
 
 using namespace std;
 

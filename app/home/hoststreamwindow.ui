@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>440</width>
-    <height>467</height>
+    <height>492</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -36,6 +36,15 @@ QPushButton#hostButton {
 	border: 2px solid rgb(249, 220, 161);
 }
 QPushButton#hostButton:pressed {
+	background-color: rgba(217, 162, 64, 80);
+	border: 2px solid rgb(249, 220, 161);
+}
+QPushButton#ethics_button {
+	min-width: 190;
+	background-color: rgb(217, 162, 64);
+	border: 2px solid rgb(249, 220, 161);
+}
+QPushButton#ethics_button:pressed {
 	background-color: rgba(217, 162, 64, 80);
 	border: 2px solid rgb(249, 220, 161);
 }
@@ -222,6 +231,39 @@ QCheckBox {
       </size>
      </property>
     </spacer>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_9">
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="ethics_button">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>44</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Ethics Agreement</string>
+       </property>
+       <property name="default">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -512,6 +554,14 @@ QCheckBox {
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton:disabled {
+color: white;
+background-color: gray;
+border-color: gray;
+}
+</string>
        </property>
        <property name="text">
         <string>Host</string>

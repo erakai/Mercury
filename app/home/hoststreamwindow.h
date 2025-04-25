@@ -26,7 +26,12 @@ private slots:
   void tutorial_button_press();
   void public_stream_toggled();
 
+  void on_ethics_button_clicked();
+
 private:
+  void set_ethics_agreed_to(bool agreed);
+  bool ethics_agreed_to;
+
   Ui::HostStreamWindow *ui;
 
   StreamPreviewWindow *spw = nullptr;

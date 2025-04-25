@@ -8,7 +8,7 @@ StreamControlPanel::StreamControlPanel(QWidget *parent)
   // StreamWindow *stream_window = qobject_cast<StreamWindow
   // *>(parent->parent());
 
-  auto *panel_container = new QWidget(this);
+  QWidget *panel_container = new QWidget(this);
   panel_container->setStyleSheet(
       "QWidget {"
       "    background-color: #222222;" // Dark background

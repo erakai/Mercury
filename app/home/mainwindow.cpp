@@ -7,7 +7,6 @@
 #include "../api/mapi.hpp"
 
 #include <QJsonObject>
-#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {

@@ -1,5 +1,6 @@
 #ifndef STREAMDISPLAYCONTROLS_H
 #define STREAMDISPLAYCONTROLS_H
+#include "stream/qualitycontrolbutton.hpp"
 #include "stream/volumecontrolwidget.hpp"
 #include <QWidget>
 #include <QPushButton>
@@ -14,6 +15,9 @@ private:
 
 public:
   StreamDisplayControls(QWidget *parent);
+
+  // Making this public to expose signal
+  QualityControlButton *quality_control;
 
 signals:
   void fullScreenButtonPressed();

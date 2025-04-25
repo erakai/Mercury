@@ -3,6 +3,7 @@
 #include "annotationdisplay.hpp"
 #include "sidepane.hpp"
 #include "stream/painttoolwidget.hpp"
+#include "stream/qualitycontrolbutton.hpp"
 #include "streamdisplay.hpp"
 #include "streamservice.hpp"
 #include "hstp.hpp"
@@ -16,7 +17,6 @@
 #include <QMainWindow>
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qwidget.h>
-#include "singleton/audiomanager.hpp"
 
 using namespace std;
 
@@ -96,6 +96,8 @@ public slots:
   void onAnnotationStatusChanged(bool checked);
   void onClearButtonClicked();
 
+  void onClientSideQualityChanged(QualityOption quality);
+
   // These next two are host-only
   void viewer_disconnected(int id, std::string alias);
   // This is called after a client is validated
@@ -127,6 +129,8 @@ private:
   StreamDisplayControls *stream_display_controls;
   PaintToolWidget *paint_tool;
   int streamDisplayMode = 0; // 0 def, 1 fullscreen, 2 tbh (no chat maybe)
+
+  QualityOption client_side_stream_quality = QualityOption::DEFAULT;
 
   StreamInfo *stream_info;
   bool has_host_muted_stream = false;

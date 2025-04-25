@@ -7,6 +7,7 @@
 #include "utils.h"
 
 #include <QtLogging>
+#include <QTextEdit>
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QHostAddress>
@@ -26,6 +27,8 @@ HostStreamWindow::HostStreamWindow(QWidget *parent)
 
   connect(ui->publicStream, &QCheckBox::toggled, this,
           &HostStreamWindow::public_stream_toggled);
+
+  set_ethics_agreed_to(false);
 
   QString ip = Utils::instance().getIpAddress();
   ui->ipAddressButton->setText(ip);
@@ -148,4 +151,56 @@ void HostStreamWindow::tutorial_button_press()
   {
     qCritical("Unable to open tutorial URL.");
   }
+}
+
+void HostStreamWindow::on_ethics_button_clicked()
+{
+  QDialog *ethics_dialog = new QDialog(this);
+  ethics_dialog->setStyleSheet(QString("QDialog {"
+                                       "background-color: rgb(11, 17, 20);"
+                                       "}"));
+
+  ethics_dialog->setWindowTitle("Ethics Agreement");
+
+  QTextEdit *text_area = new QTextEdit(ethics_dialog);
+  text_area->setReadOnly(true);
+  QString ethicsAgreement = R"(
+        <h2 style='text-align: center;'>Mercury Ethics Agreement</h2>
+
+        <p>By using or developing Mercury, you agree to the following terms:</p>
+
+        <ol>
+            <li><strong>Respect for Content:</strong> You will not upload, share, or stream any content that violates copyright laws, is illegal, or infringes on the rights of others.</li>
+            <li><strong>Respect for Users:</strong> You agree to treat all other users with respect and refrain from using offensive, discriminatory, or harassing language or behavior.</li>
+            <li><strong>Privacy and Confidentiality:</strong> You will respect the privacy of other users, refrain from sharing personal or sensitive information without consent, and follow all applicable privacy regulations.</li>
+            <li><strong>Fair Use:</strong> You will not use the streaming service for any fraudulent, abusive, or harmful activities, including the distribution of malicious software or unauthorized content.</li>
+            <li><strong>Compliance with Laws:</strong> You will comply with all applicable local, national, and international laws while using the application.</li>
+        </ol>
+
+        <p>By accepting these terms, you agree to use this service responsibly, ethically, and in accordance with all laws and regulations.</p>
+        )";
+  text_area->setHtml(ethicsAgreement);
+  text_area->setFixedHeight(300);
+  text_area->setFixedWidth(400);
+
+  QPushButton *agree_button = new QPushButton("I Agree", ethics_dialog);
+  connect(agree_button, &QPushButton::clicked, this,
+          [=, this]()
+          {
+            set_ethics_agreed_to(true);
+            ethics_dialog->accept();
+          });
+
+  QVBoxLayout *dialog_layout = new QVBoxLayout(ethics_dialog);
+  dialog_layout->addWidget(text_area);
+  dialog_layout->addWidget(agree_button);
+  ethics_dialog->setLayout(dialog_layout);
+
+  ethics_dialog->exec(); // This makes the dialog modal
+}
+
+void HostStreamWindow::set_ethics_agreed_to(bool agreed)
+{
+  ethics_agreed_to = agreed;
+  ui->hostButton->setEnabled(ethics_agreed_to);
 }

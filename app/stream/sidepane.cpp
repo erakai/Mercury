@@ -1,4 +1,5 @@
 #include "sidepane.hpp"
+#include "../home/utils.h"
 #include <QtWidgets/qlistwidget.h>
 #include <QMouseEvent>
 #include <QApplication>
@@ -171,17 +172,22 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
   messageRawText.replace("\n", "<br>");
   messageRawText.replace(QRegularExpression("([\\w\\d]{30})"), "\\1&#8203;");
 
+  QString receiverUsernameTag = "@" + Utils::instance().getDisplayName();
+  QString messageHighlight = (messageRawText.contains(receiverUsernameTag))
+                                 ? "background-color: rgba(255, 255, 0, 0.3);"
+                                 : "";
+
   QString nameColor = "#4fc3f7";
   if (sender)
   {
     nameColor = "#d9a140";
   }
 
-  QString richMessage =
-      QString(R"(
-  <span style="color:%1; font-weight:bold;">%2:%3 </span><span style="color:#ffffff;">%4</span>
+  QString richMessage = QString(R"(
+  <span style="color:%1; font-weight:bold;">%2:%3 </span><span style="color:#ffffff; %4">%5</span>
   )")
-          .arg(nameColor, senderRawText, optionalLineBreak, messageRawText);
+                            .arg(nameColor, senderRawText, optionalLineBreak,
+                                 messageHighlight, messageRawText);
 
   label->setText(richMessage);
   label->setWordWrap(true);

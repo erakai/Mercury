@@ -1,4 +1,5 @@
 #include "sidepane.hpp"
+#include "../home/utils.h"
 #include <QtWidgets/qlistwidget.h>
 #include <QMouseEvent>
 #include <QApplication>
@@ -6,6 +7,16 @@
 SidePane::SidePane(QWidget *parent) : QTabWidget(parent)
 {
   setTabPosition(QTabWidget::North);
+
+  connect(this, &QTabWidget::currentChanged, this,
+          [this](int index)
+          {
+            if (widget(index) == chat_tab)
+            {
+              unreadMessageCount = 0;
+              setTabText(indexOf(chat_tab), "Chat");
+            }
+          });
 }
 
 void SidePane::initialize_chat_tab(const std::string &display_name)
@@ -162,6 +173,28 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
   QListWidgetItem *item = new QListWidgetItem();
   chatBox->addItem(item);
 
+  QWidget *p = this->parentWidget();
+  while (p && !qobject_cast<QTabWidget *>(p))
+  {
+    p = p->parentWidget();
+  }
+
+  QTabWidget *parentPane = qobject_cast<QTabWidget *>(p);
+  if (parentPane)
+  {
+    if (parentPane->currentWidget() != this)
+    {
+      SidePane *sidePane = qobject_cast<SidePane *>(parentPane);
+      if (sidePane)
+      {
+        sidePane->unreadMessageCount++;
+        sidePane->setTabText(
+            sidePane->indexOf(this),
+            QString("🔴 Chat (%1)").arg(sidePane->unreadMessageCount));
+      }
+    }
+  }
+
   QLabel *label = new QLabel();
   label->setTextFormat(Qt::RichText);
 
@@ -171,17 +204,22 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
   messageRawText.replace("\n", "<br>");
   messageRawText.replace(QRegularExpression("([\\w\\d]{30})"), "\\1&#8203;");
 
+  QString receiverUsernameTag = "@" + Utils::instance().getDisplayName();
+  QString messageHighlight = (messageRawText.contains(receiverUsernameTag))
+                                 ? "background-color: rgba(255, 255, 0, 0.3);"
+                                 : "";
+
   QString nameColor = "#4fc3f7";
   if (sender)
   {
     nameColor = "#d9a140";
   }
 
-  QString richMessage =
-      QString(R"(
-  <span style="color:%1; font-weight:bold;">%2:%3 </span><span style="color:#ffffff;">%4</span>
+  QString richMessage = QString(R"(
+  <span style="color:%1; font-weight:bold;">%2:%3 </span><span style="color:#ffffff; %4">%5</span>
   )")
-          .arg(nameColor, senderRawText, optionalLineBreak, messageRawText);
+                            .arg(nameColor, senderRawText, optionalLineBreak,
+                                 messageHighlight, messageRawText);
 
   label->setText(richMessage);
   label->setWordWrap(true);

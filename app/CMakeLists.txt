@@ -49,6 +49,9 @@ qt_add_executable(mercury
         stream/streamdisplaycontrols.hpp
         stream/qualitycontrolbutton.cpp
 )
+if(APPLE)
+    set_target_properties(mercury PROPERTIES MACOSX_BUNDLE TRUE)
+endif()
 
 # Qt set up
 target_link_libraries(mercury PRIVATE Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Multimedia Qt6::MultimediaWidgets)

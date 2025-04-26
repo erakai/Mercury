@@ -27,7 +27,7 @@ ReactionPanel::ReactionPanel(QWidget *parent)
   {
     for (int j = 0; j < cols; j++)
     {
-      if (index >= reactionStringList.size())
+      if (index >= (int) reactionStringList.size())
       {
         goto doneAddingButtons;
       }

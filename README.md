@@ -40,5 +40,11 @@ cp -r assets/ mercury.app/Contents/MacOS/assets/
 macdeployqt mercury.app -dmg -verbose=2
 ```
 
+To deploy on Windows, do the below after building (from your build dir), then zip the folder.
+```bash
+C://Qt//6.8.2//mingw_64//bin//windeployqt.exe mercury.exe
+```
+
+
 
 ### Screenshots

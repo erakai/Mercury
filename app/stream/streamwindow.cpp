@@ -497,7 +497,7 @@ bool StreamWindow::provide_next_frame(QImage &next_video,
 void StreamWindow::onClientSideQualityChanged(QualityOption quality)
 {
   client_side_stream_quality = quality;
-  qInfo("set to %d", quality);
+  qInfo("set to %d", (int) quality);
 }
 
 void StreamWindow::send_chat_message(string message)

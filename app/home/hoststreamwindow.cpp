@@ -55,18 +55,16 @@ void HostStreamWindow::on_hostButton_clicked()
 {
   hide();
 
-  spw = new StreamPreviewWindow();
+  QString stream_name = ui->streamNameLineEdit->text();
+  QString ip_address = ui->ipAddressButton->text();
+  quint16 tcp_port = ui->tcpPortLineEdit->text().toUShort();
+  bool public_stream = (ui->publicStream->checkState() == 2);
+
+  spw = new StreamPreviewWindow(nullptr, stream_name, ip_address, tcp_port,
+                                public_stream);
   spw->show();
   spw->raise();          // for MacOS
   spw->activateWindow(); // for Windows
-
-  // Add stream to stream browser if "Make Publicly Available" is checked
-  if (ui->publicStream->checkState() == 2)
-  {
-    mercury::add_public_stream(ui->streamNameLineEdit->text(),
-                               ui->tcpPortLineEdit->text().toInt(),
-                               ui->ipAddressButton->text());
-  }
 
   connect(spw, &StreamPreviewWindow::closed, this,
           &HostStreamWindow::open_stream_window);

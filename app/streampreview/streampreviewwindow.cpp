@@ -21,7 +21,9 @@
 #include <QAction>
 #include <QCheckBox>
 
-StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
+StreamPreviewWindow::StreamPreviewWindow(QWidget *parent, QString stream_title,
+                                         QString stream_ip_address,
+                                         int host_tcp, bool public_stream)
     : QWidget(parent), screenListView(new QListView(this)),
       windowListView(new QListView(this)),
       audioInputListView(new QListView(this)),
@@ -34,7 +36,10 @@ StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
       windowLabel(new QLabel(tr("Select window to capture:"), this)),
       audioInputLabel(new QLabel(tr("Select audio input source"))),
       videoWidgetLabel(new QLabel(tr("Capture output:"), this)),
-      captureWindowAudioButton(new QCheckBox(this))
+      captureWindowAudioButton(new QCheckBox(this)), stream_title(stream_title),
+      stream_ip_address(stream_ip_address), host_tcp(host_tcp),
+      public_stream(public_stream)
+
 {
   setAttribute(Qt::WA_DeleteOnClose, false);
 
@@ -205,6 +210,12 @@ void StreamPreviewWindow::onScreenCaptureErrorChanged()
 void StreamPreviewWindow::onStartStopButtonClicked()
 {
   streamStarted = true;
+  // Add stream to stream browser if "Make Publicly Available" is checked
+  if (public_stream)
+  {
+    mercury::add_public_stream(stream_title, host_tcp, stream_ip_address,
+                               nullptr);
+  }
   VideoManager::instance().setMediaCaptureSession(*mediaCaptureSession);
   QAudioDevice audio_device = audioCapture->device();
   AudioManager::instance().set_audio_device(audio_device);

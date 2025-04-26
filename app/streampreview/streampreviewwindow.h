@@ -4,6 +4,8 @@
 #ifndef SCREENCAPTUREPREVIEW_H
 #define SCREENCAPTUREPREVIEW_H
 
+#include "../stream/streamservice.hpp"
+
 #include <QScreenCapture>
 #include <QWindowCapture>
 #include <QAudioInput>
@@ -33,7 +35,10 @@ class StreamPreviewWindow : public QWidget
   Q_OBJECT
 
 public:
-  explicit StreamPreviewWindow(QWidget *parent = nullptr);
+  explicit StreamPreviewWindow(QWidget *parent = nullptr,
+                               QString stream_title = "",
+                               QString stream_ip_address = "", int host_tcp = 0,
+                               bool public_steam = false);
   ~StreamPreviewWindow() override;
 
 protected:
@@ -80,6 +85,10 @@ private:
   QLabel *videoWidgetLabel = nullptr;
   QCheckBox *captureWindowAudioButton = nullptr;
   SourceType sourceType = SourceType::Screen;
+  QString stream_title;
+  QString stream_ip_address;
+  int host_tcp;
+  bool public_stream;
 };
 
 #endif // SCREENCAPTUREPREVIEW_H

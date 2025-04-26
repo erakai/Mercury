@@ -110,16 +110,10 @@ StreamPreviewWindow::StreamPreviewWindow(QWidget *parent, QString stream_title,
   updateActive(SourceType::Screen, true);
 }
 
-bool streamStarted = false;
-
 StreamPreviewWindow::~StreamPreviewWindow() = default;
 
 void StreamPreviewWindow::closeEvent(QCloseEvent *event)
 {
-  if (!streamStarted)
-  {
-    mercury::delete_public_stream(Utils::instance().getIpAddress());
-  }
   emit closed();
   QWidget::closeEvent(event);
 }
@@ -209,7 +203,6 @@ void StreamPreviewWindow::onScreenCaptureErrorChanged()
 
 void StreamPreviewWindow::onStartStopButtonClicked()
 {
-  streamStarted = true;
   // Add stream to stream browser if "Make Publicly Available" is checked
   if (public_stream)
   {

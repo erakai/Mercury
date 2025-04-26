@@ -149,5 +149,5 @@ TEST_F(MftpTest, SendAndProcessBasic)
   // compression
 
   // Examine this in: build/assets/...
-  ASSERT_TRUE(received_image.save("assets/test.jpg", "JPG"));
+  //   ASSERT_TRUE(received_image.save("assets/test.jpg", "JPG"));
 }

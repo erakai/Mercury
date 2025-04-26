@@ -14,6 +14,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
   // that don't rely on ui files, open an example in Qt Creator (the screenshot
   // example is really good).
   ui.setupUi(this);
+  QString app_dir = QCoreApplication::applicationDirPath();
+  QString file(app_dir + "/assets/MercuryLogo.png");
+  QPixmap pix(file);
+  ui.label->setPixmap(pix);
+
   ui.settingsButton->setText(Utils::instance().getDisplayName());
 }
 

@@ -30,5 +30,15 @@ make
 
 Or, you can open QtCreator, and load this project by selecting "Open File or Project" and selecting the top-level `CMakeLists.txt` file. Then, go to Build -> Run. You need to do this to edit `ui` files.
 
+#### Deployment
+To deploy on MacOS, do the following after building (from `build/`):
+
+```bash
+export PATH="~/Qt/[YOUR VERSION]/macos/bin:$PATH"
+cp -r config/ mercury.app/Contents/MacOS/config/
+cp -r assets/ mercury.app/Contents/MacOS/assets/
+macdeployqt mercury.app -dmg -verbose=2
+```
+
 
 ### Screenshots

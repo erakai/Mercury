@@ -1,6 +1,7 @@
 #include "reactiondisplay.hpp"
 
 #include <QLabel>
+#include <QCoreApplication>
 #include <QPropertyAnimation>
 #include <QRandomGenerator>
 #include <QGraphicsOpacityEffect>
@@ -21,8 +22,10 @@ void ReactionDisplay::addReaction(ReactionPanel::Reaction reaction)
 
 void ReactionDisplay::displayReaction(ReactionPanel::Reaction reaction)
 {
-  QString filepath = QString("assets/reactions/%1")
-                         .arg(ReactionPanel::getReactionAssetName(reaction));
+  QString app_dir = QCoreApplication::applicationDirPath();
+  QString filepath(app_dir +
+                   QString("/assets/reactions/%1")
+                       .arg(ReactionPanel::getReactionAssetName(reaction)));
   QPixmap reactionPixmap(filepath);
 
   if (reactionPixmap.isNull())

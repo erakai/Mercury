@@ -56,7 +56,9 @@ void SettingsWindow::set_button_ids()
 void SettingsWindow::set_up()
 {
   // Grab all settings to update the ui
-  QSettings settings("config/MercuryClientSettings.ini", QSettings::IniFormat);
+  QString app_dir = QCoreApplication::applicationDirPath();
+  QSettings settings(app_dir + "/config/MercuryClientSettings.ini",
+                     QSettings::IniFormat);
 
   // GENERAL SETTINGS SETUP
 

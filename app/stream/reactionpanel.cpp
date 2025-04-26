@@ -2,6 +2,7 @@
 
 #include <QLabel>
 #include <QPushButton>
+#include <QCoreApplication>
 #include <QtWidgets/qgridlayout.h>
 
 const std::vector<std::string> ReactionPanel::reactionStringList = {
@@ -33,9 +34,11 @@ ReactionPanel::ReactionPanel(QWidget *parent)
       auto *reaction_button = new QPushButton(parent);
       // reaction_button->setStyleSheet("");
       auto reaction = static_cast<Reaction>(index);
-      QString filename =
-          QString("assets/reactions/%1").arg(getReactionAssetName(reaction));
-      QPixmap pix(filename);
+      QString app_dir = QCoreApplication::applicationDirPath();
+      QString file(
+          app_dir +
+          QString("/assets/reactions/%1").arg(getReactionAssetName(reaction)));
+      QPixmap pix(file);
       reaction_button->setIcon(QIcon(pix));
       reaction_button->setIconSize(QSize(24, 24));
       reaction_button->setFixedSize(40, 40);

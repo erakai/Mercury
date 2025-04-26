@@ -4,17 +4,17 @@
 #include <fstream>
 #include <QDir>
 #include <QSettings>
-#include <sys/stat.h>
+#include <QStandardPaths>
+#include <QCoreApplication>
 
 int FPS = 5;
 
 /* Checks to see if config file is present */
 bool mercury::check_config_file_presence()
 {
-
-  const std::string &configFilePath = "config/MercuryClientSettings.ini";
-  struct stat buffer;
-  return (stat(configFilePath.c_str(), &buffer) == 0);
+  QString app_dir = QCoreApplication::applicationDirPath();
+  QFile config_path(app_dir + "/config/MercuryClientSettings.ini");
+  return config_path.exists();
 }
 
 /* Driver function for curl_default_settings */
@@ -31,13 +31,13 @@ void mercury::curl_default_config()
 
   const QString &url = "https://raw.githubusercontent.com/erakai/Mercury/"
                        "main/config/DefaultClientSettings.ini";
-  const QString &outputFilename = "config/MercuryClientSettings.ini";
 
-  QDir dir("config");
+  QString app_dir = QCoreApplication::applicationDirPath();
+  QDir dir(app_dir + "/config");
 
   if (!dir.exists())
   {
-    if (dir.mkpath("."))
+    if (QDir().mkpath(dir.path()))
     {
       qInfo("Created config directory successfully.");
     }
@@ -47,6 +47,7 @@ void mercury::curl_default_config()
     }
   }
 
+  const QString &outputFilename = app_dir + "/config/MercuryClientSettings.ini";
   mercury::download_file(url, outputFilename);
 
   return;
@@ -110,7 +111,9 @@ void mercury::save_all_settings(QString displayName, bool darkMode,
                                 int defaultClientUdpPort,
                                 int defaultHostTcpPort, int defaultHostUdpPort)
 {
-  QSettings settings("config/MercuryClientSettings.ini", QSettings::IniFormat);
+  QString app_dir = QCoreApplication::applicationDirPath();
+  const QString &outputFilename = app_dir + "/config/MercuryClientSettings.ini";
+  QSettings settings(outputFilename, QSettings::IniFormat);
 
   settings.setValue("GeneralSettings/Alias", displayName);
   settings.setValue("GeneralSettings/DarkMode", darkMode);

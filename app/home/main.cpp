@@ -6,17 +6,17 @@
 #include <QDialog>
 #include <QDir>
 #include <QTextEdit>
+#include <QStandardPaths>
 
 int main(int argc, char **argv)
 {
-  //  qSetMessagePattern(
-  //      "%{time process} %{type} %{function}:%{line} - %{message}");
   qSetMessagePattern("%{time process} %{type} - %{message}");
 
   QApplication a(argc, argv);
   QCoreApplication::setApplicationName("Mercury");
   QCoreApplication::setApplicationVersion("0.0.1");
 
+  // Generate config file
   if (!(mercury::check_config_file_presence()))
   {
 
@@ -24,7 +24,9 @@ int main(int argc, char **argv)
     mercury::curl_default_config();
   }
 
-  QDir assets_path("assets");
+  // Confirm assets file
+  QString app_dir = QCoreApplication::applicationDirPath();
+  QDir assets_path(app_dir + "/assets");
   if (!assets_path.exists())
   {
     qCritical("Assets folder not found!");

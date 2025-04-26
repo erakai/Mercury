@@ -71,6 +71,8 @@ class SidePane : public QTabWidget
   Q_OBJECT;
 
 public:
+  int unreadMessageCount = 0;
+
   SidePane(QWidget *parent = nullptr);
 
   void initialize_chat_tab(const string &display_name);

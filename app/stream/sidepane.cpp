@@ -7,6 +7,16 @@
 SidePane::SidePane(QWidget *parent) : QTabWidget(parent)
 {
   setTabPosition(QTabWidget::North);
+
+  connect(this, &QTabWidget::currentChanged, this,
+          [this](int index)
+          {
+            if (widget(index) == chat_tab)
+            {
+              unreadMessageCount = 0;
+              setTabText(indexOf(chat_tab), "Chat");
+            }
+          });
 }
 
 void SidePane::initialize_chat_tab(const std::string &display_name)
@@ -162,6 +172,28 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
 {
   QListWidgetItem *item = new QListWidgetItem();
   chatBox->addItem(item);
+
+  QWidget *p = this->parentWidget();
+  while (p && !qobject_cast<QTabWidget *>(p))
+  {
+    p = p->parentWidget();
+  }
+
+  QTabWidget *parentPane = qobject_cast<QTabWidget *>(p);
+  if (parentPane)
+  {
+    if (parentPane->currentWidget() != this)
+    {
+      SidePane *sidePane = qobject_cast<SidePane *>(parentPane);
+      if (sidePane)
+      {
+        sidePane->unreadMessageCount++;
+        sidePane->setTabText(
+            sidePane->indexOf(this),
+            QString("Chat · %1 🔴").arg(sidePane->unreadMessageCount));
+      }
+    }
+  }
 
   QLabel *label = new QLabel();
   label->setTextFormat(Qt::RichText);

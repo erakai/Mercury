@@ -12,7 +12,10 @@ StreamDisplayControls::StreamDisplayControls(QWidget *parent)
 
   fullscreenButton = new QPushButton(this);
   fullscreenButton->setFixedSize(48, 48); // Adjust button size as needed
-  QPixmap pix("assets/fullscreen_button_icon.png");
+
+  QString app_dir = QCoreApplication::applicationDirPath();
+  QString file(app_dir + "/assets/fullscreen_button_icon.png");
+  QPixmap pix(file);
   fullscreenButton->setIcon(QIcon(pix));
   fullscreenButton->setIconSize(QSize(48, 48));
   fullscreenButton->setStyleSheet(

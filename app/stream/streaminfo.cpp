@@ -35,7 +35,9 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   // host_name_layout->addStretch();
 
   viewer_count_icon = new QLabel(this);
-  QPixmap vc_pix("assets/viewer-count-icon.png");
+  QString app_dir = QCoreApplication::applicationDirPath();
+  QString file(app_dir + "/assets/viewer-count-icon.png");
+  QPixmap vc_pix(file);
   QIcon ico(vc_pix);
   viewer_count_icon->setPixmap(ico.pixmap({24, 24}));
   // viewer_count_label->setVisible(true);
@@ -63,7 +65,9 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   if (stream_window->is_client())
   {
     unstable_network_indicator = new QLabel(this);
-    QPixmap pix("assets/unstable-indicator.png");
+    QString app_dir = QCoreApplication::applicationDirPath();
+    QString filep(app_dir + "/assets/unstable-indicator.png");
+    QPixmap pix(filep);
     QIcon ico(pix);
     unstable_network_indicator->setPixmap(ico.pixmap({48, 48}));
     unstable_network_indicator->setVisible(false);

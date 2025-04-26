@@ -1,8 +1,12 @@
 #include "utils.h"
 #include "config/mconfig.hpp"
 
+#include <QCoreApplication>
+
 Utils::Utils()
-    : settings("config/MercuryClientSettings.ini", QSettings::IniFormat)
+    : settings(QCoreApplication::applicationDirPath() +
+                   "/config/MercuryClientSettings.ini",
+               QSettings::IniFormat)
 {
   foreach (const QHostAddress &address, QNetworkInterface::allAddresses())
   {

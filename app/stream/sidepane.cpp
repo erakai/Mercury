@@ -190,7 +190,7 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
         sidePane->unreadMessageCount++;
         sidePane->setTabText(
             sidePane->indexOf(this),
-            QString("Chat · %1 🔴").arg(sidePane->unreadMessageCount));
+            QString("Chat (%1) 🔴").arg(sidePane->unreadMessageCount));
       }
     }
   }

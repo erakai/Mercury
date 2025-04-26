@@ -8,7 +8,7 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QPushButton>
-#include <QLineEdit>
+#include <QTextEdit>
 #include <QCheckBox>
 #include <QSettings>
 #include <QTabWidget>
@@ -31,7 +31,7 @@ class ChatTab : public QWidget
 public:
   ChatTab(const string &displayName, QWidget *parent = nullptr);
 
-  void new_chat_message(ChatMessage msg);
+  void new_chat_message(ChatMessage msg, bool sender = false);
   void render_and_send_message(string msgContent);
 
 signals:
@@ -39,8 +39,11 @@ signals:
 
 private:
   QListWidget *chatBox;
-  QLineEdit *messageInput;
+  QTextEdit *messageInput;
   string displayName;
+
+protected:
+  bool eventFilter(QObject *watched, QEvent *event) override;
 };
 
 class ViewerListTab : public QWidget
@@ -68,6 +71,8 @@ class SidePane : public QTabWidget
   Q_OBJECT;
 
 public:
+  int unreadMessageCount = 0;
+
   SidePane(QWidget *parent = nullptr);
 
   void initialize_chat_tab(const string &display_name);

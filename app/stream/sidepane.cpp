@@ -1,9 +1,22 @@
 #include "sidepane.hpp"
+#include "../home/utils.h"
 #include <QtWidgets/qlistwidget.h>
+#include <QMouseEvent>
+#include <QApplication>
 
 SidePane::SidePane(QWidget *parent) : QTabWidget(parent)
 {
   setTabPosition(QTabWidget::North);
+
+  connect(this, &QTabWidget::currentChanged, this,
+          [this](int index)
+          {
+            if (widget(index) == chat_tab)
+            {
+              unreadMessageCount = 0;
+              setTabText(indexOf(chat_tab), "Chat");
+            }
+          });
 }
 
 void SidePane::initialize_chat_tab(const std::string &display_name)
@@ -41,47 +54,188 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
   QVBoxLayout *layout = new QVBoxLayout(this);
   chatBox = new QListWidget(this);
 
-  QPalette chatBoxPalette = chatBox->palette();
-  chatBoxPalette.setColor(QPalette::Base, QColor(64, 68, 69));
-  chatBoxPalette.setColor(QPalette::Text, QColor(221, 231, 235));
-  chatBox->setPalette(chatBoxPalette);
-
   chatBox->setSelectionMode(QAbstractItemView::NoSelection);
   chatBox->setFocusPolicy(Qt::NoFocus);
   chatBox->setEditTriggers(QAbstractItemView::NoEditTriggers);
   chatBox->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+  chatBox->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  chatBox->setWordWrap(true);
+  chatBox->setStyleSheet(R"(
+  QListWidget {
+    background-color: rgb(34, 34, 34);
+    color: rgb(221, 231, 235);
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 4px;
+  }
+)");
   layout->addWidget(chatBox);
 
   QHBoxLayout *inputLayout = new QHBoxLayout();
 
-  messageInput = new QLineEdit(this);
-  QPalette inputPalette = messageInput->palette();
-  inputPalette.setColor(QPalette::Base, QColor(197, 197, 197));
-  inputPalette.setColor(QPalette::Text, Qt::black);
-  messageInput->setPalette(inputPalette);
+  messageInput = new QTextEdit(this);
+  messageInput->setPlaceholderText("Send a message");
+  messageInput->setAcceptRichText(false);
+  messageInput->setFixedHeight(35);
+  messageInput->setFocusPolicy(Qt::StrongFocus);
+  messageInput->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  messageInput->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+  messageInput->setStyleSheet(R"(
+  QTextEdit {
+    border: 1px solid;
+    border-radius: 5px;
+    background-color: rgb(34, 34, 34);
+    color: white;
+    padding: 5px 10px; /* top/bottom padding helps with multiline readability */
+    font-size: 14px;
+  }
+
+  QTextEdit:focus {
+    border: 1px solid rgb(54, 120, 156);
+  }
+)");
 
   inputLayout->addWidget(messageInput);
-
-  // QPushButton *sendButton = new QPushButton("Send", this);
-  // inputLayout->addWidget(sendButton);
-
   layout->addLayout(inputLayout);
   setLayout(layout);
 
-  connect(messageInput, &QLineEdit::returnPressed, this,
+  connect(messageInput, &QTextEdit::textChanged, this,
           [this]()
           {
-            render_and_send_message(
-                messageInput->text().trimmed().toStdString());
+            QTextDocument *doc = messageInput->document();
+            int docHeight = static_cast<int>(doc->size().height());
+
+            int newHeight = std::clamp(docHeight + 10, 30, 100);
+            messageInput->setFixedHeight(newHeight);
           });
+
+  qApp->installEventFilter(this);
 }
 
-void ChatTab::new_chat_message(ChatMessage msg)
+bool ChatTab::eventFilter(QObject *watched, QEvent *event)
 {
-  QString messageToRender =
-      QString::fromStdString(msg.sender + ":\n" + msg.message + "\n");
+  // Input box: FOCUS event block
+  if (event->type() == QEvent::MouseButtonPress)
+  {
 
-  chatBox->addItem(new QListWidgetItem(messageToRender));
+    bool mouseOverInput = messageInput->rect().contains(
+        messageInput->mapFromGlobal(QCursor::pos()));
+
+    if (messageInput && messageInput->hasFocus() && !mouseOverInput)
+    {
+      QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+      QPoint globalPos = mouseEvent->globalPosition().toPoint();
+
+      QWidget *clickedWidget = QApplication::widgetAt(globalPos);
+
+      if (clickedWidget != messageInput)
+      {
+        messageInput->clearFocus();
+      }
+    }
+
+    else if (messageInput && !messageInput->hasFocus() && mouseOverInput)
+    {
+      messageInput->setFocus();
+    }
+  }
+
+  // Input box: enter and shift + enter event block
+  else if (watched == messageInput && event->type() == QEvent::KeyPress)
+  {
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+    if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
+    {
+      if (!(keyEvent->modifiers() & Qt::ShiftModifier))
+      {
+        render_and_send_message(
+            messageInput->toPlainText().trimmed().toStdString());
+        messageInput->clear();
+        messageInput->document()->setTextWidth(
+            messageInput->viewport()->width());
+        messageInput->setFixedHeight(35);
+        return true;
+      }
+
+      // Else if Shift+Enter: allow inserting a newline
+    }
+  }
+
+  else if (event->type() == QEvent::Wheel)
+  { /* do nothing (disable scroll wheel) */
+  }
+
+  return QWidget::eventFilter(watched, event);
+}
+
+void ChatTab::new_chat_message(ChatMessage msg, bool sender)
+{
+  QListWidgetItem *item = new QListWidgetItem();
+  chatBox->addItem(item);
+
+  QWidget *p = this->parentWidget();
+  while (p && !qobject_cast<QTabWidget *>(p))
+  {
+    p = p->parentWidget();
+  }
+
+  QTabWidget *parentPane = qobject_cast<QTabWidget *>(p);
+  if (parentPane)
+  {
+    if (parentPane->currentWidget() != this)
+    {
+      SidePane *sidePane = qobject_cast<SidePane *>(parentPane);
+      if (sidePane)
+      {
+        sidePane->unreadMessageCount++;
+        sidePane->setTabText(
+            sidePane->indexOf(this),
+            QString("🔴 Chat (%1)").arg(sidePane->unreadMessageCount));
+      }
+    }
+  }
+
+  QLabel *label = new QLabel();
+  label->setTextFormat(Qt::RichText);
+
+  QString senderRawText = QString::fromStdString(msg.sender);
+  QString messageRawText = QString::fromStdString(msg.message);
+  QString optionalLineBreak = (messageRawText.contains("\n")) ? "<br>" : "";
+  messageRawText.replace("\n", "<br>");
+  messageRawText.replace(QRegularExpression("([\\w\\d]{30})"), "\\1&#8203;");
+
+  QString receiverUsernameTag = "@" + Utils::instance().getDisplayName();
+  QString messageHighlight = (messageRawText.contains(receiverUsernameTag))
+                                 ? "background-color: rgba(255, 255, 0, 0.3);"
+                                 : "";
+
+  QString nameColor = "#4fc3f7";
+  if (sender)
+  {
+    nameColor = "#d9a140";
+  }
+
+  QString richMessage = QString(R"(
+  <span style="color:%1; font-weight:bold;">%2:%3 </span><span style="color:#ffffff; %4">%5</span>
+  )")
+                            .arg(nameColor, senderRawText, optionalLineBreak,
+                                 messageHighlight, messageRawText);
+
+  label->setText(richMessage);
+  label->setWordWrap(true);
+  label->setStyleSheet(
+      "background-color: transparent; padding: 0px 10px 0px 10px;");
+  int maxWidth = chatBox->viewport()->width();
+  label->setMaximumWidth(maxWidth);
+
+  label->adjustSize();
+  const int minHeight = 30;
+  QSize labelSize = label->sizeHint();
+  if (labelSize.height() < minHeight)
+    labelSize.setHeight(minHeight);
+  item->setSizeHint(labelSize);
+
+  chatBox->setItemWidget(item, label);
   chatBox->scrollToBottom();
 }
 
@@ -91,7 +245,7 @@ void ChatTab::render_and_send_message(std::string msgContent)
     return;
 
   messageInput->clear();
-  new_chat_message({displayName, msgContent});
+  new_chat_message({displayName, msgContent}, true);
   emit send_chat_message(msgContent);
 }
 

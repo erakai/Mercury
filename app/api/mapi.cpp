@@ -17,14 +17,16 @@ QNetworkAccessManager *networkManager()
 }
 
 void mercury::add_public_stream(QString streamName, int hostTCP,
-                                QString streamIP)
+                                QString streamIP, QByteArray thumbnail)
 {
   QUrl requestURL(BASE_URL + "/addstream");
 
+  QString thumbnailBase64 = QString::fromUtf8(thumbnail.toBase64());
   QJsonObject json;
   json["streamName"] = streamName;
   json["hostTCP"] = hostTCP;
   json["streamIP"] = streamIP;
+  json["thumbnail"] = thumbnailBase64;
 
   QJsonDocument doc(json);
   QByteArray payload = doc.toJson();
@@ -94,4 +96,13 @@ QJsonArray mercury::fetch_public_streams()
 
   reply->deleteLater();
   return streamList;
+}
+
+QByteArray qpixmap_to_bytearray(const QPixmap &pixmap)
+{
+  QByteArray byteArray;
+  QBuffer buffer(&byteArray);
+  buffer.open(QIODevice::WriteOnly);
+  pixmap.save(&buffer, "PNG");
+  return byteArray;
 }

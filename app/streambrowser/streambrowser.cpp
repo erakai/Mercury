@@ -16,7 +16,8 @@
 #include <QHostAddress>
 
 StreamBrowser::StreamBrowser(QWidget *parent, QStringList streamNames,
-                             QList<int> hostTCPs, QStringList streamIPs)
+                             QList<int> hostTCPs, QStringList streamIPs,
+                             QList<QPixmap> thumbnails)
     : QDialog(parent)
 {
   setStyleSheet("background-color: transparent;");
@@ -24,6 +25,7 @@ StreamBrowser::StreamBrowser(QWidget *parent, QStringList streamNames,
   this->streamNames = streamNames;
   this->hostTCPs = hostTCPs;
   this->streamIPs = streamIPs;
+  this->thumbnails = thumbnails;
 
   QVBoxLayout *outerLayout = new QVBoxLayout(this);
   outerLayout->setContentsMargins(0, 0, 0, 0);
@@ -105,10 +107,24 @@ QWidget *StreamBrowser::createUI()
 )");
     tile->setFixedSize(308, 202);
 
+    if (!thumbnails[i].isNull())
+    {
+      QLabel *thumbnailLabel = new QLabel(tile);
+      thumbnailLabel->setFixedSize(tile->size());
+      thumbnailLabel->move(0, 0);
+      thumbnailLabel->setPixmap(thumbnails[i].scaled(
+          tile->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+      thumbnailLabel->setScaledContents(true);
+      thumbnailLabel->setStyleSheet("border-radius: 4px;");
+      thumbnailLabel->setAttribute(Qt::WA_StyledBackground);
+      thumbnailLabel->lower();
+    }
+
     QLabel *liveBadge = new QLabel("LIVE", tile);
     liveBadge->move(8, 8);
     liveBadge->setStyleSheet("background-color: #3681a3; color: white; "
                              "padding: 2px 6px; border-radius: 4px;");
+    liveBadge->raise();
 
     QLabel *label = new QLabel(streamNames[i]);
     label->setStyleSheet("color: white; font-weight: bold;");

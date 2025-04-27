@@ -11,7 +11,8 @@ public:
   explicit StreamBrowser(QWidget *parent = nullptr,
                          const QStringList streamNames = {},
                          const QList<int> hostTCPs = {},
-                         const QStringList streamIPs = {});
+                         const QStringList streamIPs = {},
+                         const QList<QPixmap> thumbnails = {});
 
 private:
   QWidget *createUI();
@@ -19,6 +20,7 @@ private:
   QStringList streamNames;
   QList<int> hostTCPs;
   QStringList streamIPs;
+  QList<QPixmap> thumbnails;
 };
 
 #endif // STREAMBROWSER_HPP

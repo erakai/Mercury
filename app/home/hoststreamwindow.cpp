@@ -132,6 +132,8 @@ void HostStreamWindow::open_stream_window()
   serv->stream_name = ui->streamNameLineEdit->text().toStdString();
   serv->start_timestamp = QDateTime::currentSecsSinceEpoch();
   serv->reactions_enabled = ui->reactionsEnabledCheckBox->checkState() == 2;
+  serv->ip_address = ui->ipAddressButton->text().toStdString();
+  serv->public_stream = (ui->publicStream->checkState() == 2);
   serv->server->start_server();
   // This sets itself to delete on close, so no memory leak (I think)
   StreamWindow *w = new StreamWindow(alias, serv);

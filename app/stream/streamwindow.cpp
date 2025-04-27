@@ -381,7 +381,9 @@ void StreamWindow::stream_fully_initialized()
 
   // start recording audio of host
   if (is_host())
+  {
     AudioManager::instance().start_recording(3000);
+  }
 }
 
 void StreamWindow::closeEvent(QCloseEvent *event)
@@ -442,6 +444,31 @@ bool StreamWindow::provide_next_frame(QImage &next_video,
     {
       servh->server->send_frame("desktop", audio_array, QVideoFrame(img));
       next_video = img;
+
+      // Add stream to stream browser if "Make Publicly Available" is checked
+      if (servh->public_stream)
+      {
+        QImage first_frame_image;
+        if (VideoManager::instance().GetVideoImage(first_frame_image) ==
+            VideoManager::SUCCESS)
+        {
+          QPixmap first_frame = QPixmap::fromImage(first_frame_image);
+          QByteArray first_frame_bytes =
+              mercury::qpixmap_to_bytearray(first_frame);
+
+          mercury::add_public_stream(
+              QString::fromStdString(servh->stream_name), servh->tcp_port,
+              QString::fromStdString(servh->ip_address), first_frame_bytes);
+        }
+        else
+        {
+          mercury::add_public_stream(
+              QString::fromStdString(servh->stream_name), servh->tcp_port,
+              QString::fromStdString(servh->ip_address), nullptr);
+        }
+        servh->public_stream = false;
+      }
+
       return true;
     }
     else

@@ -34,6 +34,7 @@ void MainWindow::on_streamBrowserButton_clicked()
   QStringList streamNames;
   QList<int> hostTCPs;
   QStringList streamIPs;
+  QList<QPixmap> thumbnails;
 
   for (const QJsonValue &stream : publicStreamArray)
   {
@@ -44,14 +45,24 @@ void MainWindow::on_streamBrowserButton_clicked()
     QString streamName = streamObject["streamName"].toString();
     int hostTCP = streamObject["hostTCP"].toInt();
     QString streamIP = streamObject["streamIP"].toString();
+    QString thumbnailBase64 = streamObject["thumbnail"].toString();
 
     streamNames.append(streamName);
     hostTCPs.append(hostTCP);
     streamIPs.append(streamIP);
+
+    QPixmap thumbnail;
+    if (!thumbnailBase64.isEmpty())
+    {
+      QByteArray thumbnailBytes =
+          QByteArray::fromBase64(thumbnailBase64.toUtf8());
+      thumbnail.loadFromData(thumbnailBytes, "JPEG");
+    }
+    thumbnails.append(thumbnail);
   }
 
   StreamBrowser *streamBrowser =
-      new StreamBrowser(this, streamNames, hostTCPs, streamIPs);
+      new StreamBrowser(this, streamNames, hostTCPs, streamIPs, thumbnails);
   streamBrowser->setAttribute(Qt::WA_DeleteOnClose);
   streamBrowser->setWindowTitle("Stream Browser");
   streamBrowser->resize(1440, 900);

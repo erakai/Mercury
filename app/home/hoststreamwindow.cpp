@@ -3,7 +3,6 @@
 #include "stream/streamwindow.hpp"
 #include "toastnotification.h"
 #include "ui_hoststreamwindow.h"
-#include "api/mapi.hpp"
 #include "utils.h"
 
 #include <QtLogging>
@@ -59,14 +58,6 @@ void HostStreamWindow::on_hostButton_clicked()
   spw->show();
   spw->raise();          // for MacOS
   spw->activateWindow(); // for Windows
-
-  // Add stream to stream browser if "Make Publicly Available" is checked
-  if (ui->publicStream->checkState() == 2)
-  {
-    mercury::add_public_stream(ui->streamNameLineEdit->text(),
-                               ui->tcpPortLineEdit->text().toInt(),
-                               ui->ipAddressButton->text());
-  }
 
   connect(spw, &StreamPreviewWindow::closed, this,
           &HostStreamWindow::open_stream_window);
@@ -134,6 +125,8 @@ void HostStreamWindow::open_stream_window()
   serv->stream_name = ui->streamNameLineEdit->text().toStdString();
   serv->start_timestamp = QDateTime::currentSecsSinceEpoch();
   serv->reactions_enabled = ui->reactionsEnabledCheckBox->checkState() == 2;
+  serv->ip_address = ui->ipAddressButton->text().toStdString();
+  serv->public_stream = (ui->publicStream->checkState() == 2);
   serv->server->start_server();
   // This sets itself to delete on close, so no memory leak (I think)
   StreamWindow *w = new StreamWindow(alias, serv);

@@ -7,8 +7,6 @@
 #include "audioinputlistmodel.h"
 #include "../singleton/videomanager.h"
 #include "singleton/audiomanager.hpp"
-#include "../api/mapi.hpp"
-#include "../home/utils.h"
 #include <QMediaCaptureSession>
 #include <QScreenCapture>
 #include <QVideoWidget>
@@ -35,6 +33,7 @@ StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
       audioInputLabel(new QLabel(tr("Select audio input source"))),
       videoWidgetLabel(new QLabel(tr("Capture output:"), this)),
       captureWindowAudioButton(new QCheckBox(this))
+
 {
   setAttribute(Qt::WA_DeleteOnClose, false);
 
@@ -105,16 +104,10 @@ StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
   updateActive(SourceType::Screen, true);
 }
 
-bool streamStarted = false;
-
 StreamPreviewWindow::~StreamPreviewWindow() = default;
 
 void StreamPreviewWindow::closeEvent(QCloseEvent *event)
 {
-  if (!streamStarted)
-  {
-    mercury::delete_public_stream(Utils::instance().getIpAddress());
-  }
   emit closed();
   QWidget::closeEvent(event);
 }
@@ -204,10 +197,10 @@ void StreamPreviewWindow::onScreenCaptureErrorChanged()
 
 void StreamPreviewWindow::onStartStopButtonClicked()
 {
-  streamStarted = true;
   VideoManager::instance().setMediaCaptureSession(*mediaCaptureSession);
   QAudioDevice audio_device = audioCapture->device();
   AudioManager::instance().set_audio_device(audio_device);
+
   close();
 }
 

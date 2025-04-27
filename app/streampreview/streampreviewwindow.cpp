@@ -7,7 +7,6 @@
 #include "audioinputlistmodel.h"
 #include "../singleton/videomanager.h"
 #include "singleton/audiomanager.hpp"
-#include "../api/mapi.hpp"
 #include <QMediaCaptureSession>
 #include <QScreenCapture>
 #include <QVideoWidget>
@@ -20,9 +19,7 @@
 #include <QAction>
 #include <QCheckBox>
 
-StreamPreviewWindow::StreamPreviewWindow(QWidget *parent, QString stream_title,
-                                         QString stream_ip_address,
-                                         int host_tcp, bool public_stream)
+StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
     : QWidget(parent), screenListView(new QListView(this)),
       windowListView(new QListView(this)),
       audioInputListView(new QListView(this)),
@@ -35,9 +32,7 @@ StreamPreviewWindow::StreamPreviewWindow(QWidget *parent, QString stream_title,
       windowLabel(new QLabel(tr("Select window to capture:"), this)),
       audioInputLabel(new QLabel(tr("Select audio input source"))),
       videoWidgetLabel(new QLabel(tr("Capture output:"), this)),
-      captureWindowAudioButton(new QCheckBox(this)), stream_title(stream_title),
-      stream_ip_address(stream_ip_address), host_tcp(host_tcp),
-      public_stream(public_stream)
+      captureWindowAudioButton(new QCheckBox(this))
 
 {
   setAttribute(Qt::WA_DeleteOnClose, false);

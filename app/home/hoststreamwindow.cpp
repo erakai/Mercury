@@ -3,7 +3,6 @@
 #include "stream/streamwindow.hpp"
 #include "toastnotification.h"
 #include "ui_hoststreamwindow.h"
-#include "api/mapi.hpp"
 #include "utils.h"
 
 #include <QtLogging>
@@ -55,13 +54,7 @@ void HostStreamWindow::on_hostButton_clicked()
 {
   hide();
 
-  QString stream_name = ui->streamNameLineEdit->text();
-  QString ip_address = ui->ipAddressButton->text();
-  quint16 tcp_port = ui->tcpPortLineEdit->text().toUShort();
-  bool public_stream = (ui->publicStream->checkState() == 2);
-
-  spw = new StreamPreviewWindow(nullptr, stream_name, ip_address, tcp_port,
-                                public_stream);
+  spw = new StreamPreviewWindow();
   spw->show();
   spw->raise();          // for MacOS
   spw->activateWindow(); // for Windows

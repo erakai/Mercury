@@ -98,7 +98,7 @@ QJsonArray mercury::fetch_public_streams()
   return streamList;
 }
 
-QByteArray qpixmap_to_bytearray(const QPixmap &pixmap)
+QByteArray mercury::qpixmap_to_bytearray(const QPixmap &pixmap)
 {
   QByteArray byteArray;
   QBuffer buffer(&byteArray);

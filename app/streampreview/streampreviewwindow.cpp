@@ -8,7 +8,6 @@
 #include "../singleton/videomanager.h"
 #include "singleton/audiomanager.hpp"
 #include "../api/mapi.hpp"
-#include "../home/utils.h"
 #include <QMediaCaptureSession>
 #include <QScreenCapture>
 #include <QVideoWidget>
@@ -206,8 +205,19 @@ void StreamPreviewWindow::onStartStopButtonClicked()
   // Add stream to stream browser if "Make Publicly Available" is checked
   if (public_stream)
   {
-    mercury::add_public_stream(stream_title, host_tcp, stream_ip_address,
-                               nullptr);
+    if (screenCapture->screen())
+    {
+      QPixmap first_frame = screenCapture->screen()->grabWindow(0);
+      QByteArray first_frame_bytes = mercury::qpixmap_to_bytearray(first_frame);
+
+      mercury::add_public_stream(stream_title, host_tcp, stream_ip_address,
+                                 first_frame_bytes);
+    }
+    else
+    {
+      mercury::add_public_stream(stream_title, host_tcp, stream_ip_address,
+                                 nullptr);
+    }
   }
   VideoManager::instance().setMediaCaptureSession(*mediaCaptureSession);
   QAudioDevice audio_device = audioCapture->device();

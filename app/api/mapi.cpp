@@ -103,6 +103,8 @@ QByteArray mercury::qpixmap_to_bytearray(const QPixmap &pixmap)
   QByteArray byteArray;
   QBuffer buffer(&byteArray);
   buffer.open(QIODevice::WriteOnly);
-  pixmap.save(&buffer, "PNG");
+  pixmap.save(
+      &buffer, "JPG",
+      80); // JPG encoding at 80% quality (three hoorays for lossy compression)
   return byteArray;
 }

@@ -119,6 +119,13 @@ QWidget *StreamBrowser::createUI()
       thumbnailLabel->setAttribute(Qt::WA_StyledBackground);
       thumbnailLabel->lower();
     }
+    else
+    {
+      QLabel *noThumbnailLabel = new QLabel(tile);
+      noThumbnailLabel->setText("No Preview Available");
+      noThumbnailLabel->setFixedSize(tile->size());
+      noThumbnailLabel->setAlignment(Qt::AlignCenter);
+    }
 
     QLabel *liveBadge = new QLabel("LIVE", tile);
     liveBadge->move(8, 8);

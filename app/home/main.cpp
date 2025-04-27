@@ -50,6 +50,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
+  qInfo("Initializing main window...");
   MainWindow w;
   w.show();
 

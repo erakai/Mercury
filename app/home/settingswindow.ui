@@ -52,6 +52,7 @@ Line {
 	fill:  rgb(223, 234, 237);
 }
 
+QTextEdit { border: 1px solid white; }
 
 QDialog#SettingsWindow {
 	background-color: rgb(11, 17, 20);
@@ -82,7 +83,7 @@ QWidget#scrollAreaWidgetContents {
         <x>0</x>
         <y>0</y>
         <width>535</width>
-        <height>541</height>
+        <height>595</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout">
@@ -130,73 +131,6 @@ QWidget#scrollAreaWidgetContents {
              </item>
              <item>
               <widget class="QLineEdit" name="defaultClientUdpPortLineEdit"/>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_7">
-             <item>
-              <widget class="QLabel" name="clientStreamResolutionLabel">
-               <property name="text">
-                <string>Stream Resolution:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="clientStreamResolutionRadio1">
-               <property name="text">
-                <string>360p</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">clientStreamResolutionButtonGroup</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="clientStreamResolutionRadio2">
-               <property name="text">
-                <string>720p</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">clientStreamResolutionButtonGroup</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="clientStreamResolutionRadio3">
-               <property name="text">
-                <string>1080p</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">clientStreamResolutionButtonGroup</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="clientStreamResolutionRadio4">
-               <property name="text">
-                <string>1440p</string>
-               </property>
-               <attribute name="buttonGroup">
-                <string notr="true">clientStreamResolutionButtonGroup</string>
-               </attribute>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_4">
-               <property name="orientation">
-                <enum>Qt::Orientation::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </item>
@@ -349,7 +283,7 @@ QWidget#scrollAreaWidgetContents {
              <item>
               <widget class="QRadioButton" name="streamFramerateRadio1">
                <property name="text">
-                <string>15 fps</string>
+                <string>5 fps</string>
                </property>
                <attribute name="buttonGroup">
                 <string notr="true">hostStreamFramerateButtonGroup</string>
@@ -359,7 +293,7 @@ QWidget#scrollAreaWidgetContents {
              <item>
               <widget class="QRadioButton" name="streamFramerateRadio2">
                <property name="text">
-                <string>30 fps</string>
+                <string>12 fps</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -372,7 +306,7 @@ QWidget#scrollAreaWidgetContents {
              <item>
               <widget class="QRadioButton" name="streamFramerateRadio3">
                <property name="text">
-                <string>60 fps</string>
+                <string>24 fps</string>
                </property>
                <attribute name="buttonGroup">
                 <string notr="true">hostStreamFramerateButtonGroup</string>
@@ -450,6 +384,44 @@ QWidget#scrollAreaWidgetContents {
              </item>
              <item>
               <widget class="QLineEdit" name="defaultHostTcpPortLineEdit"/>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QGridLayout" name="gridLayout_2">
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>IP Whitelist:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>IP Blacklist:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" colspan="2">
+              <widget class="QTextEdit" name="whitelist_text"/>
+             </item>
+             <item row="1" column="1">
+              <widget class="QCheckBox" name="whitelist_checkbox">
+               <property name="text">
+                <string>Enabled</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QCheckBox" name="blacklist_checkbox">
+               <property name="text">
+                <string>Enabled</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2" colspan="2">
+              <widget class="QTextEdit" name="blacklist_text"/>
              </item>
             </layout>
            </item>
@@ -547,7 +519,7 @@ QWidget#scrollAreaWidgetContents {
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>80</height>
           </size>
          </property>
         </spacer>
@@ -605,7 +577,7 @@ QWidget#scrollAreaWidgetContents {
  <connections/>
  <buttongroups>
   <buttongroup name="clientStreamResolutionButtonGroup"/>
-  <buttongroup name="hostStreamFramerateButtonGroup"/>
   <buttongroup name="hostStreamResolutionButtonGroup"/>
+  <buttongroup name="hostStreamFramerateButtonGroup"/>
  </buttongroups>
 </ui>

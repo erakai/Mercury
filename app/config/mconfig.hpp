@@ -8,6 +8,7 @@
 // Right now this is pulled by streamdisplay, and updated
 // by performance tab.
 extern int FPS;
+extern std::shared_ptr<QSettings> mercury_settings;
 
 using namespace std;
 

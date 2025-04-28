@@ -24,8 +24,13 @@ int main(int argc, char **argv)
     mercury::curl_default_config();
   }
 
-  // Confirm assets file
+  // Load settings
   QString app_dir = QCoreApplication::applicationDirPath();
+  const QString &outputFilename = app_dir + "/config/MercuryClientSettings.ini";
+  mercury_settings =
+      std::make_shared<QSettings>(outputFilename, QSettings::IniFormat);
+
+  // Confirm assets file
   QDir assets_path(app_dir + "/assets");
   if (!assets_path.exists())
   {

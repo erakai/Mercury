@@ -9,6 +9,7 @@
 #include <QCoreApplication>
 
 int FPS = 5;
+std::shared_ptr<QSettings> mercury_settings;
 
 /* Checks to see if config file is present */
 bool mercury::check_config_file_presence()
@@ -133,23 +134,22 @@ void mercury::save_all_settings(QString displayName, bool darkMode,
                                 bool blacklistEnabled, bool whitelistEnabled,
                                 QString blacklist, QString whitelist)
 {
-  QString app_dir = QCoreApplication::applicationDirPath();
-  const QString &outputFilename = app_dir + "/config/MercuryClientSettings.ini";
-  QSettings settings(outputFilename, QSettings::IniFormat);
+  mercury_settings->setValue("GeneralSettings/Alias", displayName);
+  mercury_settings->setValue("GeneralSettings/DarkMode", darkMode);
+  mercury_settings->setValue("ClientSettings/DefaultClientUdpPort",
+                             defaultClientUdpPort);
+  mercury_settings->setValue("HostSettings/StreamResolution",
+                             hostStreamResOption);
+  mercury_settings->setValue("HostSettings/FrameRate", hostFramerateOption);
+  mercury_settings->setValue("HostSettings/MaxViewers", maxViewerCount);
+  mercury_settings->setValue("HostSettings/DefaultHostTcpPort",
+                             defaultHostTcpPort);
+  mercury_settings->setValue("HostSettings/DefaultHostUdpPort",
+                             defaultHostUdpPort);
 
-  settings.setValue("GeneralSettings/Alias", displayName);
-  settings.setValue("GeneralSettings/DarkMode", darkMode);
-  settings.setValue("ClientSettings/DefaultClientUdpPort",
-                    defaultClientUdpPort);
-  settings.setValue("HostSettings/StreamResolution", hostStreamResOption);
-  settings.setValue("HostSettings/FrameRate", hostFramerateOption);
-  settings.setValue("HostSettings/MaxViewers", maxViewerCount);
-  settings.setValue("HostSettings/DefaultHostTcpPort", defaultHostTcpPort);
-  settings.setValue("HostSettings/DefaultHostUdpPort", defaultHostUdpPort);
+  mercury_settings->setValue("HostSettings/WhitelistEnabled", whitelistEnabled);
+  mercury_settings->setValue("HostSettings/BlacklistEnabled", blacklistEnabled);
 
-  settings.setValue("HostSettings/WhitelistEnabled", whitelistEnabled);
-  settings.setValue("HostSettings/BlacklistEnabled", blacklistEnabled);
-
-  settings.setValue("HostSettings/Whitelist", whitelist);
-  settings.setValue("HostSettings/Blacklist", blacklist);
+  mercury_settings->setValue("HostSettings/Whitelist", whitelist);
+  mercury_settings->setValue("HostSettings/Blacklist", blacklist);
 }

@@ -48,24 +48,19 @@ void SettingsWindow::set_button_ids()
 
 void SettingsWindow::set_up()
 {
-  // Grab all settings to update the ui
-  QString app_dir = QCoreApplication::applicationDirPath();
-  QSettings settings(app_dir + "/config/MercuryClientSettings.ini",
-                     QSettings::IniFormat);
-
   // GENERAL SETTINGS SETUP
 
-  ui->displayNameLineEdit->setText(mercury::get_alias(settings));
-  ui->darkModeCheckBox->setChecked(mercury::get_dark_mode(settings));
+  ui->displayNameLineEdit->setText(mercury::get_alias(*mercury_settings));
+  ui->darkModeCheckBox->setChecked(mercury::get_dark_mode(*mercury_settings));
 
   // CLIENT SETTINGS SETUP
 
   ui->defaultClientUdpPortLineEdit->setText(
-      QString::number(mercury::get_defaultClientUdpPort(settings)));
+      QString::number(mercury::get_defaultClientUdpPort(*mercury_settings)));
 
   // HOST SETTINGS SETUP
 
-  int hostStreamResOption = mercury::get_host_stream_res(settings);
+  int hostStreamResOption = mercury::get_host_stream_res(*mercury_settings);
   if (hostStreamResOption != 360 && hostStreamResOption != 720 &&
       hostStreamResOption != 1080 && hostStreamResOption != 1440)
   {
@@ -74,7 +69,7 @@ void SettingsWindow::set_up()
   ui->hostStreamResolutionButtonGroup->button(hostStreamResOption)
       ->setChecked(true);
 
-  int streamFramerateOption = mercury::get_host_stream_fps(settings);
+  int streamFramerateOption = mercury::get_host_stream_fps(*mercury_settings);
   if (streamFramerateOption != 5 && streamFramerateOption != 12 &&
       streamFramerateOption != 24)
   {
@@ -83,19 +78,22 @@ void SettingsWindow::set_up()
   ui->hostStreamFramerateButtonGroup->button(streamFramerateOption)
       ->setChecked(true);
 
-  ui->maxViewerCountSpinBox->setValue(mercury::get_host_max_viewers(settings));
+  ui->maxViewerCountSpinBox->setValue(
+      mercury::get_host_max_viewers(*mercury_settings));
 
   ui->defaultHostUdpPortLineEdit->setText(
-      QString::number(mercury::get_defaultHostUdpPort(settings)));
+      QString::number(mercury::get_defaultHostUdpPort(*mercury_settings)));
   ui->defaultHostTcpPortLineEdit->setText(
-      QString::number(mercury::get_defaultHostTcpPort(settings)));
+      QString::number(mercury::get_defaultHostTcpPort(*mercury_settings)));
 
-  ui->whitelist_checkbox->setChecked(mercury::get_whitelist_enabled(settings));
-  ui->blacklist_checkbox->setChecked(mercury::get_blacklist_enabled(settings));
+  ui->whitelist_checkbox->setChecked(
+      mercury::get_whitelist_enabled(*mercury_settings));
+  ui->blacklist_checkbox->setChecked(
+      mercury::get_blacklist_enabled(*mercury_settings));
 
-  QString whitelistText = mercury::get_whitelist(settings).join("\n");
+  QString whitelistText = mercury::get_whitelist(*mercury_settings).join("\n");
   ui->whitelist_text->setText(whitelistText);
-  QString blacklistText = mercury::get_blacklist(settings).join("\n");
+  QString blacklistText = mercury::get_blacklist(*mercury_settings).join("\n");
   ui->blacklist_text->setText(blacklistText);
 }
 

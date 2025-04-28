@@ -98,6 +98,13 @@ public:
     compression = comp;
   }
   bool get_compression() { return compression; }
+  void set_blacklist_whitelist(bool wenabled, QList<QString> blist,
+                               QList<QString> wlist)
+  {
+    whitelist_enabled = wenabled;
+    blacklist = blist;
+    whitelist = wlist;
+  }
 
   /*
   Sends a message to every client.
@@ -200,6 +207,11 @@ private:
 
   // The host's hashed password
   QByteArray host_pass;
+
+  // The blacklist/whitelist of the host
+  bool whitelist_enabled = false;
+  QList<QString> whitelist;
+  QList<QString> blacklist;
 
   // Global UDP socket that all clients will be contacted with
   std::shared_ptr<QUdpSocket> mftp_sock = nullptr;

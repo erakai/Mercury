@@ -2,12 +2,14 @@
 #include "filedownloader.hpp"
 
 #include <fstream>
+#include <QRegularExpression>
 #include <QDir>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QCoreApplication>
 
 int FPS = 5;
+std::shared_ptr<QSettings> mercury_settings;
 
 /* Checks to see if config file is present */
 bool mercury::check_config_file_presence()
@@ -65,12 +67,6 @@ QString mercury::get_alias(QSettings &settings)
   return settings.value("GeneralSettings/Alias").toString();
 }
 
-int mercury::get_client_stream_res(QSettings &settings)
-{
-
-  return settings.value("ClientSettings/StreamResolution").toInt();
-}
-
 int mercury::get_host_stream_res(QSettings &settings)
 {
 
@@ -104,25 +100,56 @@ int mercury::get_defaultHostUdpPort(QSettings &settings)
   return settings.value("HostSettings/DefaultHostUdpPort").toInt();
 }
 
+QList<QString> mercury::get_blacklist(QSettings &settings)
+{
+  QList<QString> ret;
+  QString val = settings.value("HostSettings/Blacklist").toString();
+
+  return val.split(u';').toVector();
+}
+
+bool mercury::get_blacklist_enabled(QSettings &settings)
+{
+  return settings.value("HostSettings/BlacklistEnabled").toBool();
+}
+
+bool mercury::get_whitelist_enabled(QSettings &settings)
+{
+  return settings.value("HostSettings/WhitelistEnabled").toBool();
+}
+
+QList<QString> mercury::get_whitelist(QSettings &settings)
+{
+  QList<QString> ret;
+  QString val = settings.value("HostSettings/Whitelist").toString();
+
+  return val.split(u';').toVector();
+}
+
 void mercury::save_all_settings(QString displayName, bool darkMode,
-                                int clientStreamResOption,
                                 int hostStreamResOption,
                                 int hostFramerateOption, int maxViewerCount,
                                 int defaultClientUdpPort,
-                                int defaultHostTcpPort, int defaultHostUdpPort)
+                                int defaultHostTcpPort, int defaultHostUdpPort,
+                                bool blacklistEnabled, bool whitelistEnabled,
+                                QString blacklist, QString whitelist)
 {
-  QString app_dir = QCoreApplication::applicationDirPath();
-  const QString &outputFilename = app_dir + "/config/MercuryClientSettings.ini";
-  QSettings settings(outputFilename, QSettings::IniFormat);
+  mercury_settings->setValue("GeneralSettings/Alias", displayName);
+  mercury_settings->setValue("GeneralSettings/DarkMode", darkMode);
+  mercury_settings->setValue("ClientSettings/DefaultClientUdpPort",
+                             defaultClientUdpPort);
+  mercury_settings->setValue("HostSettings/StreamResolution",
+                             hostStreamResOption);
+  mercury_settings->setValue("HostSettings/FrameRate", hostFramerateOption);
+  mercury_settings->setValue("HostSettings/MaxViewers", maxViewerCount);
+  mercury_settings->setValue("HostSettings/DefaultHostTcpPort",
+                             defaultHostTcpPort);
+  mercury_settings->setValue("HostSettings/DefaultHostUdpPort",
+                             defaultHostUdpPort);
 
-  settings.setValue("GeneralSettings/Alias", displayName);
-  settings.setValue("GeneralSettings/DarkMode", darkMode);
-  settings.setValue("ClientSettings/StreamResolution", clientStreamResOption);
-  settings.setValue("ClientSettings/DefaultClientUdpPort",
-                    defaultClientUdpPort);
-  settings.setValue("HostSettings/StreamResolution", hostStreamResOption);
-  settings.setValue("HostSettings/FrameRate", hostFramerateOption);
-  settings.setValue("HostSettings/MaxViewers", maxViewerCount);
-  settings.setValue("HostSettings/DefaultHostTcpPort", defaultHostTcpPort);
-  settings.setValue("HostSettings/DefaultHostUdpPort", defaultHostUdpPort);
+  mercury_settings->setValue("HostSettings/WhitelistEnabled", whitelistEnabled);
+  mercury_settings->setValue("HostSettings/BlacklistEnabled", blacklistEnabled);
+
+  mercury_settings->setValue("HostSettings/Whitelist", whitelist);
+  mercury_settings->setValue("HostSettings/Blacklist", blacklist);
 }

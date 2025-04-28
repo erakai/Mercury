@@ -116,8 +116,52 @@ void MercuryServer::add_new_client()
     return;
   Client new_client;
 
-  // TODO: VERIFY CLIENT NOT ON BLACKLIST BEFORE ADDING TO LIST
   QTcpSocket *connection = nextPendingConnection();
+  QHostAddress connected_computer = connection->peerAddress();
+
+  bool ok = false;
+  quint32 ipv4 = connected_computer.toIPv4Address(&ok);
+  if (ok)
+    connected_computer = QHostAddress(ipv4);
+
+  // If we have a whitelist, check it matches it...
+  if (whitelist_enabled)
+  {
+    bool matches_one = false;
+    for (QString ip_string : whitelist)
+    {
+      QHostAddress ip(ip_string);
+      if (!ip.isNull() && ip == connected_computer)
+      {
+        matches_one = true;
+        break;
+      }
+    }
+    if (!matches_one)
+    {
+      qInfo() << "Someone tried to connect from non-whitelisted IP:"
+              << connected_computer;
+      connection->close();
+      return;
+    }
+  }
+
+  // If we have a blacklist, check it's not on it
+  if (blacklist.size() > 0)
+  {
+    for (QString ip_string : blacklist)
+    {
+      QHostAddress ip(ip_string);
+      if (!ip.isNull() && ip == connected_computer)
+      {
+        qInfo() << "Someone tried to connect from blacklisted IP:"
+                << connected_computer;
+        connection->close();
+        return;
+      }
+    }
+  }
+
   new_client.id = ++id_counter;
   new_client.hstp_sock = std::shared_ptr<QTcpSocket>(connection);
   new_client.handler = HstpHandler();

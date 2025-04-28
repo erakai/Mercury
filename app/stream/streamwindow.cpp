@@ -23,6 +23,19 @@ StreamWindow::StreamWindow(std::string alias, shared_ptr<HostService> host_data,
     : QMainWindow(parent), mode(MercuryMode::HOST), alias(alias),
       servh(host_data)
 {
+  // Tell the server what the settings are
+  QList<QString> blacklist = mercury::get_blacklist(*mercury_settings);
+  QList<QString> whitelist = mercury::get_whitelist(*mercury_settings);
+  bool blacklist_enabled = mercury::get_blacklist_enabled(*mercury_settings);
+  bool whitelist_enabled = mercury::get_whitelist_enabled(*mercury_settings);
+
+  if (!blacklist_enabled)
+    blacklist.clear();
+  if (!whitelist_enabled)
+    whitelist.clear();
+
+  servh->server->set_blacklist_whitelist(whitelist_enabled, blacklist,
+                                         whitelist);
 }
 
 StreamWindow::StreamWindow(std::string alias,

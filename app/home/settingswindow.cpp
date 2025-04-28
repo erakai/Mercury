@@ -8,6 +8,7 @@
 #include <QSettings>
 #include <QStringList>
 #include <QRandomGenerator>
+#include <QtCore/qregularexpression.h>
 
 SettingsWindow::SettingsWindow(QWidget *parent)
     : QDialog(parent), ui(new Ui::SettingsWindow)
@@ -29,15 +30,7 @@ void SettingsWindow::on_closeButton_clicked()
 
 void SettingsWindow::set_button_ids()
 { // A helper to set button group buttonIds for easy reference
-  // Client Stream Resolution
-  ui->clientStreamResolutionButtonGroup->setId(ui->clientStreamResolutionRadio1,
-                                               360);
-  ui->clientStreamResolutionButtonGroup->setId(ui->clientStreamResolutionRadio2,
-                                               720);
-  ui->clientStreamResolutionButtonGroup->setId(ui->clientStreamResolutionRadio3,
-                                               1080);
-  ui->clientStreamResolutionButtonGroup->setId(ui->clientStreamResolutionRadio4,
-                                               1440);
+
   // Host Stream Resolution
   ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio1,
                                              360);
@@ -48,41 +41,26 @@ void SettingsWindow::set_button_ids()
   ui->hostStreamResolutionButtonGroup->setId(ui->hostStreamResolutionRadio4,
                                              1440);
   // Host framerate
-  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio1, 15);
-  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio2, 30);
-  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio3, 60);
+  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio1, 5);
+  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio2, 12);
+  ui->hostStreamFramerateButtonGroup->setId(ui->streamFramerateRadio3, 24);
 }
 
 void SettingsWindow::set_up()
 {
-  // Grab all settings to update the ui
-  QString app_dir = QCoreApplication::applicationDirPath();
-  QSettings settings(app_dir + "/config/MercuryClientSettings.ini",
-                     QSettings::IniFormat);
-
   // GENERAL SETTINGS SETUP
 
-  ui->displayNameLineEdit->setText(mercury::get_alias(settings));
-  ui->darkModeCheckBox->setChecked(mercury::get_dark_mode(settings));
+  ui->displayNameLineEdit->setText(mercury::get_alias(*mercury_settings));
+  ui->darkModeCheckBox->setChecked(mercury::get_dark_mode(*mercury_settings));
 
   // CLIENT SETTINGS SETUP
 
-  int clientStreamResOption = mercury::get_client_stream_res(settings);
-
-  if (clientStreamResOption != 360 && clientStreamResOption != 720 &&
-      clientStreamResOption != 1080 && clientStreamResOption != 1440)
-  {
-    clientStreamResOption = 720;
-  }
-  ui->clientStreamResolutionButtonGroup->button(clientStreamResOption)
-      ->setChecked(true);
-
   ui->defaultClientUdpPortLineEdit->setText(
-      QString::number(mercury::get_defaultClientUdpPort(settings)));
+      QString::number(mercury::get_defaultClientUdpPort(*mercury_settings)));
 
   // HOST SETTINGS SETUP
 
-  int hostStreamResOption = mercury::get_host_stream_res(settings);
+  int hostStreamResOption = mercury::get_host_stream_res(*mercury_settings);
   if (hostStreamResOption != 360 && hostStreamResOption != 720 &&
       hostStreamResOption != 1080 && hostStreamResOption != 1440)
   {
@@ -91,35 +69,53 @@ void SettingsWindow::set_up()
   ui->hostStreamResolutionButtonGroup->button(hostStreamResOption)
       ->setChecked(true);
 
-  int streamFramerateOption = mercury::get_host_stream_fps(settings);
-  if (streamFramerateOption != 15 && streamFramerateOption != 30 &&
-      streamFramerateOption != 60)
+  int streamFramerateOption = mercury::get_host_stream_fps(*mercury_settings);
+  if (streamFramerateOption != 5 && streamFramerateOption != 12 &&
+      streamFramerateOption != 24)
   {
-    streamFramerateOption = 60;
+    streamFramerateOption = 5;
   }
   ui->hostStreamFramerateButtonGroup->button(streamFramerateOption)
       ->setChecked(true);
 
-  ui->maxViewerCountSpinBox->setValue(mercury::get_host_max_viewers(settings));
+  ui->maxViewerCountSpinBox->setValue(
+      mercury::get_host_max_viewers(*mercury_settings));
 
   ui->defaultHostUdpPortLineEdit->setText(
-      QString::number(mercury::get_defaultHostUdpPort(settings)));
+      QString::number(mercury::get_defaultHostUdpPort(*mercury_settings)));
   ui->defaultHostTcpPortLineEdit->setText(
-      QString::number(mercury::get_defaultHostTcpPort(settings)));
+      QString::number(mercury::get_defaultHostTcpPort(*mercury_settings)));
+
+  ui->whitelist_checkbox->setChecked(
+      mercury::get_whitelist_enabled(*mercury_settings));
+  ui->blacklist_checkbox->setChecked(
+      mercury::get_blacklist_enabled(*mercury_settings));
+
+  QString whitelistText = mercury::get_whitelist(*mercury_settings).join("\n");
+  ui->whitelist_text->setText(whitelistText);
+  QString blacklistText = mercury::get_blacklist(*mercury_settings).join("\n");
+  ui->blacklist_text->setText(blacklistText);
 }
 
 void SettingsWindow::on_applyButton_clicked()
 {
   QString alias = ui->displayNameLineEdit->text();
   bool darkMode = ui->darkModeCheckBox->isChecked();
-  int clientStreamResOption =
-      ui->clientStreamResolutionButtonGroup->checkedId();
   int hostStreamResOption = ui->hostStreamResolutionButtonGroup->checkedId();
   int hostFramerateOption = ui->hostStreamFramerateButtonGroup->checkedId();
   int maxViewerCount = ui->maxViewerCountSpinBox->value();
   int defaultClientUdpPort = ui->defaultClientUdpPortLineEdit->text().toInt();
   int defaultHostTcpPort = ui->defaultHostTcpPortLineEdit->text().toInt();
   int defaultHostUdpPort = ui->defaultHostUdpPortLineEdit->text().toInt();
+
+  bool blacklistEnabled = ui->blacklist_checkbox->isChecked();
+  bool whitelistEnabled = ui->whitelist_checkbox->isChecked();
+  QString blacklist = ui->blacklist_text->toPlainText();
+  QString whitelist = ui->whitelist_text->toPlainText();
+  blacklist.replace(QRegularExpression(";"), "");
+  whitelist.replace(QRegularExpression(";"), "");
+  blacklist.replace(QRegularExpression("\n"), ";");
+  whitelist.replace(QRegularExpression("\n"), ";");
 
   if (alias.length() > 15)
   {
@@ -150,10 +146,10 @@ void SettingsWindow::on_applyButton_clicked()
   // notify other objects that the name should be updated
   emit aliasChanged(alias);
 
-  mercury::save_all_settings(alias, darkMode, clientStreamResOption,
-                             hostStreamResOption, hostFramerateOption,
-                             maxViewerCount, defaultClientUdpPort,
-                             defaultHostTcpPort, defaultHostUdpPort);
+  mercury::save_all_settings(
+      alias, darkMode, hostStreamResOption, hostFramerateOption, maxViewerCount,
+      defaultClientUdpPort, defaultHostTcpPort, defaultHostUdpPort,
+      blacklistEnabled, whitelistEnabled, blacklist, whitelist);
 
   ToastNotification::showToast(this, "All changes saved!");
 }

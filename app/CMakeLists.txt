@@ -77,6 +77,35 @@ if(APPLE)
     set_target_properties(mercury PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/app/Info.plist
+        MACOSX_BUNDLE_ICON_FILE mercury.icns
+    )
+
+    # Copy MercuryLogo.icns into the app bundle
+    add_custom_command(TARGET mercury POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/assets/mercury.icns
+        $<TARGET_BUNDLE_DIR:mercury>/Contents/Resources/mercury.icns
+    )
+
+    # Copy Info.plist manually after building
+    add_custom_command(TARGET mercury POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/app/Info.plist
+        $<TARGET_BUNDLE_DIR:mercury>/Contents/Info.plist
+    )
+
+    # Copy assets folder into .app/Contents/MacOS/assets
+    add_custom_command(TARGET mercury POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        $<TARGET_BUNDLE_DIR:mercury>/Contents/MacOS/assets
+    )
+
+    # Copy config folder into .app/Contents/MacOS/config
+    add_custom_command(TARGET mercury POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/app/config
+        $<TARGET_BUNDLE_DIR:mercury>/Contents/MacOS/config
     )
 endif()
 

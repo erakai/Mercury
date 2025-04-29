@@ -18,6 +18,8 @@
         <string></string>
         <key>CFBundleName</key>
         <string>Mercury</string>
+        <key>CFBundleDisplayName</key>
+        <string>Mercury</string>
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleShortVersionString</key>

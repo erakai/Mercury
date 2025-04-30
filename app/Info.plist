@@ -11,7 +11,7 @@
         <key>CFBundleIconFile</key>
         <string></string>
         <key>CFBundleIdentifier</key>
-        <string>mercury</string>
+        <string>com.clak.mercury</string>
         <key>CFBundleInfoDictionaryVersion</key>
         <string>6.0</string>
         <key>CFBundleLongVersionString</key>
@@ -23,11 +23,11 @@
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleShortVersionString</key>
-        <string></string>
+        <string>0.9</string>
         <key>CFBundleSignature</key>
         <string>????</string>
         <key>CFBundleVersion</key>
-        <string></string>
+        <string>0.9</string>
         <key>CSResourcesFileMapped</key>
         <true/>
         <key>NSHumanReadableCopyright</key>

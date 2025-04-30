@@ -30,25 +30,21 @@ make
 
 Or, you can open QtCreator, and load this project by selecting "Open File or Project" and selecting the top-level `CMakeLists.txt` file. Then, go to Build -> Run. You need to do this to edit `ui` files.
 
-#### Deployment
-To deploy on MacOS, add this section to `app/CMakeLists.txt` after the executable is created:
-```bash
-if(APPLE)
-    set_target_properties(mercury PROPERTIES MACOSX_BUNDLE TRUE)
-endif()
-```
-Then build and run these commands from `build/`:
+#### Deployment on MacOS
+To deploy on MacOS, build and run these commands from `build/`:
 ```bash
 export PATH="~/Qt/[YOUR VERSION]/macos/bin:$PATH"
-cp -r config/ mercury.app/Contents/MacOS/config/
-cp -r assets/ mercury.app/Contents/MacOS/assets/
 macdeployqt mercury.app -dmg -verbose=2
 ```
 
+Then move Merucry.app into `applications/` on your local machine. (*this is requred for MacOS to register the custom URL scheme*)
+
+#### Deployment on Windows
 To deploy on Windows, do the below after building (from your build dir), then zip the folder.
 ```bash
 C://Qt//[YOUR VERSION]//mingw_64//bin//windeployqt.exe mercury.exe
 ```
+
 
 
 

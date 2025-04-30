@@ -37,7 +37,7 @@ export PATH="~/Qt/[YOUR VERSION]/macos/bin:$PATH"
 macdeployqt mercury.app -dmg -verbose=2
 ```
 
-Then move Merucry.app into `applications/` on your local machine. (*this is requred for MacOS to register the custom URL scheme*)
+Then move Mercury.app into `applications/` on your local machine. (*this is requred for MacOS to register the custom URL scheme*)
 
 #### Deployment on Windows
 To deploy on Windows, do the below after building (from your build dir), then zip the folder.

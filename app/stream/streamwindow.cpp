@@ -681,7 +681,7 @@ void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
     QPoint p(annotation.points[0].x, annotation.points[0].y);
     annotation_display->addLine(
         p, p, QColor(annotation.red, annotation.green, annotation.blue),
-        annotation.thickness);
+        annotation.thickness, 0);
   }
   else
   {
@@ -691,7 +691,7 @@ void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
       QPoint p(annotation.points[i - 1].x, annotation.points[i - 1].y);
       annotation_display->addLine(
           p, q, QColor(annotation.red, annotation.green, annotation.blue),
-          annotation.thickness);
+          annotation.thickness, 0);
     }
   }
 }
@@ -745,7 +745,8 @@ void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
     thickness *= -1;
   }
 
-  annotation_display->addLine(old_point, pos, currentColor, thickness);
+  int mode = paint_tool->m_brushTypeCombo->currentIndex();
+  annotation_display->addLine(old_point, pos, currentColor, thickness, mode);
   old_point = pos;
   points.push_back(pos);
 }

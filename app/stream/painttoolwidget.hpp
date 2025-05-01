@@ -5,6 +5,7 @@
 #include <QColor>
 #include <QLineEdit>
 #include <QRadioButton>
+#include <QSpinBox>
 
 class QLabel;
 class QPushButton;
@@ -28,7 +29,7 @@ private:
   QColor m_selectedColor;
   QLabel *m_colorIndicator;
   QPushButton *m_colorButton;
-  QLineEdit *m_brushSizeEdit;
+  QSpinBox *m_brushSizeEdit;
   QRadioButton *m_eraseButton;
 };
 

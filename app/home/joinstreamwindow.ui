@@ -14,7 +14,7 @@
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QPushButton {
+   <string notr="true">/*QPushButton {
 	background-color: rgb(54, 120, 156);
 	color: rgb(223, 234, 237);
 	border: 2px solid rgb(160, 207, 226);
@@ -45,7 +45,10 @@ QLabel[header=true] {
 
 QDialog#JoinStreamWindow {
 	background-color: rgb(11, 17, 20);
-}</string>
+}*/</string>
+  </property>
+  <property name="containerStyle" stdset="0">
+   <string>outer</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -53,8 +56,8 @@ QDialog#JoinStreamWindow {
      <property name="text">
       <string>Join Stream</string>
      </property>
-     <property name="header" stdset="0">
-      <bool>true</bool>
+     <property name="labelStyle" stdset="0">
+      <string>title</string>
      </property>
     </widget>
    </item>
@@ -188,6 +191,9 @@ QDialog#JoinStreamWindow {
        <property name="text">
         <string>Cancel</string>
        </property>
+       <property name="buttonStyle" stdset="0">
+        <string>secondary</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -203,6 +209,9 @@ QDialog#JoinStreamWindow {
        </property>
        <property name="default">
         <bool>true</bool>
+       </property>
+       <property name="buttonStyle" stdset="0">
+        <string>primary</string>
        </property>
       </widget>
      </item>

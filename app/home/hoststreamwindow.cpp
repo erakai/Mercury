@@ -55,6 +55,7 @@ void HostStreamWindow::on_hostButton_clicked()
   hide();
 
   spw = new StreamPreviewWindow();
+  spw->setProperty("containerStyle", "outer");
   spw->show();
   spw->raise();          // for MacOS
   spw->activateWindow(); // for Windows
@@ -149,9 +150,7 @@ void HostStreamWindow::tutorial_button_press()
 void HostStreamWindow::on_ethics_button_clicked()
 {
   QDialog *ethics_dialog = new QDialog(this);
-  ethics_dialog->setStyleSheet(QString("QDialog {"
-                                       "background-color: rgb(11, 17, 20);"
-                                       "}"));
+  ethics_dialog->setProperty("containerStyle", "outer");
 
   ethics_dialog->setWindowTitle("Ethics Agreement");
 

@@ -1,5 +1,7 @@
 #include "sidepane.hpp"
 #include "../home/utils.h"
+#include "config/mconfig.hpp"
+
 #include <QtWidgets/qlistwidget.h>
 #include <QMouseEvent>
 #include <QApplication>
@@ -60,15 +62,15 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
   chatBox->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
   chatBox->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   chatBox->setWordWrap(true);
-  chatBox->setStyleSheet(R"(
-  QListWidget {
-    background-color: rgb(34, 34, 34);
-    color: rgb(221, 231, 235);
-    border: 1px solid;
-    border-radius: 8px;
-    padding: 4px;
-  }
-)");
+  //   chatBox->setStyleSheet(R"(
+  //   QListWidget {
+  //     background-color: rgb(34, 34, 34);
+  //     color: rgb(221, 231, 235);
+  //     border: 1px solid;
+  //     border-radius: 8px;
+  //     padding: 4px;
+  //   }
+  // )");
   layout->addWidget(chatBox);
 
   QHBoxLayout *inputLayout = new QHBoxLayout();
@@ -80,20 +82,6 @@ ChatTab::ChatTab(const std::string &displayName, QWidget *parent)
   messageInput->setFocusPolicy(Qt::StrongFocus);
   messageInput->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   messageInput->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-  messageInput->setStyleSheet(R"(
-  QTextEdit {
-    border: 1px solid;
-    border-radius: 5px;
-    background-color: rgb(34, 34, 34);
-    color: white;
-    padding: 5px 10px; /* top/bottom padding helps with multiline readability */
-    font-size: 14px;
-  }
-
-  QTextEdit:focus {
-    border: 1px solid rgb(54, 120, 156);
-  }
-)");
 
   inputLayout->addWidget(messageInput);
   layout->addLayout(inputLayout);
@@ -215,11 +203,16 @@ void ChatTab::new_chat_message(ChatMessage msg, bool sender)
     nameColor = "#d9a140";
   }
 
+  QString msgColor = "#1a1a1a";
+  if (mercury::get_dark_mode(*mercury_settings))
+  {
+    msgColor = "#f0f0f0";
+  }
   QString richMessage = QString(R"(
-  <span style="color:%1; font-weight:bold;">%2:%3 </span><span style="color:#ffffff; %4">%5</span>
+  <span style="color:%1; font-weight:bold;">%2:%3 </span><span style="color:%4; %5">%6</span>
   )")
                             .arg(nameColor, senderRawText, optionalLineBreak,
-                                 messageHighlight, messageRawText);
+                                 msgColor, messageHighlight, messageRawText);
 
   label->setText(richMessage);
   label->setWordWrap(true);

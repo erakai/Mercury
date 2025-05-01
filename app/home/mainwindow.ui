@@ -32,39 +32,10 @@
    <string>Mercury</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QPushButton {
-	background-color: rgb(54, 120, 156);
-	color: rgb(223, 234, 237);
-	border: 2px solid rgb(160, 207, 226);
-	min-height: 40px;
-	min-width: 40px;
-	border-radius: 20px;
-}
-QPushButton:pressed {
-	background-color: rgba(173, 213, 255, 80);
-}
-QPushButton#hostButton {
-	background-color: rgb(217, 162, 64);
-	border: 2px solid rgb(249, 220, 161);
-}
-QPushButton#hostButton:pressed {
-	background-color: rgba(217, 162, 64, 80);
-	border: 2px solid rgb(249, 220, 161);
-}
-QPushButton#settingsButton {
-	padding: 4px;
-	border-radius: 8px;
- 	min-width: 80px;
-}
-
-QLabel {
-	color: rgb(223, 234, 237);
-}
-
-
-QMainWindow {
-	background-color: rgb(11, 17, 20);
-}</string>
+   <string notr="true"/>
+  </property>
+  <property name="containerStyle" stdset="0">
+   <string>outer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -160,7 +131,7 @@ QMainWindow {
         <item>
          <widget class="QPushButton" name="streamBrowserButton">
           <property name="text">
-           <string>Stream Browser</string>
+           <string>Browse</string>
           </property>
          </widget>
         </item>
@@ -197,6 +168,12 @@ QMainWindow {
           <property name="text">
            <string>Host</string>
           </property>
+          <property name="buttonStyle" stdset="0">
+           <string>primary</string>
+          </property>
+          <property name="containerStyle" stdset="0">
+           <string>outer</string>
+          </property>
          </widget>
         </item>
        </layout>
@@ -211,7 +188,7 @@ QMainWindow {
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>37</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

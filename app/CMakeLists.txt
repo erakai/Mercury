@@ -107,6 +107,13 @@ if(APPLE)
         ${CMAKE_SOURCE_DIR}/app/config
         $<TARGET_BUNDLE_DIR:mercury>/Contents/MacOS/config
     )
+
+    # Copy executable out for ease of use
+    add_custom_command(TARGET mercury POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_BUNDLE_DIR:mercury>/Contents/MacOS/mercury
+        $<TARGET_BUNDLE_DIR:mercury>/..
+    )
 endif()
 
 qt_finalize_executable(mercury)

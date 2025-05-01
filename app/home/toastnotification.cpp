@@ -19,7 +19,9 @@ void ToastNotification::showToast(QWidget *parent, const QString &text,
     toast->setStyleSheet(toast->styleSheet().append("color: red;"));
     break;
   default:
-    toast->setStyleSheet(toast->styleSheet().append("color: white;"));
+    break;
+    // toast->setStyleSheet(toast->styleSheet().append("color: #f0f0f0;"));
+    // toast->setProperty("")
   }
   toast->setText(text);
   toast->raise();
@@ -37,10 +39,11 @@ void ToastNotification::showToast(QWidget *parent, const QString &text,
 ToastNotification::ToastNotification(QWidget *parent) : QLabel(parent)
 {
   setAlignment(Qt::AlignCenter);
-  setStyleSheet("background-color: rgba(192, 192, 192, 255);"
-                "font-weight: bold;"
-                "padding: 10px;"
-                "border-radius: 10px;");
+  // setStyleSheet("background-color: rgba(192, 192, 192, 255);"
+  //               "font-weight: bold;"
+  //               "padding: 10px;"
+  //               "border-radius: 10px;");
+  setProperty("containerStyle", "info");
   setFixedSize(300, 50);
   setAttribute(Qt::WA_TransparentForMouseEvents);
 }

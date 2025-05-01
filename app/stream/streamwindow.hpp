@@ -143,6 +143,8 @@ private:
   // Determines whether or not this window is a client or a host
   const MercuryMode mode;
 
+  void updateEraseCursor(int radius);
+
   // Must be <18 characters
   string alias;
 

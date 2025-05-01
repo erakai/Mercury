@@ -33,7 +33,8 @@ class StreamPreviewWindow : public QWidget
   Q_OBJECT
 
 public:
-  explicit StreamPreviewWindow(QWidget *parent = nullptr);
+  explicit StreamPreviewWindow(QWidget *parent = nullptr,
+                               QString startButtonName = "Start Stream");
   ~StreamPreviewWindow() override;
 
 protected:

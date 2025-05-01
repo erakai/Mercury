@@ -19,7 +19,8 @@
 #include <QAction>
 #include <QCheckBox>
 
-StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
+StreamPreviewWindow::StreamPreviewWindow(QWidget *parent,
+                                         QString startButtonName)
     : QWidget(parent), screenListView(new QListView(this)),
       windowListView(new QListView(this)),
       audioInputListView(new QListView(this)),
@@ -64,7 +65,7 @@ StreamPreviewWindow::StreamPreviewWindow(QWidget *parent)
   captureWindowAudioButton->setText(tr("Capture audio for this source"));
   captureWindowAudioButton->setChecked(true);
 
-  startStopButton->setText(tr("Start Stream"));
+  startStopButton->setText(startButtonName);
 
   gridLayout->addWidget(screenLabel, 0, 0);
   gridLayout->addWidget(screenListView, 1, 0);

@@ -1,4 +1,5 @@
 #include "streamcontrolpanel.hpp"
+#include "../streampreview/streampreviewwindow.h"
 
 #include <QCheckBox>
 #include <QVBoxLayout>
@@ -44,6 +45,20 @@ StreamControlPanel::StreamControlPanel(QWidget *parent)
 
   connect(mute_stream_btn, &MuteStreamButton::mute_status_changed, this,
           [this](bool is_muted) { emit mute_status_changed(is_muted); });
+
+  change_source_btn = new QPushButton(this);
+  change_source_btn->setText("Change Source");
+  control_button_grid->addWidget(change_source_btn, 0, Qt::AlignLeft);
+
+  connect(change_source_btn, &QPushButton::clicked, this,
+          []()
+          {
+            StreamPreviewWindow *spw =
+                new StreamPreviewWindow(nullptr, "Change Source");
+            spw->show();
+            spw->raise();          // for MacOS
+            spw->activateWindow(); // for Windows
+          });
 
   // create main layout in case we want to add other things
   auto *main_layout = new QVBoxLayout(this);

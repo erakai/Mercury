@@ -13,10 +13,11 @@ PaintToolWidget::PaintToolWidget(QWidget *parent) : QWidget(parent)
   // Create a label and a textbox for the brush size with a validator for
   // numbers 1-100.
   QLabel *brushSizeLabel = new QLabel("Brush Size:");
-  m_brushSizeEdit = new QLineEdit;
-  m_brushSizeEdit->setText("3");
+  m_brushSizeEdit = new QSpinBox;
+  m_brushSizeEdit->setValue(3);
   m_brushSizeEdit->setFixedWidth(90);
-  m_brushSizeEdit->setValidator(new QIntValidator(1, 100, this));
+  m_brushSizeEdit->setMaximum(100);
+  m_brushSizeEdit->setMinimum(1);
 
   // Create a small circular label to serve as a color indicator.
   m_colorIndicator = new QLabel;

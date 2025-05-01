@@ -52,6 +52,7 @@ private:
   )";
 
   MuteStreamButton *mute_stream_btn;
+  QPushButton *change_source_btn;
 };
 
 #endif // STREAMCONTROLPANEL_H

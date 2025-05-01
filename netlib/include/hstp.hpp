@@ -103,13 +103,14 @@ struct NETLIB_EXPORT HSTP_Annotation
   uint8_t blue;
   // Thickness instead of the erase flag
   int8_t thickness;
+  uint8_t mode;
 
   // Default constructor
   HSTP_Annotation() = default;
 
   HSTP_Annotation(const std::vector<QPoint> &v, uint8_t r, uint8_t g, uint8_t b,
-                  uint8_t thick)
-      : red(r), green(g), blue(b), thickness(thick)
+                  uint8_t thick, uint8_t mode)
+      : red(r), green(g), blue(b), thickness(thick), mode(mode)
   {
     points.reserve(v.size());
     for (const auto &qp : v)
@@ -120,7 +121,6 @@ struct NETLIB_EXPORT HSTP_Annotation
     }
   }
 
-  // Constructor that deserializes from a shared_ptr<char[]>
   HSTP_Annotation(const std::shared_ptr<char[]> &buffer)
   {
     const char *ptr = buffer.get();
@@ -143,35 +143,37 @@ struct NETLIB_EXPORT HSTP_Annotation
     // Deserialize the RGB values
     std::memcpy(&red, ptr, sizeof(red));
     ptr += sizeof(red);
-
     std::memcpy(&green, ptr, sizeof(green));
     ptr += sizeof(green);
-
     std::memcpy(&blue, ptr, sizeof(blue));
     ptr += sizeof(blue);
 
-    // Deserialize the thickness (stored as a single byte)
+    // Deserialize the thickness
     std::memcpy(&thickness, ptr, sizeof(thickness));
+    ptr += sizeof(thickness);
+
+    std::memcpy(&mode, ptr, sizeof(mode));
   }
 
-  // Serializes the current annotation to a shared_ptr<char[]>
   std::shared_ptr<char[]> serialize() const
   {
     // Calculate total size:
     // - 2 bytes for the number of points
-    // - 4 bytes per point (2 bytes for x and 2 for y)
+    // - 4 bytes per point (2 for x, 2 for y)
     // - 3 bytes for RGB
     // - 1 byte for thickness
+    // - 1 byte for mode
     size_t dataSize = sizeof(uint16_t) +
                       points.size() * (sizeof(uint16_t) * 2) + sizeof(red) +
-                      sizeof(green) + sizeof(blue) + sizeof(thickness);
+                      sizeof(green) + sizeof(blue) + sizeof(thickness) +
+                      sizeof(mode); // <-- include mode here
 
-    std::shared_ptr<char[]> buffer(new char[dataSize],
-                                   std::default_delete<char[]>());
+    auto buffer = std::shared_ptr<char[]>(new char[dataSize],
+                                          std::default_delete<char[]>());
     char *ptr = buffer.get();
 
     // Serialize the number of points
-    uint16_t num_points = points.size();
+    uint16_t num_points = static_cast<uint16_t>(points.size());
     std::memcpy(ptr, &num_points, sizeof(num_points));
     ptr += sizeof(num_points);
 
@@ -187,15 +189,17 @@ struct NETLIB_EXPORT HSTP_Annotation
     // Serialize the RGB values
     std::memcpy(ptr, &red, sizeof(red));
     ptr += sizeof(red);
-
     std::memcpy(ptr, &green, sizeof(green));
     ptr += sizeof(green);
-
     std::memcpy(ptr, &blue, sizeof(blue));
     ptr += sizeof(blue);
 
-    // Serialize the thickness as a byte
+    // Serialize the thickness
     std::memcpy(ptr, &thickness, sizeof(thickness));
+    ptr += sizeof(thickness);
+
+    // ---- NEW: Serialize the mode ----
+    std::memcpy(ptr, &mode, sizeof(mode));
 
     return buffer;
   }

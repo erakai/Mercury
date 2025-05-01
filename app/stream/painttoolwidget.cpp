@@ -66,11 +66,6 @@ PaintToolWidget::PaintToolWidget(QWidget *parent) : QWidget(parent)
   // Set the default selection to "Brush".
   m_brushTypeCombo->setCurrentIndex(0);
 
-  // Group the erase button so it remains exclusive.
-  QButtonGroup *modeGroup = new QButtonGroup(this);
-  modeGroup->addButton(m_eraseButton);
-  modeGroup->setExclusive(true);
-
   // Create a horizontal layout and add all widgets in order.
   QHBoxLayout *mainLayout = new QHBoxLayout;
   mainLayout->addWidget(brushSizeLabel);

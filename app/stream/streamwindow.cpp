@@ -722,52 +722,94 @@ bool StreamWindow::eventFilter(QObject *watched, QEvent *event)
   return QMainWindow::eventFilter(watched, event);
 }
 
+#include <QCursor>
+#include <QPainter>
+#include <QPixmap>
+#include <QPen>
+
+void StreamWindow::updateEraseCursor(int radius)
+{
+  // diameter = 2 * radius; add 2px so the 1px pen sits fully inside
+  int dia = radius * 2;
+  QPixmap pixmap(dia + 2, dia + 2);
+  pixmap.fill(Qt::transparent);
+
+  QPainter p(&pixmap);
+  p.setRenderHint(QPainter::Antialiasing, true);
+  p.setPen(QPen(Qt::black, 1));  // ring color & width
+  p.drawEllipse(1, 1, dia, dia); // leave 1px margin
+  p.end();
+
+  // create the cursor with the hotspot in the center of the pixmap
+  // hotspot X = radius+1, hotspot Y = radius+1
+  QCursor cursor(pixmap, radius + 1, radius + 1);
+  annotation_display->setCursor(cursor);
+}
+
 void StreamWindow::onAnnotationDisplayMousePressed(QMouseEvent *event)
 {
-  // Start a new annotation by clearing previous points.
   points.clear();
-  QPoint pos = event->pos();
-  old_point = pos;
-  points.push_back(pos);
+  old_point = event->pos();
+  points.push_back(old_point);
+
+  // show or clear the erase‐ring cursor
+  if (paint_tool->isEraseMode())
+  {
+    int radius = qAbs(paint_tool->brushSize());
+    updateEraseCursor(radius);
+  }
+  else
+  {
+    annotation_display->unsetCursor();
+  }
 }
 
 void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
 {
   QPoint pos = event->pos();
+  auto *tool = paint_tool;
+  QColor col = tool->selectedColor();
+  int thick = tool->brushSize();
 
-  PaintToolWidget *toolWidget = paint_tool;
-  QColor currentColor = toolWidget->selectedColor();
-  int thickness = toolWidget->brushSize();
-
-  // TODO add erase support
-  if (toolWidget->isEraseMode())
+  // update cursor if we’re erasing
+  if (tool->isEraseMode())
   {
-    thickness *= -1;
+    int radius = qAbs(thick);
+    updateEraseCursor(radius);
+    thick = -radius; // send a negative thickness for erase
+  }
+  else
+  {
+    annotation_display->unsetCursor();
   }
 
-  int mode = paint_tool->m_brushTypeCombo->currentIndex();
-  annotation_display->addLine(old_point, pos, currentColor, thickness, mode);
+  int mode = tool->m_brushTypeCombo->currentIndex();
+  annotation_display->addLine(old_point, pos, col, thick, mode);
   old_point = pos;
   points.push_back(pos);
 }
 
-void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
+void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent * /*event*/)
 {
-  Q_UNUSED(event);
+  auto *tool = paint_tool;
+  QColor col = tool->selectedColor();
+  int thick = tool->brushSize();
+  int mode = tool->m_brushTypeCombo->currentIndex();
 
-  PaintToolWidget *toolWidget = paint_tool;
-  QColor currentColor = toolWidget->selectedColor();
-  int thickness = toolWidget->brushSize();
-
-  // TODO add erase support
-  if (toolWidget->isEraseMode())
+  // keep cursor ring up if still erasing, or clear otherwise
+  if (tool->isEraseMode())
   {
-    thickness *= -1;
+    int radius = qAbs(thick);
+    updateEraseCursor(radius);
+    thick = -radius;
+  }
+  else
+  {
+    annotation_display->unsetCursor();
   }
 
-  send_annotation(HSTP_Annotation(points, currentColor.red(),
-                                  currentColor.green(), currentColor.blue(),
-                                  thickness));
+  send_annotation(
+      HSTP_Annotation(points, col.red(), col.green(), col.blue(), thick, mode));
   points.clear();
 }
 

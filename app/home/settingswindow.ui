@@ -14,56 +14,10 @@
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QPushButton {
-	background-color: rgb(54, 120, 156);
-	color: rgb(223, 234, 237);
-	border: 2px solid rgb(160, 207, 226);
-	min-height: 40px;
-	min-width: 40px;
-	border-radius: 20px;
-}
-QPushButton:pressed {
-	background-color: rgba(173, 213, 255, 80);
-}
-QPushButton#applyButton {
-	background-color: rgb(217, 162, 64);
-	border: 2px solid rgb(249, 220, 161);
-}
-QPushButton#applyButton:pressed {
-	background-color: rgba(217, 162, 64, 80);
-	border: 2px solid rgb(249, 220, 161);
-}
-
-QLabel {
-	color: rgb(223, 234, 237);
-}
-QLabel[sectionHeader=true] {
-	font-size: 30px;
-}
-
-QRadioButton {
-	color:  rgb(223, 234, 237);
-}
-
-Line {
-	border: 2px solid rgb(160, 207, 226);
-	background-color: rgb(160, 207, 226);
-	color:  rgb(223, 234, 237);
-	fill:  rgb(223, 234, 237);
-}
-
-QTextEdit { border: 1px solid white; }
-
-QDialog#SettingsWindow {
-	background-color: rgb(11, 17, 20);
-}
-
-QScrollArea {
-	background-color: rgb(11, 17, 20);
-}
-QWidget#scrollAreaWidgetContents {
-	background-color: rgb(11, 17, 20);
-}</string>
+   <string notr="true"/>
+  </property>
+  <property name="containerStyle" stdset="0">
+   <string>outer</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="5,1">
    <item>
@@ -77,14 +31,20 @@ QWidget#scrollAreaWidgetContents {
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
+     <property name="containerStyle" stdset="0">
+      <string>outer</string>
+     </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
         <width>535</width>
-        <height>595</height>
+        <height>541</height>
        </rect>
+      </property>
+      <property name="containerStyle" stdset="0">
+       <string>outer</string>
       </property>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
@@ -100,6 +60,9 @@ QWidget#scrollAreaWidgetContents {
          </property>
          <property name="sectionHeader" stdset="0">
           <bool>true</bool>
+         </property>
+         <property name="labelStyle" stdset="0">
+          <string>title</string>
          </property>
         </widget>
        </item>
@@ -162,6 +125,9 @@ QWidget#scrollAreaWidgetContents {
          <property name="sectionHeader" stdset="0">
           <bool>true</bool>
          </property>
+         <property name="labelStyle" stdset="0">
+          <string>title</string>
+         </property>
         </widget>
        </item>
        <item row="9" column="0">
@@ -177,6 +143,9 @@ QWidget#scrollAreaWidgetContents {
          </property>
          <property name="sectionHeader" stdset="0">
           <bool>true</bool>
+         </property>
+         <property name="labelStyle" stdset="0">
+          <string>title</string>
          </property>
         </widget>
        </item>
@@ -567,6 +536,9 @@ QWidget#scrollAreaWidgetContents {
        <property name="text">
         <string>Apply</string>
        </property>
+       <property name="buttonStyle" stdset="0">
+        <string>primary</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -576,7 +548,6 @@ QWidget#scrollAreaWidgetContents {
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="clientStreamResolutionButtonGroup"/>
   <buttongroup name="hostStreamResolutionButtonGroup"/>
   <buttongroup name="hostStreamFramerateButtonGroup"/>
  </buttongroups>

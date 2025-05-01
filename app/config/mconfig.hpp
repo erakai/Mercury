@@ -47,6 +47,9 @@ void save_all_settings(QString displayName, bool darkMode,
                        int defaultHostTcpPort, int defaultHostUdpPort,
                        bool blacklistEnabled, bool whitelistEnabled,
                        QString blacklist, QString whitelist);
+
+void update_styles(bool darkMode);
+
 } // namespace mercury
 
 #endif // MCONFIG_HPP

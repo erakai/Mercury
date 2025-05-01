@@ -20,7 +20,7 @@
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QPushButton {
+   <string notr="true">/*QPushButton {
 	background-color: rgb(54, 120, 156);
 	color: rgb(223, 234, 237);
 	border: 2px solid rgb(160, 207, 226);
@@ -62,7 +62,10 @@ QDialog#HostStreamWindow {
 
 QCheckBox {
 	color: rgb(223, 234, 237);
-}</string>
+}*/</string>
+  </property>
+  <property name="containerStyle" stdset="0">
+   <string>outer</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -70,8 +73,8 @@ QCheckBox {
      <property name="text">
       <string>Host Stream</string>
      </property>
-     <property name="header" stdset="0">
-      <bool>true</bool>
+     <property name="labelStyle" stdset="0">
+      <string>title</string>
      </property>
     </widget>
    </item>
@@ -120,6 +123,9 @@ QCheckBox {
            </property>
            <property name="flat">
             <bool>false</bool>
+           </property>
+           <property name="buttonStyle" stdset="0">
+            <string>secondary</string>
            </property>
           </widget>
          </item>
@@ -251,8 +257,8 @@ QCheckBox {
       <widget class="QPushButton" name="ethics_button">
        <property name="minimumSize">
         <size>
-         <width>200</width>
-         <height>44</height>
+         <width>0</width>
+         <height>0</height>
         </size>
        </property>
        <property name="text">
@@ -260,6 +266,9 @@ QCheckBox {
        </property>
        <property name="default">
         <bool>false</bool>
+       </property>
+       <property name="buttonStyle" stdset="0">
+        <string>secondary</string>
        </property>
       </widget>
      </item>
@@ -519,6 +528,9 @@ QCheckBox {
        <property name="default">
         <bool>false</bool>
        </property>
+       <property name="buttonStyle" stdset="0">
+        <string>secondary</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -545,6 +557,9 @@ QCheckBox {
        <property name="text">
         <string>Cancel</string>
        </property>
+       <property name="buttonStyle" stdset="0">
+        <string>secondary</string>
+       </property>
       </widget>
      </item>
      <item>
@@ -568,6 +583,9 @@ border-color: gray;
        </property>
        <property name="default">
         <bool>true</bool>
+       </property>
+       <property name="buttonStyle" stdset="0">
+        <string>primary</string>
        </property>
       </widget>
      </item>

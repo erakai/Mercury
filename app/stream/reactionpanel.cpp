@@ -12,12 +12,13 @@ const std::vector<std::string> ReactionPanel::reactionStringList = {
 ReactionPanel::ReactionPanel(QWidget *parent)
 {
   auto *panel_container = new QWidget(this);
-  panel_container->setStyleSheet(
-      "QWidget {"
-      "    background-color: #222222;" // Dark background
-      "    border-radius: 12px;"       // Rounded corners
-      "    padding: 10px;"             // Internal spacing
-      "}");
+  panel_container->setProperty("containerStyle", "info");
+  // panel_container->setStyleSheet(
+  //     "QWidget {"
+  //     "    background-color: #222222;" // Dark background
+  //     "    border-radius: 12px;"       // Rounded corners
+  //     "    padding: 10px;"             // Internal spacing
+  //     "}");
   auto *reaction_button_grid = new QGridLayout;
 
   int index = 0;
@@ -42,18 +43,19 @@ ReactionPanel::ReactionPanel(QWidget *parent)
       reaction_button->setIcon(QIcon(pix));
       reaction_button->setIconSize(QSize(24, 24));
       reaction_button->setFixedSize(40, 40);
-      reaction_button->setStyleSheet(
-          "QPushButton {"
-          "    background-color: #333333;" // Dark gray
-          "    border-radius: 20px;"       // Fully rounded
-          "    border: none;"              // Remove border
-          "}"
-          "QPushButton:hover {"
-          "    background-color: #444444;" // Slightly lighter on hover
-          "}"
-          "QPushButton:pressed {"
-          "    background-color: #555555;" // Even lighter when pressed
-          "}");
+      reaction_button->setProperty("buttonStyle", "reaction");
+      // reaction_button->setStyleSheet(
+      //     "QPushButton {"
+      //     "    background-color: #333333;" // Dark gray
+      //     "    border-radius: 20px;"       // Fully rounded
+      //     "    border: none;"              // Remove border
+      //     "}"
+      //     "QPushButton:hover {"
+      //     "    background-color: #444444;" // Slightly lighter on hover
+      //     "}"
+      //     "QPushButton:pressed {"
+      //     "    background-color: #555555;" // Even lighter when pressed
+      //     "}");
       reaction_button_grid->addWidget(reaction_button, i, j);
       connect(reaction_button, &QPushButton::clicked, this,
               [this, reaction]() { emit reactionClicked(reaction); });

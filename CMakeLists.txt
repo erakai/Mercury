@@ -68,6 +68,10 @@ add_custom_target(config
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/config ${CMAKE_CURRENT_BINARY_DIR}/config
 )
 
+add_custom_target(styles
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/styles ${CMAKE_CURRENT_BINARY_DIR}/styles
+)
+
 # Create dependencies
 add_subdirectory(netlib)
 

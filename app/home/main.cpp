@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QTextEdit>
 #include <QStandardPaths>
+#include <QVBoxLayout>
 
 int main(int argc, char **argv)
 {
@@ -53,6 +54,26 @@ int main(int argc, char **argv)
 
     modalDialog->exec();
     return 1;
+  }
+
+  // get and apply style sheets
+  QString styleSheetFilename = app_dir + "/styles/light.qss";
+  if (mercury::get_dark_mode(*mercury_settings))
+  {
+    styleSheetFilename = app_dir + "/styles/dark.qss";
+  }
+  QFile styleSheetFile(styleSheetFilename);
+  if (styleSheetFile.open(QFile::ReadOnly))
+  {
+    QString styles = styleSheetFile.readAll();
+    a.setStyleSheet(styles);
+    // a.setStyleSheet(a.styleSheet() + "\nQPushButton {background-color: rgb(0,
+    // 162, 64);border: 2px solid rgb(249, 220, 161);padding: 6px
+    // 12px;border-radius: 12px;");
+  }
+  else
+  {
+    qWarning("Failed to load QSS stylesheet.");
   }
 
   qInfo("Initializing main window...");

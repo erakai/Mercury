@@ -29,6 +29,7 @@ PaintToolWidget::PaintToolWidget(QWidget *parent) : QWidget(parent)
 
   // Create a button for selecting a color.
   m_colorButton = new QPushButton("Select Color");
+  m_colorButton->setProperty("buttonStyle", "secondary");
 
   // Connect the button to open a color dialog.
   connect(m_colorButton, &QPushButton::clicked, this,
@@ -82,6 +83,7 @@ void PaintToolWidget::addClearButton()
 {
   // Create the clear button.
   QPushButton *clearButton = new QPushButton("Clear", this);
+  clearButton->setProperty("buttonStyle", "secondary");
 
   // Add the clear button to the existing layout so that it appears on the
   // right.

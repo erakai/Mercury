@@ -55,7 +55,7 @@ bool StreamWindow::set_up()
   configure_menu_and_tool_bar();
 
   display->setLayout(main_layout);
-  display->setStyleSheet("background-color: #3C4143;");
+  display->setProperty("containerStyle", "outer");
   setCentralWidget(display);
 
   // Create a container widget to stack the stream display and the annotation
@@ -365,6 +365,7 @@ void StreamWindow::initialize_primary_ui_widgets()
                 std::placeholders::_2);
   stream_display = new StreamDisplay(this, frame_func);
   stream_display->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  stream_display->setProperty("containerStyle", "outer");
 
   reaction_display = new ReactionDisplay(this);
 

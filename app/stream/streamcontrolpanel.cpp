@@ -10,12 +10,13 @@ StreamControlPanel::StreamControlPanel(QWidget *parent)
   // *>(parent->parent());
 
   QWidget *panel_container = new QWidget(this);
-  panel_container->setStyleSheet(
-      "QWidget {"
-      "    background-color: #222222;" // Dark background
-      "    border-radius: 8;"          // Rounded corners
-      "    padding: 8;"                // Internal spacing
-      "}");
+  panel_container->setProperty("containerStyle", "info");
+  // panel_container->setStyleSheet(
+  //     "QWidget {"
+  //     "    background-color: #222222;" // Dark background
+  //     "    border-radius: 8;"          // Rounded corners
+  //     "    padding: 8;"                // Internal spacing
+  //     "}");
 
   // create control button layout
   auto *control_button_grid = new QVBoxLayout();
@@ -27,7 +28,6 @@ StreamControlPanel::StreamControlPanel(QWidget *parent)
   reactions_enabled_check_box->setSizePolicy(QSizePolicy::Minimum,
                                              QSizePolicy::Preferred);
   reactions_enabled_check_box->setText("Reactions Enabled");
-  reactions_enabled_check_box->setStyleSheet(checkboxStyle);
   control_button_grid->addWidget(reactions_enabled_check_box, 0, Qt::AlignLeft);
 
   // connect reaction control to send signal
@@ -40,7 +40,7 @@ StreamControlPanel::StreamControlPanel(QWidget *parent)
 
   mute_stream_btn = new MuteStreamButton(this);
   mute_stream_btn->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
-  mute_stream_btn->setStyleSheet(checkboxStyle);
+  // mute_stream_btn->setStyleSheet(checkboxStyle);
   control_button_grid->addWidget(mute_stream_btn, 0, Qt::AlignLeft);
 
   connect(mute_stream_btn, &MuteStreamButton::mute_status_changed, this,

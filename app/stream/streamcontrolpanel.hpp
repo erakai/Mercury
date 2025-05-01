@@ -20,36 +20,36 @@ signals:
 
 private:
   QCheckBox *reactions_enabled_check_box;
-  const QString checkboxStyle = R"(
-    QCheckBox {
-        color: #f0f0f0;
-        font-size: 16px;
-        spacing: 8px;
-    }
-    QCheckBox::indicator {
-        width: 18px;
-        height: 18px;
-        border-radius: 4px;
-        background: #222; /* Dark background */
-        border: 2px solid #444; /* Subtle border */
-    }
-    QCheckBox::indicator:hover {
-        border: 2px solid #666; /* Highlight on hover */
-    }
-    QCheckBox::indicator:checked {
-        background: #087AA0; /* Green when checked */
-        border: 2px solid #087AA0;
-    }
-    QCheckBox::indicator:checked::before {
-        font-size: 14px;
-        color: #f0f0f0;
-        font-weight: bold;
-        text-align: center;
-        position: absolute;
-        left: 4px;
-        top: 2px;
-    }
-  )";
+  // const QString checkboxStyle = R"(
+  //   QCheckBox {
+  //       color: #f0f0f0;
+  //       font-size: 16px;
+  //       spacing: 8px;
+  //   }
+  //   QCheckBox::indicator {
+  //       width: 18px;
+  //       height: 18px;
+  //       border-radius: 4px;
+  //       background: #222; /* Dark background */
+  //       border: 2px solid #444; /* Subtle border */
+  //   }
+  //   QCheckBox::indicator:hover {
+  //       border: 2px solid #666; /* Highlight on hover */
+  //   }
+  //   QCheckBox::indicator:checked {
+  //       background: #087AA0; /* Green when checked */
+  //       border: 2px solid #087AA0;
+  //   }
+  //   QCheckBox::indicator:checked::before {
+  //       font-size: 14px;
+  //       color: #f0f0f0;
+  //       font-weight: bold;
+  //       text-align: center;
+  //       position: absolute;
+  //       left: 4px;
+  //       top: 2px;
+  //   }
+  // )";
 
   MuteStreamButton *mute_stream_btn;
   QPushButton *change_source_btn;

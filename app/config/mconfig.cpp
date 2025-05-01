@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QApplication>
 #include <QCoreApplication>
 
 int FPS = 5;
@@ -152,4 +153,27 @@ void mercury::save_all_settings(QString displayName, bool darkMode,
 
   mercury_settings->setValue("HostSettings/Whitelist", whitelist);
   mercury_settings->setValue("HostSettings/Blacklist", blacklist);
+
+  update_styles(darkMode);
+}
+
+void mercury::update_styles(bool darkMode)
+{
+  QString app_dir = QCoreApplication::applicationDirPath();
+  QString styleSheetFilename = app_dir + "/styles/light.qss";
+  if (mercury::get_dark_mode(*mercury_settings))
+  {
+    styleSheetFilename = app_dir + "/styles/dark.qss";
+  }
+  QFile styleSheetFile(styleSheetFilename);
+  if (styleSheetFile.open(QFile::ReadOnly))
+  {
+    QString styles = styleSheetFile.readAll();
+    QApplication *app = qobject_cast<QApplication *>(QApplication::instance());
+    app->setStyleSheet(styles);
+  }
+  else
+  {
+    qWarning("Failed to load QSS stylesheet.");
+  }
 }

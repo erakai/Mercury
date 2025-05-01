@@ -17,17 +17,18 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   basic_stream_info_layout = new QVBoxLayout;
 
   stream_title_label = new QLabel(stream_title, this);
-  stream_title_label->setStyleSheet("    color: #f0f0f0;"  // Almost white text
-                                    "    font-size: 36px;" // Large text
-                                    "    font-weight: bold;" // Bold text
-  );
+  // stream_title_label->setStyleSheet("    color: #f0f0f0;"  // Almost white
+  // text
+  //                                   "    font-size: 36px;" // Large text
+  //                                   "    font-weight: bold;" // Bold text
+  // );
+  stream_title_label->setProperty("labelStyle", "title");
 
   host_name_label = new QLabel("Host: " + host_name, this);
-  host_name_label->setStyleSheet("color: #f0f0f0; font-size: 18px;");
+  host_name_label->setProperty("labelStyle", "info");
   auto *host_name_container = new QWidget(this);
-  host_name_container->setStyleSheet(
-      "border-radius: 10px; background-color: #333333;");
   auto *host_name_layout = new QHBoxLayout;
+  host_name_container->setProperty("containerStyle", "info");
   host_name_container->setLayout(host_name_layout);
   host_name_layout->addWidget(host_name_label);
   host_name_container->setSizePolicy(QSizePolicy::Fixed,
@@ -40,19 +41,15 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   QPixmap vc_pix(file);
   QIcon ico(vc_pix);
   viewer_count_icon->setPixmap(ico.pixmap({24, 24}));
-  // viewer_count_label->setVisible(true);
-  // set viewer count
   viewer_count_label = new QLabel("Viewers: 1", this);
-  viewer_count_label->setStyleSheet(
-      "    color: #f0f0f0;"  // Almost white text
-      "    font-size: 18px;" // Large text
-                             // "    font-weight: ;"          // Bold text
-  );
+  viewer_count_label->setProperty("labelStyle", "info");
+  // viewer_count_label->setStyleSheet("background-color: rgb(255, 255, 255);");
   auto *viewer_count_container = new QWidget(this);
-  viewer_count_container->setStyleSheet(
-      "border-radius: 10px; background-color: #333333;");
+  // viewer_count_container->setStyleSheet(
+  //     "border-radius: 10px; background-color: #333333;");
   auto *viewer_count_layout = new QHBoxLayout;
   viewer_count_container->setLayout(viewer_count_layout);
+  viewer_count_container->setProperty("containerStyle", "info");
   viewer_count_layout->addWidget(viewer_count_icon);
   viewer_count_layout->addWidget(viewer_count_label);
   viewer_count_container->setSizePolicy(QSizePolicy::Fixed,
@@ -76,8 +73,9 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   basic_stream_info_layout->addStretch();
 
   extra_info_sidebar = new QWidget(this);
-  extra_info_sidebar->setStyleSheet(
-      "background-color: #333333; border-radius: 10px; padding: 24px;");
+  extra_info_sidebar->setProperty("containerStyle", "info");
+  // extra_info_sidebar->setStyleSheet(
+  //     "background-color: #333333; border-radius: 10px; padding: 24px;");
   extra_info_sidebar->setFixedSize(400, height()); // Adjust width if needed
   extra_info_sidebar->move(this->width(), 0);      // Start off-screen
   auto *basic_stream_info_container = new QWidget(this);
@@ -99,15 +97,15 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
   extra_info_sidebar->setContentsMargins(8, 8, 8, 8);
 
   stream_start_time_label = new QLabel("Stream Start: ", extra_info_sidebar);
-  stream_start_time_label->setStyleSheet(
-      "color: #dddddd; font-size: 18px; padding: 0px;");
+  // stream_start_time_label->setStyleSheet(
+  //     "color: #dddddd; font-size: 18px; padding: 0px;");
   stream_start_time_label->setSizePolicy(QSizePolicy::Preferred,
                                          QSizePolicy::Fixed);
 
   stream_duration_label =
       new QLabel("Stream Duration: 00:00:00", extra_info_sidebar);
-  stream_duration_label->setStyleSheet(
-      "color: #dddddd; font-size: 18px; padding: 0px;");
+  // stream_duration_label->setStyleSheet(
+  //     "color: #dddddd; font-size: 18px; padding: 0px;");
   stream_duration_label->setSizePolicy(QSizePolicy::Preferred,
                                        QSizePolicy::Fixed);
   seconds_timer = new QTimer(this);
@@ -117,14 +115,14 @@ StreamInfo::StreamInfo(QWidget *parent, const QString &stream_title,
 
   extra_info_viewer_count_label =
       new QLabel("Viewer Count: 1", extra_info_sidebar);
-  extra_info_viewer_count_label->setStyleSheet(
-      "color: #dddddd; font-size: 18px; padding: 0px;");
+  // extra_info_viewer_count_label->setStyleSheet(
+  //     "color: #dddddd; font-size: 18px; padding: 0px;");
   extra_info_viewer_count_label->setSizePolicy(QSizePolicy::Preferred,
                                                QSizePolicy::Fixed);
 
   reactions_enabled_label = new QLabel("Reactions: On", extra_info_sidebar);
-  reactions_enabled_label->setStyleSheet(
-      "color: #dddddd; font-size: 18px; padding: 0px;");
+  // reactions_enabled_label->setStyleSheet(
+  //     "color: #dddddd; font-size: 18px; padding: 0px;");
   reactions_enabled_label->setSizePolicy(QSizePolicy::Preferred,
                                          QSizePolicy::Fixed);
 

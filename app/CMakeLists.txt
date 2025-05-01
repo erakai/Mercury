@@ -3,6 +3,21 @@ set(TEST_SOURCES
 test/mercury_test.cpp
 )
 
+# Stylesheet copying setup
+set(STYLE_SHEET_DIR ${CMAKE_SOURCE_DIR}/app/styles)
+set(STYLE_SHEET_OUT_DIR ${CMAKE_BINARY_DIR}/styles)
+
+# Copy stylesheet if different
+add_custom_command(
+        OUTPUT ${STYLE_SHEET_OUT_DIR}/dark.qss
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${STYLE_SHEET_OUT_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${STYLE_SHEET_DIR}/dark.qss
+        ${STYLE_SHEET_OUT_DIR}/dark.qss
+        DEPENDS ${STYLE_SHEET_DIR}/dark.qss
+        COMMENT "Copying updated dark.qss stylesheet"
+)
+
 # The binary
 qt_add_executable(mercury
   MANUAL_FINALIZATION
@@ -64,6 +79,7 @@ target_link_libraries(mercury PRIVATE netlib)
 # Add dependency on assets in case we want any
 add_dependencies(mercury assets)
 add_dependencies(mercury config)
+add_dependencies(mercury styles)
 
 # Install to destination
 include(GNUInstallDirs)
@@ -101,10 +117,17 @@ if(APPLE)
         $<TARGET_BUNDLE_DIR:mercury>/Contents/MacOS/assets
     )
 
+    # Copy styles folder into .app/Contents/MacOS/styles
+    add_custom_command(TARGET mercury POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/styles
+        $<TARGET_BUNDLE_DIR:mercury>/Contents/MacOS/styles
+    )
+
     # Copy config folder into .app/Contents/MacOS/config
     add_custom_command(TARGET mercury POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/app/config
+        ${CMAKE_SOURCE_DIR}/config
         $<TARGET_BUNDLE_DIR:mercury>/Contents/MacOS/config
     )
 

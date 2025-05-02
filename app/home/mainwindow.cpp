@@ -7,6 +7,7 @@
 #include "../api/mapi.hpp"
 
 #include <QJsonObject>
+#include <QDesktopServices>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -94,4 +95,12 @@ void MainWindow::on_joinButton_clicked()
   joinStreamWindow->setModal(true);
   joinStreamWindow->setAttribute(Qt::WA_DeleteOnClose);
   joinStreamWindow->open();
+}
+
+void MainWindow::on_gettingStartedButton_clicked()
+{
+  if (!QDesktopServices::openUrl(QUrl("https://erakai.github.io/Mercury/")))
+  {
+    qCritical("Unable to open tutorial URL.");
+  }
 }

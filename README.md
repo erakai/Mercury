@@ -2,7 +2,7 @@
 
 Mercury is FOSS designed to allow for decentralized, peer to peer streaming and chatting between small groups. Built in C++ using Qt and a custom networking library for real-time video and audio, it prioritizes speed, efficiency, and ease of use.
 
-Read `docs/` for more information.
+Read `docs/` for more information or check out the [user docs](https://erakai.github.io/Mercury/) to learn more.
 
 **Contributors**
 - Alex Hunton

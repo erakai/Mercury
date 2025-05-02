@@ -246,7 +246,7 @@ ViewerListTab::ViewerListTab(string my_alias_str, QWidget *parent)
     : QWidget(nullptr)
 {
   QBoxLayout *layout = new QVBoxLayout(this);
-  layout->setSpacing(7);
+  layout->setSpacing(8);
 
   label_list = new QLabel("Viewers (0):");
   layout->addWidget(label_list);
@@ -257,32 +257,32 @@ ViewerListTab::ViewerListTab(string my_alias_str, QWidget *parent)
   viewer_list->setEditTriggers(QAbstractItemView::NoEditTriggers);
   layout->addWidget(viewer_list);
 
-  QPalette list_palette = viewer_list->palette();
-  list_palette.setColor(QPalette::Base, QColor(64, 68, 69));
-  list_palette.setColor(QPalette::Text, QColor(221, 231, 235));
-  viewer_list->setPalette(list_palette);
+  // QPalette list_palette = viewer_list->palette();
+  // list_palette.setColor(QPalette::Base, QColor(64, 68, 69));
+  // list_palette.setColor(QPalette::Text, QColor(221, 231, 235));
+  // viewer_list->setPalette(list_palette);
 }
 
 void ViewerListTab::viewer_joined(int id, string alias)
 {
   // Create a new list item and store the alias as its text.
   QListWidgetItem *new_item = new QListWidgetItem();
+  new_item->setSizeHint(QSize(100, 40));
   new_item->setText(QString::fromStdString(alias));
 
   // Create a custom widget to hold the label and the checkbox.
   QWidget *item_widget = new QWidget();
+  item_widget->setStyleSheet(item_widget->styleSheet() +
+                             "border: 2px solid red; height: 40px");
   QHBoxLayout *layout = new QHBoxLayout(item_widget);
   layout->setContentsMargins(0, 0, 0, 0); // Remove margins for a cleaner look
 
-  // Create the label displaying the alias.
-  QLabel *label = new QLabel(QString::fromStdString(alias));
   // Create the checkbox that will appear to the right of the label.
   QCheckBox *checkBox = new QCheckBox();
+  // checkBox->setStyleSheet(checkBox->styleSheet().append("padding: 12px
+  // 12px;"));
   checkBox->setChecked(true);
 
-  // Add the label, a stretch (to push the checkbox to the right), and the
-  // checkbox to the layout.
-  layout->addWidget(label);
   layout->addStretch();
   layout->addWidget(checkBox);
 

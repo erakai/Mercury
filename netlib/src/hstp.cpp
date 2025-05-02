@@ -317,7 +317,7 @@ HstpHandler::_serialize(const std::shared_ptr<HSTP_Header> &hdr)
   for (const auto &opt : hdr->options)
   {
     ds << opt.type;
-    ds << (uint16_t) opt.len;
+    ds << qToBigEndian((uint16_t) opt.len);
     ds.writeRawData(opt.data.get(), opt.len);
   }
 
@@ -351,7 +351,7 @@ HstpHandler::_deserialize(const std::shared_ptr<QByteArray> &buff)
 
     uint16_t net_len;
     ds >> net_len;
-    opt.len = net_len;
+    opt.len = qFromBigEndian(net_len);
     opt.data = std::shared_ptr<char[]>(new char[opt.len]);
     ds.readRawData(opt.data.get(), opt.len);
 

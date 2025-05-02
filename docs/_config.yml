@@ -41,10 +41,10 @@ plugins:
 navigation:
   - title: Getting Started
     children:
-      - title: Installation
-        url: getting-started/installation
       - title: Overview
         url: getting-started/overview
+      - title: Installation
+        url: getting-started/installation
   - title: Setting Up a Server
     url: server-hosting
   - title: Hosting Streams

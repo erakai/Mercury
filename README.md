@@ -5,11 +5,11 @@ Mercury is FOSS designed to allow for decentralized, peer to peer streaming and 
 Read `docs/` for more information or check out the [user docs](https://erakai.github.io/Mercury/) to learn more.
 
 **Contributors**
+- Kai Tinkess
 - Alex Hunton
 - Christopher Lee
 - Kris Leungwattanakij
 - Leonard Pan
-- Kai Tinkess
 
 ### Getting Started
 Prerequisites:

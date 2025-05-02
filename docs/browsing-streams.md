@@ -4,7 +4,7 @@ title: Browsing Streams
 nav_order: 5
 ---
 
-# Joining a Stream
+# Browsing Streams
 
 This page is on exploring public streams. If you have an IP address and TCP port to join with, check out how to [join a stream](joining-streams).
 
@@ -13,4 +13,4 @@ The stream browser shows all publicly available streams. Clicking on one will al
 <img src="images/stream_browser.png" alt="stream_browser" style="max-height: 400px; height: auto; width: auto;" />
 
 
-Next: [In-Stream Features](/features/chat)
+Next: [In-Stream Features](features/chat)

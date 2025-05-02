@@ -1,0 +1,142 @@
+{"0": {
+    "doc": "Annotations",
+    "title": "Annotations",
+    "content": "Annotations are drawings that can be made directly on the stream and will be shared with all viewers and the host. The tool bar across the top of the stream allows the user to customize the color and brush size of annotations. The host has an additional button that allows them to clear all annotations. To disable annotations for specific users, the host can uncheck annotation privileges for the users under the Viewer List tab on the side pane. Next: Viewer List . ",
+    "url": "/Mercury/features/annotations.html",
+    
+    "relUrl": "/features/annotations.html"
+  },"1": {
+    "doc": "Browsing Streams",
+    "title": "Browsing Streams",
+    "content": "This page is on exploring public streams. If you have an IP address and TCP port to join with, check out how to join a stream. The stream browser shows all publicly available streams. Clicking on one will allow you to join the stream. Next: In-Stream Features . ",
+    "url": "/Mercury/browsing-streams.html",
+    
+    "relUrl": "/browsing-streams.html"
+  },"2": {
+    "doc": "Chat",
+    "title": "Chat",
+    "content": "The chat is a place for viewers to communicate with other viewers and the host. Your name shows up in yellow, while others’ names show up in blue. To see the chat, make sure that the side panel on the right is set to “Chat” and not “Viewer List” (only applies for the host), or “performance”. To type in the chat, simply click on the text field at the bottom, type your message and hit enter. All viewers and the host will receive the chat message. Next: Reactions . ",
+    "url": "/Mercury/features/chat.html",
+    
+    "relUrl": "/features/chat.html"
+  },"3": {
+    "doc": "Hosting Streams",
+    "title": "Hosting a Stream",
+    "content": "A button to copy your IP Address is provided at the top of the host stream window. You can then manually select the UDP port (for audio and video stream) and the TCP port (for all other communication). You will need to share the IP address and the appropriate TCP port with your users so they can connect to your stream. A name for the stream (Stream Name) can be set as well as the alias for the host (Display Name) which will default to the one set in Settings. Not setting either of these will result in a default value to be used. Next, a password can optionally be provided. To not use a password, simply keep the password field empty. An option to set enable/disable stream reactions before starting the stream is here for convenience . This can be changed during the stream. You can make your stream available to the public via the Stream Browser by checking the “Make Publicly Available” checkbox. This allows for all clients to easily access your stream. On the contrary, unchecking the “Make Publicly Available” check box will ensure that viewers use your ip address and select the appropriate UDP port to connect to your stream. Before moving on, you must agree to the Ethics Agreement which covers the ethical responsiblity you take on by hosting a stream using Mercury. After pressing the “Host” button, you will be prompted to select the streaming source. This can either be a window or the entire screen. The audio source can also be optionally captured and manually selected. The video and audio stream can be changed during the stream (See stream control panel). Upon selecting the appropriate options, pressing “Start Stream” will begin the stream, entering you into the streaming window and allowing viewers to join. Next: Joining Streams . ",
+    "url": "/Mercury/hosting-streams.html#hosting-a-stream",
+    
+    "relUrl": "/hosting-streams.html#hosting-a-stream"
+  },"4": {
+    "doc": "Hosting Streams",
+    "title": "Hosting Streams",
+    "content": " ",
+    "url": "/Mercury/hosting-streams.html",
+    
+    "relUrl": "/hosting-streams.html"
+  },"5": {
+    "doc": "In-Stream Features",
+    "title": "In-Stream Features",
+    "content": " ",
+    "url": "/Mercury/features/",
+    
+    "relUrl": "/features/"
+  },"6": {
+    "doc": "Getting Started",
+    "title": "Getting Started",
+    "content": " ",
+    "url": "/Mercury/getting-started/",
+    
+    "relUrl": "/getting-started/"
+  },"7": {
+    "doc": "index",
+    "title": "index",
+    "content": " ",
+    "url": "/Mercury/",
+    
+    "relUrl": "/"
+  },"8": {
+    "doc": "Installation",
+    "title": "Installation",
+    "content": "To install Mercury for use, download the appropriate version for your operating system from the latest release. To contribute to the project, check out how to set up the development environment here. Next: Setting up a Server . ",
+    "url": "/Mercury/getting-started/installation.html",
+    
+    "relUrl": "/getting-started/installation.html"
+  },"9": {
+    "doc": "Joining Streams",
+    "title": "Joining a Stream",
+    "content": "This page is on manually joining a stream via IP address. To learn how to explore public streams see how to use the Stream Browser. To manually join a stream, provide the host IP address along with the host TCP port which your host should provide you with. Additionally, provide an available port on your machine for UDP. Additionally, you can select a Display Name to use in stream which will show up in the stream chat and viewer list. The default name that is used can be changed in Settings. Finally, if your stream host has set a password, enter it here. If there is no stream password, simply leave the password field blank. Upon pressing join, if the all entered information is accurate, you will be joined to the host’s stream. Next: Browsing Streams . ",
+    "url": "/Mercury/joining-streams.html#joining-a-stream",
+    
+    "relUrl": "/joining-streams.html#joining-a-stream"
+  },"10": {
+    "doc": "Joining Streams",
+    "title": "Joining Streams",
+    "content": " ",
+    "url": "/Mercury/joining-streams.html",
+    
+    "relUrl": "/joining-streams.html"
+  },"11": {
+    "doc": "Overview",
+    "title": "Overview",
+    "content": "Mercury is FOSS designed to allow for decentralized, peer to peer streaming and chatting between small groups. Built in C++ using Qt and a custom networking library for real-time video and audio, it prioritizes speed, efficiency, and ease of use. Contributors . | Alex Hunton | Christopher Lee | Kris Leungwattanakij | Leonard Pan | Kai Tinkess | . Mercury allows basic streaming functionalities such as hosting, joining, and browsing streams. In-Stream Features include: chat, reactions, annotations, and performance metrics . Next: Installation . ",
+    "url": "/Mercury/getting-started/overview.html",
+    
+    "relUrl": "/getting-started/overview.html"
+  },"12": {
+    "doc": "Performance",
+    "title": "Performance",
+    "content": "The performance tab is located on the side pane of the stream. The stream host and viewers see different interfaces for the performance. The host is able to set the fps (frames per second), frame compression, and performance update frequency of the stream. Additionally, it can see network performance details of each viewer. The fps refers the frames per second that are captured and sent to viewers. The frame compression refers to the amount that frames are compressed before being sent to viewers. The performance update frequency refers to how often performance metrics on the performance tab are updated. All viewers are able to see their own network performance which includes a few current values along with a time table showing the metrics at intervals set by performance update frequency (see above). Next: Settings . ",
+    "url": "/Mercury/features/performance.html",
+    
+    "relUrl": "/features/performance.html"
+  },"13": {
+    "doc": "Reactions",
+    "title": "Reactions",
+    "content": "Reactions can be sent using the reaction panel located at the bottom of the stream. Both the host and viewers can send reactions given that the host has them enabled. To see how to enable or disable reactions, check out hosting streams and the stream control panel. Reactions enabled: . Reactions disabled: . Upon pressing a reaction, the corresponding reaction emoji appears on the stream for all viewers and the host. Next: Annotations . ",
+    "url": "/Mercury/features/reactions.html",
+    
+    "relUrl": "/features/reactions.html"
+  },"14": {
+    "doc": "Setting Up a Server",
+    "title": "Server Hosting Guide",
+    "content": "Hosting a stream with Mercury requries other devices on the internet (your viewers) to be able to discover your machine. With certain network configurations, this is no problem; your computer has a set, static (unchanging) IP address that you can share. Once given this IP, anybody can enter it into Mercury and send out a request to join. However, other network settings may not allow this. ",
+    "url": "/Mercury/server-hosting.html#server-hosting-guide",
+    
+    "relUrl": "/server-hosting.html#server-hosting-guide"
+  },"15": {
+    "doc": "Setting Up a Server",
+    "title": "The Problem",
+    "content": "It is common nowadays for a network to be configured with private addresses. Only the router in your home will have a “regular” IP address. All other devices on the network like computers or phones are instead given a private IP address. Then, when you want to browse the internet, your router performs what is called NAT translation to replace your private IP address with its public one in your outgoing internet packets. It notes what services you are trying to reach, and when those send data back to you, knows to forward that data back to your computer. Wikipedia explains this as the following (read more here): . Most Internet service providers (ISPs) allocate only a single publicly routable IPv4 address to each residential customer, but many homes have more than one computer, smartphone, or other Internet-connected device. In this situation, a network address translator (NAT/PAT) gateway is usually used to provide Internet connectivity to multiple hosts. This poses an issue: . | if your viewer is given your private address, they won’t know how to reach your computer - only your router knows what that private address points to, and the viewer won’t know how to find the router | if your viwer is given your public address, they won’t know how to reach your computer - they will find the router, but not be able to specify to the router which of its connected computers they want | . Thankfully, this issue has multiple solutions. Static IP . By far the simplest solution is to purchase a static IP. These are public addresses an ISP will lease out to you for a set price. Once you have purchased one of these, you can configure it to your computer, and any other device on the internet who specifies that IP will be able to connect to you. | ISP | Price (/month) | . | AT&amp;T | $15 to $40 | . | Version Business | $99.95 | . | Nordlayer | $50 | . | Spectrum | $15 | . Port Forwarding . Another easy, and this time free, option is port forwarding. Choose a port that you will stream all Mercury session out of. Now, go to your router configuration settings, and port forward it to direct all traffic aimed at your public IP and that port to your computer. Any device supplied with your router’s public IP and your chosen port will send traffic directly to your computer, allowing you to stream to them. A guide to port forwarding: https://www.noip.com/support/knowledgebase/general-port-forwarding-guide . Using a VPS . A VPS (Virtual Private Server) can be rented from online providers, and often can have a static IP (for an extra fee). This is cheaper than purchasing one for your own device because you don’t have to lease one for an extended period of time from the ISP - only discuss renting the server from whatever company owns it. As a result, if you own a VPS with a static IP, you can remote into it using something like VNC and run Mercury from it. Some options: . | https://aws.amazon.com/free/compute/lightsail/ | https://azure.microsoft.com/en-us/ | https://cloudzy.com/dedicated-ip-vps/ | https://go.lightnode.com/dedicated-ip-vps | https://www.vps-mart.com/ip | . Cloud Tunneling . Cloud tunneling refers to a wide array of techniques for transporting data across a network using protocols not normally supported. Generally, it refers to encapsulating packets within additional headers (such as IP-in-IP). However, a specific kind of tunnel has become more popular recently. By trusting an external provider (such as Cloudflare) with your network traffic, you can have your users send data to a Cloudflare server, and have that server forward it on to your network. The way this avoids the issue with the NAT translation that normally occurs is that your computer can repeatedly send small packets of data to the Cloudflare server, and thus inform your router that any data coming from that server should be sent to it. The downside to this is that you will be exposing all network traffic, you may have to pay a fee as usage scales, and configuring it for uncommon kinds of data (anything besides SSH or HTTP) can be difficult. You can read more about this option here. Next: Hosting Streams . ",
+    "url": "/Mercury/server-hosting.html#the-problem",
+    
+    "relUrl": "/server-hosting.html#the-problem"
+  },"16": {
+    "doc": "Setting Up a Server",
+    "title": "Setting Up a Server",
+    "content": " ",
+    "url": "/Mercury/server-hosting.html",
+    
+    "relUrl": "/server-hosting.html"
+  },"17": {
+    "doc": "Settings",
+    "title": "Settings",
+    "content": "Pressing on the display name in the home window brings the user to this window. The settings menu allows the user to customize default values used for their display name, default udp port, resolution, white/blacklists, and more. Additionally, dark mode can be enabled or disabled here. Here is an example of what the light theme looks like: . ",
+    "url": "/Mercury/settings.html",
+    
+    "relUrl": "/settings.html"
+  },"18": {
+    "doc": "Stream Control Panel",
+    "title": "Stream Control Panel",
+    "content": "The Stream Control Panel is a panel below the stream which only the host has access to. Currently a few simple controls are present here: . Reaction Enable/Disable . The host can toggle reactions for all viewers in the stream. Mute Stream . The mute stream checkbox allows the host to mute the audio of the stream. Change Streaming Source . The change streaming source button opens the window that allows the host to change the source that is being streamed similar to source selection in the host stream window. Next: Performance . ",
+    "url": "/Mercury/features/stream-control-panel.html",
+    
+    "relUrl": "/features/stream-control-panel.html"
+  },"19": {
+    "doc": "Viewer List",
+    "title": "Viewer List",
+    "content": "The viewer list is a tab that only the host has access to on the side pane of the stream. A simple list of all viewers (not including the host) are shown in a list. Additionally, annotations for select users can be enabled/disabled by toggling the checkbox next to their name. The viewer list accurately reflects all users currently in the stream. Next: Performance . ",
+    "url": "/Mercury/features/viewer-list.html",
+    
+    "relUrl": "/features/viewer-list.html"
+  }
+}

@@ -25,6 +25,7 @@ source: .
 search_enabled: false
 color_scheme: light
 destination: .
+baseurl: "/Mercury"
 
 # Build settings
 # theme: just-the-docs 

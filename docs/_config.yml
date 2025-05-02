@@ -24,6 +24,7 @@ description: >- # this means to ignore newlines until "baseurl:"
 source: .
 search_enabled: false
 color_scheme: light
+destination: .
 
 # Build settings
 theme: just-the-docs

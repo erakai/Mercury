@@ -1,0 +1,68 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely edit after that. If you find
+# yourself editing this file very often, consider using Jekyll's data files
+# feature for the data you need to update frequently.
+#
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
+#
+# If you need help with YAML syntax, here are some quick references for you:
+# https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
+# https://learnxinyminutes.com/docs/yaml/
+#
+# Site settings
+# These are used to personalize your new site. If you look in the HTML files,
+# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
+# You can create any custom variable you would like, and they will be accessible
+# in the templates via {{ site.myvariable }}.
+
+title: Mercury Docs
+description: >- # this means to ignore newlines until "baseurl:"
+  Desktop app for peer-to-peer video streaming, prioritizing efficiency and ease of use.
+baseurl: "/Mercury"  # <--- This is correct
+search_enabled: false
+color_scheme: dark
+
+# Build settings
+# theme: just-the-docs 
+# use remote theme for gh-pages deployment
+remote_theme: just-the-docs/just-the-docs
+enable:
+  - navigation
+# sidebar:
+#   enabled: true
+just_the_docs:
+  favicon_ico: "/images/mercury_icon.png"
+plugins:
+  - jekyll-feed
+  - jekyll-remote-theme
+navigation:
+  - title: Getting Started
+    children:
+      - title: Installation
+        url: getting-started/installation
+      - title: Overview
+        url: getting-started/overview
+  - title: Setting Up a Server
+    url: server-hosting
+  - title: Hosting Streams
+    url: hosting-streams
+  - title: Joining Streams
+    url: joining-streams
+  - title: Browsing Streams
+    url: browsing-streams
+  - title: In-Stream Features
+    children:
+      - title: Chat
+        url: features/chat
+      - title: Reactions
+        url: features/reactions
+      - title: Annotations
+        url: features/annotations
+      - title: Viewer List
+        url: features/viewer-list
+      - title: Performance
+        url: features/performance
+  

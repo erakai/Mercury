@@ -892,5 +892,6 @@ void StreamWindow::onClearButtonClicked()
     return;
 
   annotation_display->clear();
+  m_annotationLog.clear();
   servh->server->clear_annotations();
 }

@@ -109,14 +109,42 @@ bool HstpHandler::add_option_annotation(const HSTP_Annotation &annotation)
 
   Option opt;
   opt.type = 5; // im using 5 for now
-  opt.len = sizeof(uint16_t) +
-            annotation.points.size() * (sizeof(uint16_t) * 2) +
+  opt.len = sizeof(uint16_t) + annotation.points.size() * (sizeof(float) * 2) +
             sizeof(annotation.red) + sizeof(annotation.green) +
-            sizeof(annotation.blue) + sizeof(annotation.thickness);
+            sizeof(annotation.blue) + sizeof(annotation.thickness) +
+            sizeof(annotation.mode);
   opt.data = annotation.serialize();
 
   m_hdr->options.push_back(opt);
 
+  return true;
+}
+
+bool HstpHandler::add_option_pixmap_chunk(const char *dataPtr,
+                                          uint32_t chunkSize,
+                                          uint32_t totalSize, uint32_t offset)
+{
+  if (get_status() != MSG_STATUS::IN_PROGRESS)
+    return false;
+
+  // option layout: [4B totalSize][4B offset][chunkSize bytes]
+  uint32_t payloadLen = 4 + 4 + chunkSize;
+  Option opt;
+  opt.type = 6; // pixmap‐chunk type
+  opt.len = static_cast<uint16_t>(payloadLen);
+  opt.data = std::shared_ptr<char[]>(new char[payloadLen]);
+
+  char *p = opt.data.get();
+  uint32_t netTotal = qToBigEndian(totalSize);
+  uint32_t netOffset = qToBigEndian(offset);
+
+  std::memcpy(p, &netTotal, sizeof(netTotal));
+  p += 4;
+  std::memcpy(p, &netOffset, sizeof(netOffset));
+  p += 4;
+  std::memcpy(p, dataPtr, chunkSize);
+
+  m_hdr->options.push_back(opt);
   return true;
 }
 
@@ -461,6 +489,9 @@ void HstpProcessor::emit_header(const std::shared_ptr<HSTP_Header> &hdr_ptr)
     case 5: // annotation
       handle_annotation((hdr_ptr->sender_alias), opt);
       break;
+    case 6: // pixmap
+      handle_pixmap(hdr_ptr->sender_alias, opt);
+      break;
     case 7: // fps
       handle_fps(hdr_ptr->sender_alias, opt);
       break;
@@ -604,6 +635,52 @@ void HstpProcessor::handle_annotation(HANDLER_PARAMS)
   HSTP_Annotation annotation(opt.data);
 
   emit received_annotation(alias, annotation);
+}
+
+void HstpProcessor::handle_pixmap(const char alias[ALIAS_SIZE],
+                                  const Option &opt)
+{
+  // must have at least 8 bytes of header
+  if (!opt.data || opt.len < 8)
+  {
+    qCritical("Bad pixmap chunk");
+    return;
+  }
+
+  uint32_t netTotal, netOff;
+  std::memcpy(&netTotal, opt.data.get(), 4);
+  std::memcpy(&netOff, opt.data.get() + 4, 4);
+  uint32_t totalSize = qFromBigEndian(netTotal);
+  uint32_t offset = qFromBigEndian(netOff);
+
+  const char *chunkPtr = opt.data.get() + 8;
+  uint32_t chunkLen = opt.len - 8;
+
+  // first fragment? allocate full buffer
+  if (_pixmapBuffer.isEmpty())
+  {
+    _pixmapTotal = totalSize;
+    _pixmapBuffer.resize(totalSize);
+  }
+
+  // copy into the right window
+  std::memcpy(_pixmapBuffer.data() + offset, chunkPtr, chunkLen);
+
+  // once we’ve filled the entire buffer, decode + emit
+  if (uint32_t(_pixmapBuffer.size()) == _pixmapTotal)
+  {
+    QPixmap pix;
+    if (!pix.loadFromData(_pixmapBuffer, "PNG"))
+    {
+      qCritical("Failed decoding assembled pixmap");
+    }
+    else
+    {
+      emit received_pixmap(alias, pix);
+    }
+    _pixmapBuffer.clear();
+    _pixmapTotal = 0;
+  }
 }
 
 void HstpProcessor::handle_clear_annotations(HANDLER_PARAMS)

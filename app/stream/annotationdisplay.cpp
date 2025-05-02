@@ -68,6 +68,15 @@ void AnnotationDisplay::addLine(const QPoint &start, const QPoint &end,
   updateScaled();
 }
 
+void AnnotationDisplay::setMasterPixmap(const QPixmap &pixmap)
+{
+  // Replace our “true” annotation canvas
+  m_pixmap = pixmap;
+
+  // Rebuild the scaled version so paintEvent shows the new image
+  updateScaled();
+}
+
 void AnnotationDisplay::clear()
 {
   if (!m_pixmap.isNull())

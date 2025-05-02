@@ -229,6 +229,14 @@ void StreamWindow::connect_signals_and_slots()
             &StreamWindow::new_annotation);
 
   if (is_client())
+  {
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_pixmap, this,
+            [this](const char /*alias*/[ALIAS_SIZE], const QPixmap &pix)
+            { annotation_display->setMasterPixmap(pix); });
+  }
+
+  if (is_client())
     connect(servc->client->hstp_processor().get(),
             &HstpProcessor::received_chat, this,
             [=, this](const char alias[ALIAS_SIZE],
@@ -662,6 +670,35 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   //          << servh->reactions_enabled;
   client.handler.add_option_reaction_permission(servh->reactions_enabled);
   client.handler.output_msg_to_socket(client.hstp_sock);
+
+  // ─── Now fragment and send the current annotation canvas ───────────────────
+  QPixmap hostCanvas = annotation_display->grab();
+  QByteArray ba;
+  {
+    QBuffer buf(&ba);
+    buf.open(QIODevice::WriteOnly);
+    hostCanvas.save(&buf, "PNG");
+  }
+
+  const uint32_t totalSize = static_cast<uint32_t>(ba.size());
+  const uint32_t maxChunk = 60000; // leave margin under 65535
+  uint32_t offset = 0;
+
+  while (offset < totalSize)
+  {
+    uint32_t chunkSize = std::min(maxChunk, totalSize - offset);
+
+    client.handler.init_msg(alias.c_str());
+    client.handler.add_option_pixmap_chunk(
+        ba.constData() + offset, // pointer to this slice
+        chunkSize,               // length of this slice
+        totalSize,               // full PNG size
+        offset                   // this slice’s start offset
+    );
+    client.handler.output_msg_to_socket(client.hstp_sock);
+
+    offset += chunkSize;
+  }
 }
 
 void StreamWindow::viewer_disconnected(int id, std::string _alias)
@@ -674,24 +711,33 @@ void StreamWindow::viewer_disconnected(int id, std::string _alias)
 
 void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
 {
-  if (annotation.points.size() < 1)
+  const auto &pts = annotation.points;
+  if (pts.empty())
     return;
-  else if (annotation.points.size() == 1)
+
+  // Map normalized [0..1] back into our widget coords:
+  int w = annotation_display->width();
+  int h = annotation_display->height();
+  auto toLocal = [&](const AnnotationPoint &pt)
+  { return QPoint(int(pt.x * w), int(pt.y * h)); };
+
+  // Draw either a dot or a series of segments
+  if (pts.size() == 1)
   {
-    QPoint p(annotation.points[0].x, annotation.points[0].y);
+    QPoint p = toLocal(pts[0]);
     annotation_display->addLine(
         p, p, QColor(annotation.red, annotation.green, annotation.blue),
-        annotation.thickness, 0);
+        annotation.thickness, annotation.mode);
   }
   else
   {
-    for (int i = 1; i < (int) annotation.points.size(); i++)
+    for (size_t i = 1; i < pts.size(); ++i)
     {
-      QPoint q(annotation.points[i].x, annotation.points[i].y);
-      QPoint p(annotation.points[i - 1].x, annotation.points[i - 1].y);
+      QPoint p0 = toLocal(pts[i - 1]);
+      QPoint p1 = toLocal(pts[i]);
       annotation_display->addLine(
-          p, q, QColor(annotation.red, annotation.green, annotation.blue),
-          annotation.thickness, 0);
+          p0, p1, QColor(annotation.red, annotation.green, annotation.blue),
+          annotation.thickness, annotation.mode);
     }
   }
 }
@@ -721,11 +767,6 @@ bool StreamWindow::eventFilter(QObject *watched, QEvent *event)
   }
   return QMainWindow::eventFilter(watched, event);
 }
-
-#include <QCursor>
-#include <QPainter>
-#include <QPixmap>
-#include <QPen>
 
 void StreamWindow::updateEraseCursor(int radius)
 {
@@ -808,8 +849,9 @@ void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent * /*event*/)
     annotation_display->unsetCursor();
   }
 
-  send_annotation(
-      HSTP_Annotation(points, col.red(), col.green(), col.blue(), thick, mode));
+  send_annotation(HSTP_Annotation(points, annotation_display->width(),
+                                  annotation_display->height(), col.red(),
+                                  col.green(), col.blue(), thick, mode));
   points.clear();
 }
 

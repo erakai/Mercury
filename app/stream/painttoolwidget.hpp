@@ -7,6 +7,7 @@
 #include <QRadioButton>
 #include <QSpinBox>
 #include <QComboBox>
+#include <QComboBox>
 
 class QLabel;
 class QPushButton;

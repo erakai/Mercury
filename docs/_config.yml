@@ -43,27 +43,27 @@ navigation:
   - title: Getting Started
     children:
       - title: Installation
-        url: /getting-started/installation.md
+        url: getting-started/installation
       - title: Overview
-        url: /getting-started/overview.md
+        url: getting-started/overview
   - title: Setting Up a Server
-    url: /server-hosting.md
+    url: server-hosting
   - title: Hosting Streams
-    url: /hosting-streams.md
+    url: hosting-streams
   - title: Joining Streams
-    url: /joining-streams.md
+    url: joining-streams
   - title: Browsing Streams
-    url: /browsing-streams.md
+    url: browsing-streams
   - title: In-Stream Features
     children:
       - title: Chat
-        url: /features/chat.md
+        url: features/chat
       - title: Reactions
-        url: /features/reactions.md
+        url: features/reactions
       - title: Annotations
-        url: /features/annotations.md
+        url: features/annotations
       - title: Viewer List
-        url: /features/viewer-list.md
+        url: features/viewer-list
       - title: Performance
-        url: /features/performance.md
+        url: features/performance
   

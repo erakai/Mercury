@@ -6,6 +6,8 @@
 #include <QLineEdit>
 #include <QRadioButton>
 #include <QSpinBox>
+#include <QComboBox>
+#include <QComboBox>
 
 class QLabel;
 class QPushButton;
@@ -21,6 +23,7 @@ public:
   int brushSize() const { return m_brushSizeEdit->text().toInt(); }
   bool isEraseMode() const { return m_eraseButton->isChecked(); }
   void addClearButton();
+  QComboBox *m_brushTypeCombo;
 
 signals:
   void clearButtonClicked();

@@ -1,5 +1,5 @@
 # .github/workflows/jekyll.yml
-name: Build and Deploy Jekyll Site
+name: Build and Deploy Jekyll Site to gh-pages
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.1' # Match your local Ruby version
+        ruby-version: '3.1' # Match your system Ruby version
 
     - name: Install dependencies
       working-directory: docs
@@ -27,12 +27,15 @@ jobs:
         gem install bundler
         bundle install
 
-    - name: Build site with Jekyll
+    - name: Build Jekyll site
       working-directory: docs
-      run: bundle exec jekyll build --destination ./docs/_site
+      run: bundle exec jekyll build --destination ../_site
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/_site
+        publish_dir: ./_site
+        publish_branch: gh-pages
+        force_orphan: true  # Recommended for clean history
+        enable_jekyll: true

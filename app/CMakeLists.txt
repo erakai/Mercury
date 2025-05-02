@@ -29,6 +29,7 @@ qt_add_executable(mercury
   stream/streaminfo.cpp stream/streaminfo.hpp
   stream/volumecontrolwidget.hpp  stream/volumecontrolwidget.cpp
   stream/mutestreambutton.hpp     stream/mutestreambutton.cpp
+  stream/audiowaveformwidget.hpp stream/audiowaveformwidget.cpp
   home/main.cpp
   home/mainwindow.cpp home/mainwindow.hpp home/mainwindow.ui
   home/settingswindow.h home/settingswindow.cpp home/settingswindow.ui

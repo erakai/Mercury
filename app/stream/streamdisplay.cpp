@@ -1,5 +1,6 @@
 #include "streamdisplay.hpp"
 #include <QtCore/qbuffer.h>
+#include <QtCore/qlogging.h>
 #include <QtCore/qnamespace.h>
 #include <QtMultimedia/qaudiosink.h>
 #include "config/mconfig.hpp"
@@ -117,7 +118,8 @@ void StreamDisplay::acquire_next_frame()
       qCritical("Invalid VideoFrame received.");
     }
 
-    if (audio_buffer->isOpen() && audio_buffer->isWritable())
+    if (audio_buffer->isOpen() && audio_buffer->isWritable() &&
+        !next_audio_frame.isEmpty())
     {
       QMutexLocker locker(&audio_mutex);
       audio_buffer->write(next_audio_frame);

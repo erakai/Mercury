@@ -1,7 +1,9 @@
 #include "singleton/audiomanager.hpp"
+#include <QtCore/qlogging.h>
 #include <QtCore/qsysinfo.h>
 #include <QDateTime>
 #include <QtGui/qpicture.h>
+#include <QtMultimedia/qmediaplayer.h>
 
 bool AudioManager::start_recording(qint32 buffer_size_ms)
 {
@@ -11,9 +13,10 @@ bool AudioManager::start_recording(qint32 buffer_size_ms)
     return false;
   }
 
-  if (!_audio_device)
+  if (_audio_device == nullptr && _media_player == nullptr)
   {
-    qWarning() << "No device was set, please set an audio device";
+    qWarning()
+        << "No audio device or media player is set, no audio will be played.";
     return false;
   }
 
@@ -28,17 +31,36 @@ bool AudioManager::start_recording(qint32 buffer_size_ms)
   _buffer_device.open(QIODevice::ReadWrite);
 
   // Create QAudioSource instance
-  _audio_source = new QAudioSource(*_audio_device, _format, this);
-  _audio_source->start(&_buffer_device);
-
-  if (_audio_source->state() == (QtAudio::ActiveState | QtAudio::IdleState))
+  if (has_audio_device())
   {
-    connect(&_buffer_device, &QIODevice::readyRead, this,
-            &AudioManager::on_audio_data_ready);
+    _audio_source = new QAudioSource(*_audio_device, _format, this);
+    _audio_source->start(&_buffer_device);
+
+    if (_audio_source->state() == (QtAudio::ActiveState | QtAudio::IdleState))
+    {
+      connect(&_buffer_device, &QIODevice::readyRead, this,
+              &AudioManager::on_audio_data_ready);
+    }
+    else
+    {
+      qWarning() << "Issue with starting audio source";
+      return false;
+    }
+  }
+  else if (has_media_player())
+  {
+    _audio_buffer_output = new QAudioBufferOutput(_format);
+    _audio_output = new QAudioOutput();
+    _audio_output->setMuted(true);
+
+    _media_player->setAudioOutput(_audio_output);
+    _media_player->setAudioBufferOutput(_audio_buffer_output);
+    connect(_audio_buffer_output, &QAudioBufferOutput::audioBufferReceived,
+            this, &AudioManager::on_audio_buffer_received);
   }
   else
   {
-    qWarning() << "Issue will starting audio source";
+    _buffer_device.close();
     return false;
   }
 
@@ -50,8 +72,16 @@ void AudioManager::stop_recording()
 {
   if (!_is_recording)
     return;
-  _audio_source->stop();
-  _buffer_device.close();
+  if (_audio_source != nullptr)
+    _audio_source->stop();
+  if (_buffer_device.isOpen())
+    _buffer_device.close();
+  if (_audio_buffer_output)
+    delete _audio_buffer_output;
+
+  _media_player = nullptr;
+  _audio_device = nullptr;
+
   _is_recording = false;
 }
 
@@ -100,6 +130,11 @@ void AudioManager::set_audio_device(QAudioDevice &audio_device)
   _audio_device = &audio_device;
 }
 
+void AudioManager::set_media_player(QMediaPlayer &media_player)
+{
+  _media_player = &media_player;
+}
+
 QByteArray AudioManager::get_lastmsec(int n_ms)
 {
   QMutexLocker locker(&_mutex);
@@ -118,12 +153,19 @@ QByteArray AudioManager::get_lastmsec(int n_ms)
   int aligned_bytes =
       (available_bytes / _format.bytesPerSample()) * _format.bytesPerSample();
 
+  if (has_media_player() &&
+      (_media_player->mediaStatus() == QMediaPlayer::EndOfMedia ||
+       !_media_player->isPlaying()))
+  {
+    return {};
+  }
+
   return _audio_bytearray.right(aligned_bytes);
 }
 
 void AudioManager::on_audio_data_ready()
 {
-  if (!_audio_source)
+  if (_audio_source == nullptr)
     return;
 
   if (!_buffer_device.isOpen())
@@ -145,6 +187,33 @@ void AudioManager::on_audio_data_ready()
     int max_bytes = (_max_buffer_size * _format.sampleRate() *
                      _format.channelCount() * bytes_per_sample) /
                     1000;
+    if (_audio_bytearray.size() > max_bytes)
+    {
+      _audio_bytearray.remove(0, _audio_bytearray.size() - max_bytes);
+    }
+  }
+}
+
+void AudioManager::on_audio_buffer_received(const QAudioBuffer &buffer)
+{
+  if (!buffer.isValid())
+    return;
+
+  const quint8 *data = buffer.constData<quint8>();
+  int data_size = buffer.byteCount();
+
+  if (data_size > 0)
+  {
+    QMutexLocker locker(&_mutex);
+
+    _audio_bytearray.append(reinterpret_cast<const char *>(data), data_size);
+
+    // Prevent buffer from exceeding max size
+    int bytes_per_sample = _format.bytesPerSample();
+    int max_bytes = (_max_buffer_size * _format.sampleRate() *
+                     _format.channelCount() * bytes_per_sample) /
+                    1000;
+
     if (_audio_bytearray.size() > max_bytes)
     {
       _audio_bytearray.remove(0, _audio_bytearray.size() - max_bytes);

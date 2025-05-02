@@ -135,6 +135,7 @@ private:
   StreamInfo *stream_info;
   bool has_host_muted_stream = false;
   qint64 time_since_last_mutetoast = 0;
+  qint8 count_of_mutetoasts = 0;
   const qint64 mutetoast_cooldown_ms = 10000;
 
   QMenu *stream_menu;

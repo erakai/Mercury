@@ -1,5 +1,6 @@
 #include "streamcontrolpanel.hpp"
 #include "../streampreview/streampreviewwindow.h"
+#include "stream/audiowaveformwidget.hpp"
 
 #include <QCheckBox>
 #include <QVBoxLayout>
@@ -59,6 +60,10 @@ StreamControlPanel::StreamControlPanel(QWidget *parent)
             spw->raise();          // for MacOS
             spw->activateWindow(); // for Windows
           });
+
+  audiowaveform_widget = new AudioWaveformWidget(this);
+  audiowaveform_widget->setMinimumSize(200, 50);
+  control_button_grid->addWidget(audiowaveform_widget, 0, Qt::AlignLeft);
 
   // create main layout in case we want to add other things
   auto *main_layout = new QVBoxLayout(this);

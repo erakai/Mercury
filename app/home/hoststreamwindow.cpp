@@ -102,7 +102,8 @@ void HostStreamWindow::open_stream_window()
 {
   delete (spw);
 
-  if (!VideoManager::instance().mediaCaptureIsSet())
+  if (!VideoManager::instance().mediaCaptureIsSet() &&
+      !VideoManager::instance().mediaPlayerIsSet())
     return;
 
   std::string alias = ui->displayNameLineEdit->text().toStdString();

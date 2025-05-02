@@ -22,11 +22,13 @@ jobs:
         ruby-version: '3.1' # Match your local Ruby version
 
     - name: Install dependencies
+      working-directory: docs
       run: |
         gem install bundler
         bundle install
 
     - name: Build site with Jekyll
+      working-directory: docs
       run: bundle exec jekyll build
 
     - name: Deploy to GitHub Pages

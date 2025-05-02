@@ -21,11 +21,9 @@
 title: Mercury Docs
 description: >- # this means to ignore newlines until "baseurl:"
   Desktop app for peer-to-peer video streaming, prioritizing efficiency and ease of use.
-source: .
+baseurl: "/Mercury"  # <--- This is correct
 search_enabled: false
-color_scheme: light
-destination: .
-baseurl: "/Mercury"
+color_scheme: dark
 
 # Build settings
 # theme: just-the-docs 

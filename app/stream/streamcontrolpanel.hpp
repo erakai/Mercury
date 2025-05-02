@@ -1,6 +1,7 @@
 #ifndef STREAMCONTROLPANEL_H
 #define STREAMCONTROLPANEL_H
 
+#include "stream/audiowaveformwidget.hpp"
 #include "stream/mutestreambutton.hpp"
 #include <QWidget>
 
@@ -53,6 +54,7 @@ private:
 
   MuteStreamButton *mute_stream_btn;
   QPushButton *change_source_btn;
+  AudioWaveformWidget *audiowaveform_widget;
 };
 
 #endif // STREAMCONTROLPANEL_H

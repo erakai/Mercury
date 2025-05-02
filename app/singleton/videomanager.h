@@ -7,6 +7,8 @@
 #include <QMediaCaptureSession>
 #include <QVideoSink>
 #include <QVideoFrame>
+#include <QtCore/qlogging.h>
+#include <QtMultimedia/qmediaplayer.h>
 
 #include "config/mconfig.hpp"
 
@@ -30,11 +32,18 @@ public:
   void setMediaCaptureSession(QMediaCaptureSession &session);
   VideoImageStatus GetVideoImage(QImage &image);
   bool mediaCaptureIsSet() { return m_captureSession != nullptr; }
+  bool mediaPlayerIsSet() { return m_mediaPlayer != nullptr; }
+
+  void setMediaPlayer(QMediaPlayer &player);
+  QMediaPlayer *getMediaPlayer();
 
 private:
   QMediaCaptureSession *m_captureSession;
+  QMediaPlayer *m_mediaPlayer;
   QVideoSink *m_videoSink;
   QImage m_lastImage;
+
+  void onVideoFrameChange(const QVideoFrame &frame);
 
   uint64_t last_frame_s = 0;
 
@@ -43,31 +52,12 @@ private:
       : QObject(parent), m_captureSession(nullptr),
         m_videoSink(new QVideoSink(this))
   {
-    // TODO: optimize this, this is really inefficient but will work for now.
-    // Connect the QVideoSink's videoFrameChanged signal to update the cached
-    // image.
+    if (!m_lastImage.load("assets/audio_waveform.png"))
+    {
+      qDebug() << "Failed to load in default image for player";
+    };
     connect(m_videoSink, &QVideoSink::videoFrameChanged, this,
-            [this](const QVideoFrame &frame)
-            {
-              uint64_t current_time = QDateTime::currentMSecsSinceEpoch();
-              uint64_t delta = current_time - last_frame_s;
-
-              if (delta < (1000.0 / FPS - 5))
-                return;
-
-              last_frame_s = current_time;
-              if (frame.isValid())
-              {
-                // Create a copy of the frame and map it for reading.
-                QVideoFrame cloneFrame(frame);
-                if (cloneFrame.map(QVideoFrame::ReadOnly))
-                {
-                  // Convert the frame to a QImage and store it.
-                  m_lastImage = cloneFrame.toImage();
-                  cloneFrame.unmap();
-                }
-              }
-            });
+            &VideoManager::onVideoFrameChange);
   }
 
   // Destructor (can be defaulted or customized)

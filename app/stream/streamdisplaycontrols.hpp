@@ -4,6 +4,7 @@
 #include "stream/volumecontrolwidget.hpp"
 #include <QWidget>
 #include <QPushButton>
+#include <QtWidgets/qpushbutton.h>
 
 class StreamDisplayControls : public QWidget
 {
@@ -11,6 +12,7 @@ class StreamDisplayControls : public QWidget
 
 private:
   QPushButton *fullscreenButton;
+  QPushButton *playpauseButton;
   VolumeControlWidget *volume_control;
 
 public:

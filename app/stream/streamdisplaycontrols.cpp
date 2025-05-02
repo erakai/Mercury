@@ -1,9 +1,12 @@
 #include "streamdisplaycontrols.hpp"
 
+#include "singleton/audiomanager.hpp"
+#include "singleton/videomanager.h"
 #include "stream/streamwindow.hpp"
 #include <QMouseEvent>
 #include <QVBoxLayout>
 #include <QtCore/QEvent>
+#include <QtGui/qpixmap.h>
 #include <QtWidgets/qpushbutton.h>
 
 StreamDisplayControls::StreamDisplayControls(QWidget *parent)
@@ -25,6 +28,42 @@ StreamDisplayControls::StreamDisplayControls(QWidget *parent)
 
   grid_layout->addWidget(fullscreenButton, 1, 2,
                          Qt::AlignRight | Qt::AlignBottom);
+
+  // Play/Pause Control
+  if (stream_window->is_host() && VideoManager::instance().mediaPlayerIsSet())
+  {
+    playpauseButton = new QPushButton(this);
+    playpauseButton->setFixedSize(52, 52); // Adjust button size as needed
+
+    QString app_dir = QCoreApplication::applicationDirPath();
+    QString play_file(app_dir + "/assets/play.png");
+    QString pause_file(app_dir + "/assets/pause.png");
+    QPixmap play_px(play_file);
+    QPixmap pause_px(pause_file);
+    playpauseButton->setIcon(QIcon(pause_px));
+    playpauseButton->setIconSize(QSize(48, 48));
+    playpauseButton->setStyleSheet(
+        "background-color: rgba(0, 0, 0, 0); border: none;");
+    grid_layout->addWidget(playpauseButton, 1, 0,
+                           Qt::AlignLeft | Qt::AlignBottom);
+
+    connect(playpauseButton, &QPushButton::clicked, this,
+            [this, play_px, pause_px]()
+            {
+              if (VideoManager::instance().getMediaPlayer()->isPlaying())
+              {
+                // pause
+                this->playpauseButton->setIcon(QIcon(play_px));
+                VideoManager::instance().getMediaPlayer()->pause();
+              }
+              else
+              {
+                // play
+                this->playpauseButton->setIcon(QIcon(pause_px));
+                VideoManager::instance().getMediaPlayer()->play();
+              }
+            });
+  }
 
   // Volume Control
   if (stream_window->is_client())

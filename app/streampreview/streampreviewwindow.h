@@ -9,6 +9,8 @@
 #include <QAudioInput>
 #include <QWidget>
 #include <QItemSelection>
+#include <QMediaPlayer>
+#include <QFileDialog>
 
 class ScreenListModel;
 class WindowListModel;
@@ -47,6 +49,7 @@ private slots:
   void onWindowCaptureErrorChanged();
   void onScreenCaptureErrorChanged();
   void onStartStopButtonClicked();
+  void onCurrentFileMediaChanged();
 
 signals:
   void closed();
@@ -55,7 +58,8 @@ private:
   enum class SourceType
   {
     Screen,
-    Window
+    Window,
+    File
   };
 
   void updateActive(SourceType sourceType, bool active);
@@ -67,11 +71,15 @@ private:
   AudioInputListModel *audioInputListModel = nullptr;
   QListView *screenListView = nullptr;
   QListView *windowListView = nullptr;
+  QLabel *fileSelectionLabel = nullptr;
+  QPushButton *fileSelectionButton = nullptr;
   QListView *audioInputListView = nullptr;
   QScreenCapture *screenCapture = nullptr;
   QWindowCapture *windowCapture = nullptr;
   QAudioInput *audioCapture = nullptr;
+  QLabel *audioPlaceholder = nullptr;
   QMediaCaptureSession *mediaCaptureSession = nullptr;
+  QMediaPlayer *mediaPlayer = nullptr;
   QVideoWidget *videoWidget = nullptr;
   QGridLayout *gridLayout = nullptr;
   QPushButton *startStopButton = nullptr;

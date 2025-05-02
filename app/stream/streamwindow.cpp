@@ -392,12 +392,6 @@ void StreamWindow::stream_fully_initialized()
 {
   qInfo("Beginning stream playback.");
   stream_display->begin_playback();
-
-  // start recording audio of host
-  if (is_host())
-  {
-    AudioManager::instance().start_recording(3000);
-  }
 }
 
 void StreamWindow::closeEvent(QCloseEvent *event)
@@ -438,18 +432,23 @@ bool StreamWindow::provide_next_frame(QImage &next_video,
         VideoManager::instance().GetVideoImage(img);
 
     // acquire audio frame from desktop
-    int audio_msec = 1000 / FPS;
-    QByteArray audio_array = AudioManager::instance().get_lastmsec(audio_msec);
-
+    QByteArray audio_array;
+    if (AudioManager::instance().is_recording())
+    {
+      int audio_msec = 1000 / FPS;
+      audio_array = AudioManager::instance().get_lastmsec(audio_msec);
+    }
     if (has_host_muted_stream)
     {
       // tell the user to unmute?
       if (AudioManager::is_audio_loud(audio_array) &&
           QDateTime::currentMSecsSinceEpoch() - time_since_last_mutetoast >=
-              mutetoast_cooldown_ms)
+              mutetoast_cooldown_ms &&
+          count_of_mutetoasts < 3)
       {
         ToastNotification::showToast(this, "You are currently muted!", 3000);
         time_since_last_mutetoast = QDateTime::currentMSecsSinceEpoch();
+        count_of_mutetoasts++;
       }
       audio_array = {};
     }

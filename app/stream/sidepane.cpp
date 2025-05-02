@@ -272,8 +272,7 @@ void ViewerListTab::viewer_joined(int id, string alias)
 
   // Create a custom widget to hold the label and the checkbox.
   QWidget *item_widget = new QWidget();
-  item_widget->setStyleSheet(item_widget->styleSheet() +
-                             "border: 2px solid red; height: 40px");
+  item_widget->setStyleSheet(item_widget->styleSheet() + "height: 40px");
   QHBoxLayout *layout = new QHBoxLayout(item_widget);
   layout->setContentsMargins(0, 0, 0, 0); // Remove margins for a cleaner look
 

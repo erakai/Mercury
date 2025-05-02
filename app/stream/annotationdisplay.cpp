@@ -17,8 +17,14 @@ AnnotationDisplay::AnnotationDisplay(QWidget *parent) : QWidget(parent)
 void AnnotationDisplay::addLine(const QPoint &start, const QPoint &end,
                                 QColor color, int thickness, int mode)
 {
-  if (!canAnnotate || m_pixmap.isNull() || width() <= 0 || height() <= 0)
+  if (!canAnnotate || width() <= 0 || height() <= 0)
     return;
+
+  if (m_pixmap.isNull())
+  {
+    m_pixmap = QPixmap(size());
+    m_pixmap.fill(Qt::transparent);
+  }
 
   // map widget coords → master‐pixmap coords
   const double xScale = double(m_pixmap.width()) / double(width());

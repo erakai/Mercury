@@ -18,6 +18,8 @@ public:
   void addLine(const QPoint &start, const QPoint &end, QColor color = Qt::red,
                int thickness = 3, int mode = 0);
 
+  void setMasterPixmap(const QPixmap &pixmap);
+
   void clear();
 
   bool canAnnotate = true;

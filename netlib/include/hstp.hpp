@@ -17,6 +17,8 @@
 #include <memory>
 #include <vector>
 #include <QtEndian>
+#include <QBuffer>
+#include <QPixmap>
 
 /*
 Packet formatting.
@@ -86,51 +88,64 @@ enum class MSG_STATUS
   IN_PROGRESS,
 };
 
-// Helper structure for a 2D point
+// A normalized 2D point in [0,1]
 struct AnnotationPoint
 {
-  uint16_t x;
-  uint16_t y;
+  float x; // 4 bytes
+  float y; // 4 bytes
+  // Optional compile‐time check:
+  static_assert(sizeof(x) == 4, "float must be 4 bytes");
 };
 
 struct NETLIB_EXPORT HSTP_Annotation
 {
-  // A vector of points
+  // Normalized points
   std::vector<AnnotationPoint> points;
-  // RGB color values
+
+  // RGB color
   uint8_t red;
   uint8_t green;
   uint8_t blue;
-  // Thickness instead of the erase flag
+
+  // Stroke thickness (negative = erase)
   int8_t thickness;
+
+  // 0=pen,1=brush,2=highlighter
   uint8_t mode;
 
-  // Default constructor
   HSTP_Annotation() = default;
 
-  HSTP_Annotation(const std::vector<QPoint> &v, uint8_t r, uint8_t g, uint8_t b,
-                  uint8_t thick, uint8_t mode)
-      : red(r), green(g), blue(b), thickness(thick), mode(mode)
+  //
+  // New constructor: build from absolute QPoint list + sender’s size
+  //
+  HSTP_Annotation(const std::vector<QPoint> &v, int senderWidth,
+                  int senderHeight, uint8_t r, uint8_t g, uint8_t b,
+                  int8_t thick, uint8_t m)
+      : red(r), green(g), blue(b), thickness(thick), mode(m)
   {
     points.reserve(v.size());
-    for (const auto &qp : v)
+    for (auto &qp : v)
     {
-      // Convert QPoint to Point (casting to uint16_t)
-      points.push_back(
-          {static_cast<uint16_t>(qp.x()), static_cast<uint16_t>(qp.y())});
+      // normalize into [0,1]
+      float nx = float(qp.x()) / float(senderWidth);
+      float ny = float(qp.y()) / float(senderHeight);
+      points.push_back({nx, ny});
     }
   }
 
+  //
+  // Deserialize from a raw buffer
+  //
   HSTP_Annotation(const std::shared_ptr<char[]> &buffer)
   {
     const char *ptr = buffer.get();
 
-    // First, deserialize the number of points
+    // 1) number of points (uint16_t)
     uint16_t num_points;
     std::memcpy(&num_points, ptr, sizeof(num_points));
     ptr += sizeof(num_points);
 
-    // Resize the vector and deserialize each point
+    // 2) each point: two floats
     points.resize(num_points);
     for (size_t i = 0; i < num_points; ++i)
     {
@@ -140,7 +155,7 @@ struct NETLIB_EXPORT HSTP_Annotation
       ptr += sizeof(points[i].y);
     }
 
-    // Deserialize the RGB values
+    // 3) RGB
     std::memcpy(&red, ptr, sizeof(red));
     ptr += sizeof(red);
     std::memcpy(&green, ptr, sizeof(green));
@@ -148,37 +163,41 @@ struct NETLIB_EXPORT HSTP_Annotation
     std::memcpy(&blue, ptr, sizeof(blue));
     ptr += sizeof(blue);
 
-    // Deserialize the thickness
+    // 4) thickness
     std::memcpy(&thickness, ptr, sizeof(thickness));
     ptr += sizeof(thickness);
 
+    // 5) mode
     std::memcpy(&mode, ptr, sizeof(mode));
+    // ptr += sizeof(mode); // not strictly needed at end
   }
 
+  //
+  // Serialize to a raw buffer
+  //
   std::shared_ptr<char[]> serialize() const
   {
-    // Calculate total size:
-    // - 2 bytes for the number of points
-    // - 4 bytes per point (2 for x, 2 for y)
-    // - 3 bytes for RGB
-    // - 1 byte for thickness
-    // - 1 byte for mode
-    size_t dataSize = sizeof(uint16_t) +
-                      points.size() * (sizeof(uint16_t) * 2) + sizeof(red) +
-                      sizeof(green) + sizeof(blue) + sizeof(thickness) +
-                      sizeof(mode); // <-- include mode here
+    // total size:
+    // 2 bytes for point count
+    // 8 bytes per point (2 floats)
+    // 3 bytes RGB
+    // 1 byte thickness
+    // 1 byte mode
+    size_t dataSize = sizeof(uint16_t) + points.size() * (sizeof(float) * 2) +
+                      sizeof(red) + sizeof(green) + sizeof(blue) +
+                      sizeof(thickness) + sizeof(mode);
 
     auto buffer = std::shared_ptr<char[]>(new char[dataSize],
                                           std::default_delete<char[]>());
     char *ptr = buffer.get();
 
-    // Serialize the number of points
+    // 1) write count
     uint16_t num_points = static_cast<uint16_t>(points.size());
     std::memcpy(ptr, &num_points, sizeof(num_points));
     ptr += sizeof(num_points);
 
-    // Serialize each point
-    for (const auto &pt : points)
+    // 2) write each point
+    for (auto &pt : points)
     {
       std::memcpy(ptr, &pt.x, sizeof(pt.x));
       ptr += sizeof(pt.x);
@@ -186,7 +205,7 @@ struct NETLIB_EXPORT HSTP_Annotation
       ptr += sizeof(pt.y);
     }
 
-    // Serialize the RGB values
+    // 3) RGB
     std::memcpy(ptr, &red, sizeof(red));
     ptr += sizeof(red);
     std::memcpy(ptr, &green, sizeof(green));
@@ -194,12 +213,13 @@ struct NETLIB_EXPORT HSTP_Annotation
     std::memcpy(ptr, &blue, sizeof(blue));
     ptr += sizeof(blue);
 
-    // Serialize the thickness
+    // 4) thickness
     std::memcpy(ptr, &thickness, sizeof(thickness));
     ptr += sizeof(thickness);
 
-    // ---- NEW: Serialize the mode ----
+    // 5) mode
     std::memcpy(ptr, &mode, sizeof(mode));
+    // ptr += sizeof(mode);
 
     return buffer;
   }
@@ -232,6 +252,8 @@ public:
   bool add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
                        const char *chat_msg);
   bool add_option_annotation(const HSTP_Annotation &annotation);
+  bool add_option_pixmap_chunk(const char *dataPtr, uint32_t chunkSize,
+                               uint32_t totalSize, uint32_t offset);
   bool add_option_reaction(uint32_t reaction);
   bool add_option_stream_title(const char *stream_title)
   {
@@ -395,12 +417,16 @@ signals:
 
   void received_clear_annotations();
   void received_enable_annotations(bool enabled);
+  void received_pixmap(const char alias[ALIAS_SIZE], const QPixmap &pixmap);
 
 private:
 #define HANDLER_PARAMS const char alias[ALIAS_SIZE], const Option &opt
 
   QByteArray m_hstp_buffer;
   uint16_t m_hstp_opt_len = -1;
+
+  QByteArray _pixmapBuffer;
+  uint32_t _pixmapTotal = 0;
 
   /*
    * Attempts to process a single HSTP header from the hstp_buffer. On
@@ -445,7 +471,9 @@ private:
   }
 
   void handle_annotation(HANDLER_PARAMS); // 5
-  void handle_fps(HANDLER_PARAMS)         // 7
+  void handle_pixmap(HANDLER_PARAMS);     // 6
+
+  void handle_fps(HANDLER_PARAMS) // 7
   {
     handle_uint32(alias, opt, &HstpProcessor::received_fps);
   }

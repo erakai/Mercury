@@ -1,3 +1,8 @@
+---
+layout: default
+title: Setting Up a Server
+nav_order: 2
+---
 # Server Hosting Guide
 
 Hosting a server with Mercury requries other devices on the internet (your viewers) to be able to discover your machine. With certain network configurations, this is no problem; your computer has a set, static (unchanging) IP address that you can share. Once given this IP, anybody can enter it into Mercury and send out a request to join. However, other network settings may not allow this.
@@ -45,4 +50,4 @@ Cloud tunneling refers to a wide array of techniques for transporting data acros
 
 The downside to this is that you will be exposing all network traffic, you may have to pay a fee as usage scales, and configuring it for uncommon kinds of data (anything besides SSH or HTTP) can be difficult. You can read more about this option [here](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
 
-
+Next: [Hosting Streams](hosting-streams)

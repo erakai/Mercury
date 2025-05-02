@@ -229,8 +229,8 @@ void MFTPProcessor::release_complete_frame(int index)
     payload.append(frame.datagrams[i]);
 
   QByteArray audio_bytes = payload.sliced(0, frame.header.audio_len);
-  QByteArray video_bytes = payload.sliced(
-      frame.header.audio_len, frame.header.video_len + frame.header.audio_len);
+  QByteArray video_bytes =
+      payload.sliced(frame.header.audio_len, frame.header.video_len);
 
   QImage video;
   video.loadFromData(video_bytes, "JPG");

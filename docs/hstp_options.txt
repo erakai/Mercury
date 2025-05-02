@@ -127,6 +127,30 @@ Options
     - float loss (as a percent - lower is better)
     - float fps (true frames display per second recent average) (float = 4 bytes)
 
+(ID: 10) Stream Start Time
+  
+  Sent by host to clients upon joining.
+
+  Len: 1
+  Data:
+    - Stream start time (seconds since epoch) (uint32_t)
+
+
+(ID: 11) Send Reaction
+  
+  Sent by clients and host. Reaction displayed on all user's screen
+  Len: 1
+  Data:
+    - Reaction (uint32_t)
+
+(ID: 12) Enable/Disable Reactions
+  
+  Sent by host only to disable/enable reactions from all users in stream
+  
+  Len: 1
+  Data:
+    - enabled (bool)
+
 (ID: 13) Clear Annotations
 
   Only sent by the host. Clears all annotations on each clients' and the host's screen.

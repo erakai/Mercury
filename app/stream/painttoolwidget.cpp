@@ -7,6 +7,7 @@
 #include <QButtonGroup>
 #include <QHBoxLayout>
 #include <QColorDialog>
+#include <QComboBox>
 
 PaintToolWidget::PaintToolWidget(QWidget *parent) : QWidget(parent)
 {
@@ -53,26 +54,25 @@ PaintToolWidget::PaintToolWidget(QWidget *parent) : QWidget(parent)
             }
           });
 
-  // Create radio buttons for "Brush" and "Erase".
-  QRadioButton *brushButton = new QRadioButton("Brush");
+  // Create radio button for "Erase".
   m_eraseButton = new QRadioButton("Erase");
 
-  // Group the buttons so that selecting one will unselect the other.
-  QButtonGroup *modeGroup = new QButtonGroup(this);
-  modeGroup->addButton(brushButton);
-  modeGroup->addButton(m_eraseButton);
-  modeGroup->setExclusive(true);
+  // Create a combo box for selecting brush type (Brush, Highlighter, Pen).
+  m_brushTypeCombo = new QComboBox;
+  m_brushTypeCombo->addItem("Pen");
+  m_brushTypeCombo->addItem("Brush");
+  m_brushTypeCombo->addItem("Highlighter");
 
-  // Set the Brush button as the default option.
-  brushButton->setChecked(true);
+  // Set the default selection to "Brush".
+  m_brushTypeCombo->setCurrentIndex(0);
 
-  // Create a single horizontal layout and add all widgets in order.
+  // Create a horizontal layout and add all widgets in order.
   QHBoxLayout *mainLayout = new QHBoxLayout;
   mainLayout->addWidget(brushSizeLabel);
   mainLayout->addWidget(m_brushSizeEdit);
   mainLayout->addWidget(m_colorIndicator);
   mainLayout->addWidget(m_colorButton);
-  mainLayout->addWidget(brushButton);
+  mainLayout->addWidget(m_brushTypeCombo);
   mainLayout->addWidget(m_eraseButton);
   mainLayout->addStretch();
 

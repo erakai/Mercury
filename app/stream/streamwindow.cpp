@@ -229,6 +229,14 @@ void StreamWindow::connect_signals_and_slots()
             &StreamWindow::new_annotation);
 
   if (is_client())
+  {
+    connect(servc->client->hstp_processor().get(),
+            &HstpProcessor::received_pixmap, this,
+            [this](const char /*alias*/[ALIAS_SIZE], const QPixmap &pix)
+            { annotation_display->setMasterPixmap(pix); });
+  }
+
+  if (is_client())
     connect(servc->client->hstp_processor().get(),
             &HstpProcessor::received_chat, this,
             [=, this](const char alias[ALIAS_SIZE],
@@ -537,7 +545,6 @@ bool StreamWindow::provide_next_frame(QImage &next_video,
 void StreamWindow::onClientSideQualityChanged(QualityOption quality)
 {
   client_side_stream_quality = quality;
-  qInfo("set to %d", (int) quality);
 }
 
 void StreamWindow::send_chat_message(string message)
@@ -662,6 +669,35 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   //          << servh->reactions_enabled;
   client.handler.add_option_reaction_permission(servh->reactions_enabled);
   client.handler.output_msg_to_socket(client.hstp_sock);
+
+  // ─── Now fragment and send the current annotation canvas ───────────────────
+  QPixmap hostCanvas = annotation_display->grab();
+  QByteArray ba;
+  {
+    QBuffer buf(&ba);
+    buf.open(QIODevice::WriteOnly);
+    hostCanvas.save(&buf, "PNG");
+  }
+
+  const uint32_t totalSize = static_cast<uint32_t>(ba.size());
+  const uint32_t maxChunk = 60000; // leave margin under 65535
+  uint32_t offset = 0;
+
+  while (offset < totalSize)
+  {
+    uint32_t chunkSize = std::min(maxChunk, totalSize - offset);
+
+    client.handler.init_msg(alias.c_str());
+    client.handler.add_option_pixmap_chunk(
+        ba.constData() + offset, // pointer to this slice
+        chunkSize,               // length of this slice
+        totalSize,               // full PNG size
+        offset                   // this slice’s start offset
+    );
+    client.handler.output_msg_to_socket(client.hstp_sock);
+
+    offset += chunkSize;
+  }
 }
 
 void StreamWindow::viewer_disconnected(int id, std::string _alias)
@@ -674,24 +710,33 @@ void StreamWindow::viewer_disconnected(int id, std::string _alias)
 
 void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
 {
-  if (annotation.points.size() < 1)
+  const auto &pts = annotation.points;
+  if (pts.empty())
     return;
-  else if (annotation.points.size() == 1)
+
+  // Map normalized [0..1] back into our widget coords:
+  int w = annotation_display->width();
+  int h = annotation_display->height();
+  auto toLocal = [&](const AnnotationPoint &pt)
+  { return QPoint(int(pt.x * w), int(pt.y * h)); };
+
+  // Draw either a dot or a series of segments
+  if (pts.size() == 1)
   {
-    QPoint p(annotation.points[0].x, annotation.points[0].y);
+    QPoint p = toLocal(pts[0]);
     annotation_display->addLine(
         p, p, QColor(annotation.red, annotation.green, annotation.blue),
-        annotation.thickness);
+        annotation.thickness, annotation.mode);
   }
   else
   {
-    for (int i = 1; i < (int) annotation.points.size(); i++)
+    for (size_t i = 1; i < pts.size(); ++i)
     {
-      QPoint q(annotation.points[i].x, annotation.points[i].y);
-      QPoint p(annotation.points[i - 1].x, annotation.points[i - 1].y);
+      QPoint p0 = toLocal(pts[i - 1]);
+      QPoint p1 = toLocal(pts[i]);
       annotation_display->addLine(
-          p, q, QColor(annotation.red, annotation.green, annotation.blue),
-          annotation.thickness);
+          p0, p1, QColor(annotation.red, annotation.green, annotation.blue),
+          annotation.thickness, annotation.mode);
     }
   }
 }
@@ -722,51 +767,90 @@ bool StreamWindow::eventFilter(QObject *watched, QEvent *event)
   return QMainWindow::eventFilter(watched, event);
 }
 
+void StreamWindow::updateEraseCursor(int radius)
+{
+  // diameter = 2 * radius; add 2px so the 1px pen sits fully inside
+  int dia = radius * 2;
+  QPixmap pixmap(dia + 2, dia + 2);
+  pixmap.fill(Qt::transparent);
+
+  QPainter p(&pixmap);
+  p.setRenderHint(QPainter::Antialiasing, true);
+  p.setPen(QPen(Qt::black, 1));  // ring color & width
+  p.drawEllipse(1, 1, dia, dia); // leave 1px margin
+  p.end();
+
+  // create the cursor with the hotspot in the center of the pixmap
+  // hotspot X = radius+1, hotspot Y = radius+1
+  QCursor cursor(pixmap, radius + 1, radius + 1);
+  annotation_display->setCursor(cursor);
+}
+
 void StreamWindow::onAnnotationDisplayMousePressed(QMouseEvent *event)
 {
-  // Start a new annotation by clearing previous points.
   points.clear();
-  QPoint pos = event->pos();
-  old_point = pos;
-  points.push_back(pos);
+  old_point = event->pos();
+  points.push_back(old_point);
+
+  // show or clear the erase‐ring cursor
+  if (paint_tool->isEraseMode())
+  {
+    int radius = qAbs(paint_tool->brushSize());
+    updateEraseCursor(radius);
+  }
+  else
+  {
+    annotation_display->unsetCursor();
+  }
 }
 
 void StreamWindow::onAnnotationDisplayMouseMoved(QMouseEvent *event)
 {
   QPoint pos = event->pos();
+  auto *tool = paint_tool;
+  QColor col = tool->selectedColor();
+  int thick = tool->brushSize();
 
-  PaintToolWidget *toolWidget = paint_tool;
-  QColor currentColor = toolWidget->selectedColor();
-  int thickness = toolWidget->brushSize();
-
-  // TODO add erase support
-  if (toolWidget->isEraseMode())
+  // update cursor if we’re erasing
+  if (tool->isEraseMode())
   {
-    thickness *= -1;
+    int radius = qAbs(thick);
+    updateEraseCursor(radius);
+    thick = -radius; // send a negative thickness for erase
+  }
+  else
+  {
+    annotation_display->unsetCursor();
   }
 
-  annotation_display->addLine(old_point, pos, currentColor, thickness);
+  int mode = tool->m_brushTypeCombo->currentIndex();
+  annotation_display->addLine(old_point, pos, col, thick, mode);
   old_point = pos;
   points.push_back(pos);
 }
 
-void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent *event)
+void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent * /*event*/)
 {
-  Q_UNUSED(event);
+  auto *tool = paint_tool;
+  QColor col = tool->selectedColor();
+  int thick = tool->brushSize();
+  int mode = tool->m_brushTypeCombo->currentIndex();
 
-  PaintToolWidget *toolWidget = paint_tool;
-  QColor currentColor = toolWidget->selectedColor();
-  int thickness = toolWidget->brushSize();
-
-  // TODO add erase support
-  if (toolWidget->isEraseMode())
+  // keep cursor ring up if still erasing, or clear otherwise
+  if (tool->isEraseMode())
   {
-    thickness *= -1;
+    int radius = qAbs(thick);
+    updateEraseCursor(radius);
+    thick = -radius;
+  }
+  else
+  {
+    annotation_display->unsetCursor();
   }
 
-  send_annotation(HSTP_Annotation(points, currentColor.red(),
-                                  currentColor.green(), currentColor.blue(),
-                                  thickness));
+  send_annotation(HSTP_Annotation(points, annotation_display->width(),
+                                  annotation_display->height(), col.red(),
+                                  col.green(), col.blue(), thick, mode));
   points.clear();
 }
 

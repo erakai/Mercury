@@ -36,6 +36,7 @@ just_the_docs:
   favicon_ico: "/images/mercury_icon.png"
 plugins:
   - jekyll-feed
+  - jekyll-remote-theme
 navigation:
   - title: Getting Started
     children:

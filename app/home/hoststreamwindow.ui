@@ -19,6 +19,9 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="toolTip">
+   <string/>
+  </property>
   <property name="styleSheet">
    <string notr="true">/*QPushButton {
 	background-color: rgb(54, 120, 156);
@@ -112,6 +115,9 @@ QCheckBox {
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="toolTip">
+            <string>Copy IP address</string>
+           </property>
            <property name="text">
             <string>127.0.22.45</string>
            </property>
@@ -135,6 +141,9 @@ QCheckBox {
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
           <widget class="QLabel" name="tcpPortLabel">
+           <property name="toolTip">
+            <string>Port for tcp communicaton</string>
+           </property>
            <property name="text">
             <string>TCP Port:</string>
            </property>
@@ -149,6 +158,9 @@ QCheckBox {
         <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
           <widget class="QLabel" name="udpPortLabel">
+           <property name="toolTip">
+            <string>Port for udp communicaton</string>
+           </property>
            <property name="text">
             <string>UDP Port:</string>
            </property>
@@ -163,6 +175,9 @@ QCheckBox {
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <widget class="QLabel" name="streamNameLabel">
+           <property name="toolTip">
+            <string/>
+           </property>
            <property name="text">
             <string>Stream Name:</string>
            </property>
@@ -213,6 +228,9 @@ QCheckBox {
        </item>
        <item>
         <widget class="QCheckBox" name="publicStream">
+         <property name="toolTip">
+          <string>If enabled, stream will show up in the stream browser</string>
+         </property>
          <property name="styleSheet">
           <string notr="true"/>
          </property>
@@ -260,6 +278,9 @@ QCheckBox {
          <width>0</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>View ethics agreement</string>
        </property>
        <property name="text">
         <string>Ethics Agreement</string>
@@ -510,6 +531,9 @@ QCheckBox {
          </disabled>
         </palette>
        </property>
+       <property name="toolTip">
+        <string>View tutorial (https://erakai.github.io/Mercury/server-hosting.html)</string>
+       </property>
        <property name="styleSheet">
         <string notr="true"/>
        </property>
@@ -554,6 +578,9 @@ QCheckBox {
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Cancel host stream operation</string>
+       </property>
        <property name="text">
         <string>Cancel</string>
        </property>
@@ -569,6 +596,9 @@ QCheckBox {
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Confirm host stream operation</string>
        </property>
        <property name="styleSheet">
         <string notr="true">QPushButton:disabled {

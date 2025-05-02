@@ -140,8 +140,8 @@ void HostStreamWindow::open_stream_window()
 
 void HostStreamWindow::tutorial_button_press()
 {
-  if (!QDesktopServices::openUrl(QUrl("https://github.com/erakai/Mercury/blob/"
-                                      "main/docs/server-hosting.md")))
+  if (!QDesktopServices::openUrl(
+          QUrl("https://erakai.github.io/Mercury/server-hosting.html")))
   {
     qCritical("Unable to open tutorial URL.");
   }

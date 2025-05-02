@@ -96,6 +96,9 @@ QDialog#JoinStreamWindow {
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <widget class="QLabel" name="ipAddressLabel">
+           <property name="toolTip">
+            <string>IP address provided by host of target stream</string>
+           </property>
            <property name="text">
             <string>Host IP Address:</string>
            </property>
@@ -110,6 +113,9 @@ QDialog#JoinStreamWindow {
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
           <widget class="QLabel" name="hostTcpPortLabel">
+           <property name="toolTip">
+            <string>TCP port of the host's stream</string>
+           </property>
            <property name="text">
             <string>Host TCP Port:</string>
            </property>
@@ -124,6 +130,9 @@ QDialog#JoinStreamWindow {
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
           <widget class="QLabel" name="clientUdpPortLineEdit_2">
+           <property name="toolTip">
+            <string>Client port for UDP</string>
+           </property>
            <property name="text">
             <string>UDP Port:</string>
            </property>
@@ -188,6 +197,9 @@ QDialog#JoinStreamWindow {
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Cancel join stream operation</string>
+       </property>
        <property name="text">
         <string>Cancel</string>
        </property>
@@ -203,6 +215,9 @@ QDialog#JoinStreamWindow {
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Confirm join stream operation</string>
        </property>
        <property name="text">
         <string>Join</string>

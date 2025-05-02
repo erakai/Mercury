@@ -45,7 +45,17 @@
        <number>4</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0">
+       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0">
+        <item>
+         <widget class="QPushButton" name="gettingStartedButton">
+          <property name="text">
+           <string>Getting Started</string>
+          </property>
+          <property name="icon">
+           <iconset theme="QIcon::ThemeIcon::HelpAbout"/>
+          </property>
+         </widget>
+        </item>
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
@@ -66,6 +76,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Open settings</string>
           </property>
           <property name="text">
            <string>Display Name</string>
@@ -130,6 +143,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="streamBrowserButton">
+          <property name="toolTip">
+           <string>Browse public streams</string>
+          </property>
           <property name="text">
            <string>Browse</string>
           </property>
@@ -142,6 +158,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Join a stream</string>
           </property>
           <property name="styleSheet">
            <string notr="true"/>
@@ -161,6 +180,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Host a new stream</string>
           </property>
           <property name="styleSheet">
            <string notr="true"/>

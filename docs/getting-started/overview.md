@@ -21,3 +21,5 @@ Mercury allows basic streaming functionalities such as [hosting](../hosting-stre
 <img src="../images/home.png" alt="home" style="max-height: 400px; height: auto; width: auto;" />
 
 In-Stream Features include: [chat](../features/chat), [reactions](../features/reactions), [annotations](../features/annotations), and [performance metrics](../features/performance)
+
+Next: [Installation](installation)

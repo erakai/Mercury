@@ -262,6 +262,9 @@ void StreamInfo::setReactionsEnabledLabel(bool enabled)
 
 void StreamInfo::updateStreamDuration()
 {
+  if (!stream_start_time)
+    return;
+
   uint32_t duration_in_sec = QDateTime::currentSecsSinceEpoch() -
                              stream_start_time->toSecsSinceEpoch();
   uint32_t seconds = duration_in_sec % 60;

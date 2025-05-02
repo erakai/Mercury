@@ -681,7 +681,6 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
 
   for (const HSTP_Annotation &ann : m_annotationLog)
   {
-    qDebug() << "adding annotation";
     client.handler.init_msg(alias.c_str());
     client.handler.add_option_annotation(ann);
     client.handler.output_msg_to_socket(client.hstp_sock);
@@ -719,7 +718,6 @@ void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
   int w = annotation_display->width();
   int h = annotation_display->height();
 
-  qDebug() << w << " " << h;
   auto toLocal = [&](const AnnotationPoint &pt)
   { return QPoint(int(pt.x * w), int(pt.y * h)); };
 

@@ -37,8 +37,6 @@ export PATH="~/Qt/[YOUR VERSION]/macos/bin:$PATH"
 macdeployqt mercury.app -dmg -verbose=2
 ```
 
-Then move Mercury.app into `applications/` on your local machine. (*this is requred for MacOS to register the custom URL scheme*)
-
 #### Deployment on Windows
 To deploy on Windows, do the below after building (from your build dir), then zip the folder.
 ```bash
@@ -46,6 +44,7 @@ C://Qt//[YOUR VERSION]//mingw_64//bin//windeployqt.exe mercury.exe
 ```
 
 
-
-
 ### Screenshots
+You can find screenshots of the application on our User Docs: https://erakai.github.io/Mercury/getting-started/installation
+
+![overview](docs/images/readme.png)

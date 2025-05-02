@@ -52,7 +52,7 @@ StreamDisplay::StreamDisplay(
 
   // Set the minimum size as before.
   graphics_view->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  graphics_view->setStyleSheet("border: 2px solid #FFFF00;");
+  graphics_view->setStyleSheet("border: 1px solid #000000;");
 
   // Show the graphics view.
   graphics_view->show();

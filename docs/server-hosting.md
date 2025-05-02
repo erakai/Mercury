@@ -5,7 +5,7 @@ nav_order: 2
 ---
 # Server Hosting Guide
 
-Hosting a server with Mercury requries other devices on the internet (your viewers) to be able to discover your machine. With certain network configurations, this is no problem; your computer has a set, static (unchanging) IP address that you can share. Once given this IP, anybody can enter it into Mercury and send out a request to join. However, other network settings may not allow this.
+Hosting a stream with Mercury requries other devices on the internet (your viewers) to be able to discover your machine. With certain network configurations, this is no problem; your computer has a set, static (unchanging) IP address that you can share. Once given this IP, anybody can enter it into Mercury and send out a request to join. However, other network settings may not allow this.
 
 ## The Problem
 It is common nowadays for a network to be configured with **private addresses**. Only the router in your home will have a "regular" IP address. All other devices on the network like computers or phones are instead given a private IP address. Then, when you want to browse the internet, your router performs what is called NAT translation to replace your private IP address with its public one in your outgoing internet packets. It notes what services you are trying to reach, and when those send data back to you, knows to forward that data back to your computer. Wikipedia explains this as the following (read more [here](https://en.wikipedia.org/wiki/Private_network)):

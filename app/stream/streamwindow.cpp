@@ -109,6 +109,23 @@ bool StreamWindow::set_up()
   }
 
   this->showMaximized(); // Sets Window size to max
+
+  if (is_client())
+  {
+    // Next event‐loop turn: mark ready and flush any pending strokes
+    QTimer::singleShot(0, this,
+                       [this]()
+                       {
+                         m_clientReady = true;
+                         // replay any that arrived early
+                         for (auto &ann : m_pendingAnnotations)
+                         {
+                           this->new_annotation(/*alias=*/"", ann);
+                         }
+                         m_pendingAnnotations.clear();
+                       });
+  }
+
   return true;
 }
 
@@ -227,14 +244,6 @@ void StreamWindow::connect_signals_and_slots()
     connect(servc->client->hstp_processor().get(),
             &HstpProcessor::received_annotation, this,
             &StreamWindow::new_annotation);
-
-  if (is_client())
-  {
-    connect(servc->client->hstp_processor().get(),
-            &HstpProcessor::received_pixmap, this,
-            [this](const char /*alias*/[ALIAS_SIZE], const QPixmap &pix)
-            { annotation_display->setMasterPixmap(pix); });
-  }
 
   if (is_client())
     connect(servc->client->hstp_processor().get(),
@@ -671,33 +680,12 @@ void StreamWindow::viewer_connected(int id, std::string _alias)
   client.handler.add_option_reaction_permission(servh->reactions_enabled);
   client.handler.output_msg_to_socket(client.hstp_sock);
 
-  // ─── Now fragment and send the current annotation canvas ───────────────────
-  QPixmap hostCanvas = annotation_display->grab();
-  QByteArray ba;
+  for (const HSTP_Annotation &ann : m_annotationLog)
   {
-    QBuffer buf(&ba);
-    buf.open(QIODevice::WriteOnly);
-    hostCanvas.save(&buf, "PNG");
-  }
-
-  const uint32_t totalSize = static_cast<uint32_t>(ba.size());
-  const uint32_t maxChunk = 60000; // leave margin under 65535
-  uint32_t offset = 0;
-
-  while (offset < totalSize)
-  {
-    uint32_t chunkSize = std::min(maxChunk, totalSize - offset);
-
+    qDebug() << "adding annotation";
     client.handler.init_msg(alias.c_str());
-    client.handler.add_option_pixmap_chunk(
-        ba.constData() + offset, // pointer to this slice
-        chunkSize,               // length of this slice
-        totalSize,               // full PNG size
-        offset                   // this slice’s start offset
-    );
+    client.handler.add_option_annotation(ann);
     client.handler.output_msg_to_socket(client.hstp_sock);
-
-    offset += chunkSize;
   }
 }
 
@@ -711,6 +699,19 @@ void StreamWindow::viewer_disconnected(int id, std::string _alias)
 
 void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
 {
+  // If we’re the host, stash this so late joiners can replay it
+  if (is_host())
+  {
+    m_annotationLog.push_back(annotation);
+  }
+
+  // On the client side, if we're not ready (window too small), buffer:
+  if (is_client() && !m_clientReady)
+  {
+    m_pendingAnnotations.push_back(annotation);
+    return;
+  }
+
   const auto &pts = annotation.points;
   if (pts.empty())
     return;
@@ -718,6 +719,8 @@ void StreamWindow::new_annotation(string alias, HSTP_Annotation annotation)
   // Map normalized [0..1] back into our widget coords:
   int w = annotation_display->width();
   int h = annotation_display->height();
+
+  qDebug() << w << " " << h;
   auto toLocal = [&](const AnnotationPoint &pt)
   { return QPoint(int(pt.x * w), int(pt.y * h)); };
 
@@ -837,7 +840,6 @@ void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent * /*event*/)
   int thick = tool->brushSize();
   int mode = tool->m_brushTypeCombo->currentIndex();
 
-  // keep cursor ring up if still erasing, or clear otherwise
   if (tool->isEraseMode())
   {
     int radius = qAbs(thick);
@@ -849,10 +851,20 @@ void StreamWindow::onAnnotationDisplayMouseReleased(QMouseEvent * /*event*/)
     annotation_display->unsetCursor();
   }
 
-  send_annotation(HSTP_Annotation(points, annotation_display->width(),
-                                  annotation_display->height(), col.red(),
-                                  col.green(), col.blue(), thick, mode));
+  // Build the annotation packet
+  HSTP_Annotation ann(points, annotation_display->width(),
+                      annotation_display->height(), col.red(), col.green(),
+                      col.blue(), thick, mode);
+
+  // Send it out
+  send_annotation(ann);
   points.clear();
+
+  // Record it so that future late‐joiners can replay it
+  if (is_host())
+  {
+    m_annotationLog.push_back(ann);
+  }
 }
 
 void StreamWindow::onAnnotationCheckbox(int id, bool checked)

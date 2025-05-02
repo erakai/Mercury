@@ -156,4 +156,8 @@ private:
 
   QPoint old_point;
   std::vector<QPoint> points;
+
+  std::vector<HSTP_Annotation> m_annotationLog;
+  std::vector<HSTP_Annotation> m_pendingAnnotations;
+  bool m_clientReady = false;
 };

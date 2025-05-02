@@ -18,7 +18,6 @@
 #include <vector>
 #include <QtEndian>
 #include <QBuffer>
-#include <QPixmap>
 
 /*
 Packet formatting.
@@ -252,8 +251,6 @@ public:
   bool add_option_chat(const char alias_of_chatter[ALIAS_SIZE],
                        const char *chat_msg);
   bool add_option_annotation(const HSTP_Annotation &annotation);
-  bool add_option_pixmap_chunk(const char *dataPtr, uint32_t chunkSize,
-                               uint32_t totalSize, uint32_t offset);
   bool add_option_reaction(uint32_t reaction);
   bool add_option_stream_title(const char *stream_title)
   {
@@ -417,16 +414,12 @@ signals:
 
   void received_clear_annotations();
   void received_enable_annotations(bool enabled);
-  void received_pixmap(const char alias[ALIAS_SIZE], const QPixmap &pixmap);
 
 private:
 #define HANDLER_PARAMS const char alias[ALIAS_SIZE], const Option &opt
 
   QByteArray m_hstp_buffer;
   uint16_t m_hstp_opt_len = -1;
-
-  QByteArray _pixmapBuffer;
-  uint32_t _pixmapTotal = 0;
 
   /*
    * Attempts to process a single HSTP header from the hstp_buffer. On
@@ -471,7 +464,6 @@ private:
   }
 
   void handle_annotation(HANDLER_PARAMS); // 5
-  void handle_pixmap(HANDLER_PARAMS);     // 6
 
   void handle_fps(HANDLER_PARAMS) // 7
   {

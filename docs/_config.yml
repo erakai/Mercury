@@ -27,7 +27,9 @@ color_scheme: light
 destination: .
 
 # Build settings
-theme: just-the-docs
+# theme: just-the-docs 
+# use remote theme for gh-pages deployment
+remote_theme: just-the-docs/just-the-docs
 enable:
   - navigation
 # sidebar:
